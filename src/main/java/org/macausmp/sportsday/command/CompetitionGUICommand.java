@@ -6,7 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.gui.GUIManager;
+import org.macausmp.sportsday.gui.competition.CompetitionMenuGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class CompetitionGUICommand implements IPluginCommand {
                 p.getInventory().addItem(ItemUtil.OP_BOOK);
                 return;
             }
-            p.openInventory(GUIManager.MENU_GUI.getInventory());
+            p.openInventory(new CompetitionMenuGUI().getInventory());
         } else {
             sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));
         }

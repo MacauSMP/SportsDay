@@ -12,7 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.gui.GUIManager;
+import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
 import org.macausmp.sportsday.util.*;
 
 import java.util.*;
@@ -26,7 +26,7 @@ public abstract class AbstractEvent implements IEvent {
     private final Location location;
     private final World world;
     private Stage stage = Stage.IDLE;
-    private final List<CompetitorData> Competitors = new ArrayList<>();
+    private final List<CompetitorData> competitors = new ArrayList<>();
     private static final Map<Player, IEvent> PRACTICE = new HashMap<>();
 
     public AbstractEvent(String id) {
@@ -72,11 +72,11 @@ public abstract class AbstractEvent implements IEvent {
         PRACTICE.clear();
         EVENT_TASKS.forEach(BukkitTask::cancel);
         EVENT_TASKS.clear();
-        Competitors.clear();
+        competitors.clear();
         getLeaderboard().clear();
         setStage(Stage.COMING);
-        Competitors.addAll(Competitions.getOnlineCompetitors());
-        Competitors.forEach(data -> {
+        competitors.addAll(Competitions.getOnlineCompetitors());
+        competitors.forEach(data -> {
             Player p = data.getPlayer();
             p.setBedSpawnLocation(location, true);
             if (!SportsDay.REFEREE.hasPlayer(p)) p.getInventory().clear();
@@ -184,7 +184,7 @@ public abstract class AbstractEvent implements IEvent {
      */
     protected void setStage(Stage stage) {
         this.stage = stage;
-        GUIManager.COMPETITION_INFO_GUI.update();
+        CompetitionInfoGUI.updateGUI();
     }
 
     @Override
@@ -230,7 +230,7 @@ public abstract class AbstractEvent implements IEvent {
      * @return list of {@link CompetitorData} of current event
      */
     public final List<CompetitorData> getCompetitors() {
-        return Competitors;
+        return competitors;
     }
 
     /**

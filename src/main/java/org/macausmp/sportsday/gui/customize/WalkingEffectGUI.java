@@ -22,17 +22,14 @@ import java.util.List;
 
 public class WalkingEffectGUI extends AbstractGUI {
     private static final int START_INDEX = 10;
-    private final Player player;
 
     public WalkingEffectGUI(Player player) {
-        super(54, Component.translatable("gui.customize.walking_effect.title"));
-        this.player = player;
+        super(54, Component.translatable("gui.customize.walking_effect.title"), player);
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
         }
         getInventory().setItem(8, GUIButton.BACK);
         getInventory().setItem(9, reset());
-        update();
     }
 
     @Override
@@ -40,7 +37,6 @@ public class WalkingEffectGUI extends AbstractGUI {
         for (int i = 0; i < CustomizeParticleEffect.values().length; i++) {
             getInventory().setItem(i + START_INDEX, effect(CustomizeParticleEffect.values()[i]));
         }
-        if (player == null) return;
         CustomizeParticleEffect effect = PlayerCustomize.getWalkingEffect(player);
         if (effect == null) return;
         for (int i = START_INDEX; i < getInventory().getSize(); i++) {
@@ -59,14 +55,14 @@ public class WalkingEffectGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
-            p.openInventory(new CustomizeMenuGUI().getInventory());
+        if (ItemUtil.equals(item, GUIButton.BACK)) {
+            p.openInventory(new CustomizeMenuGUI(p).getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        if (ItemUtil.isSameItem(item, "walking_effect")) {
+        if (ItemUtil.equals(item, "walking_effect")) {
             PlayerCustomize.setWalkingEffect(p, CustomizeParticleEffect.values()[e.getSlot() - START_INDEX]);
-        } else if (ItemUtil.isSameItem(item, reset())) {
+        } else if (ItemUtil.equals(item, reset())) {
             PlayerCustomize.setWalkingEffect(p, null);
         }
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));

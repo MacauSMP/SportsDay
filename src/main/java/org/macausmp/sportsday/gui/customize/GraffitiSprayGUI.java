@@ -63,14 +63,14 @@ public class GraffitiSprayGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
-            p.openInventory(new CustomizeMenuGUI().getInventory());
+        if (ItemUtil.equals(item, GUIButton.BACK)) {
+            p.openInventory(new CustomizeMenuGUI(p).getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        if (ItemUtil.isSameItem(item, "graffiti")) {
+        if (ItemUtil.equals(item, "graffiti")) {
             PlayerCustomize.setGraffitiSpray(p, CustomizeGraffitiSpray.values()[e.getSlot() - START_INDEX]);
-        } else if (ItemUtil.isSameItem(item, reset())) {
+        } else if (ItemUtil.equals(item, reset())) {
             PlayerCustomize.setGraffitiSpray(p, null);
         }
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));

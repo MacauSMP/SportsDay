@@ -33,7 +33,6 @@ public final class ItemUtil {
 
     public static final String START = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0";
 
-
     public static @NotNull ItemStack item(@NotNull ItemStack stack, String id, Object display, Object... lore) {
         ItemStack clone = stack.clone();
         clone.editMeta(meta -> {
@@ -91,14 +90,14 @@ public final class ItemUtil {
         return button.hasItemMeta() && button.getItemMeta().getPersistentDataContainer().has(ItemUtil.ITEM_ID, PersistentDataType.STRING);
     }
 
-    public static boolean isSameItem(@NotNull ItemStack button, @NotNull ItemStack button2) {
+    public static boolean equals(@NotNull ItemStack button, @NotNull ItemStack button2) {
         if (!button.hasItemMeta() || !button2.hasItemMeta()) return false;
         String id1 = button.getItemMeta().getPersistentDataContainer().get(ItemUtil.ITEM_ID, PersistentDataType.STRING);
         String id2 = button2.getItemMeta().getPersistentDataContainer().get(ItemUtil.ITEM_ID, PersistentDataType.STRING);
         return Objects.equals(id1, id2);
     }
 
-    public static boolean isSameItem(@NotNull ItemStack button, @NotNull String key) {
+    public static boolean equals(@NotNull ItemStack button, @NotNull String key) {
         if (!button.hasItemMeta()) return false;
         String id = button.getItemMeta().getPersistentDataContainer().get(ItemUtil.ITEM_ID, PersistentDataType.STRING);
         return Objects.equals(id, key);

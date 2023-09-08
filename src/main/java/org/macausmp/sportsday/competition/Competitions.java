@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
-import org.macausmp.sportsday.gui.GUIManager;
+import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
 import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
 import org.macausmp.sportsday.util.CompetitorData;
 
@@ -131,7 +131,7 @@ public final class Competitions {
             if (data.getNumber() == number) return false;
         }
         COMPETITORS.add(new CompetitorData(competitor.getUniqueId(), number));
-        GUIManager.COMPETITION_INFO_GUI.update();
+        CompetitionInfoGUI.updateGUI();
         CompetitorListGUI.updateGUI();
         competitor.sendMessage(Component.translatable("command.competition.register.success.self").args(Component.text(number)).color(NamedTextColor.GREEN));
         SportsDay.COMPETITOR.addPlayer(competitor);
@@ -151,7 +151,7 @@ public final class Competitions {
                     REGISTERED_NUMBER_LIST.remove((Integer) data.getNumber());
                     if (getCurrentEvent() != null) ((AbstractEvent) getCurrentEvent()).getCompetitors().remove(data);
                     COMPETITORS.remove(data);
-                    GUIManager.COMPETITION_INFO_GUI.update();
+                    CompetitionInfoGUI.updateGUI();
                     CompetitorListGUI.updateGUI();
                     if (competitor.isOnline()) Objects.requireNonNull(competitor.getPlayer()).sendMessage(Component.translatable("command.competition.unregister.success.self"));
                     SportsDay.AUDIENCE.addPlayer(competitor);

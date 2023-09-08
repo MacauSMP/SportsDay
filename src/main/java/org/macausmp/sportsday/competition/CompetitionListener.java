@@ -28,7 +28,8 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.competition.sumo.SumoRound;
-import org.macausmp.sportsday.gui.GUIManager;
+import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
+import org.macausmp.sportsday.gui.competition.CompetitionMenuGUI;
 import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
 import org.macausmp.sportsday.gui.customize.CustomizeMenuGUI;
 import org.macausmp.sportsday.gui.customize.GraffitiSprayGUI;
@@ -60,7 +61,7 @@ public final class CompetitionListener implements Listener {
         IEvent current = Competitions.getCurrentEvent();
         if (current == null || current.getStage() != Stage.STARTED) return;
         if (!Competitions.containPlayer(p)) return;
-        GUIManager.COMPETITION_INFO_GUI.update();
+        CompetitionInfoGUI.updateGUI();
         CompetitorListGUI.updateGUI();
     }
 
@@ -68,7 +69,7 @@ public final class CompetitionListener implements Listener {
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
         if (!Competitions.containPlayer(p)) return;
-        GUIManager.COMPETITION_INFO_GUI.update();
+        CompetitionInfoGUI.updateGUI();
         CompetitorListGUI.updateGUI();
     }
 
@@ -143,7 +144,7 @@ public final class CompetitionListener implements Listener {
     public void onQuitPractice(@NotNull PlayerInteractEvent e) {
         if (e.getItem() == null) return;
         Player p = e.getPlayer();
-        if (ItemUtil.isSameItem(e.getItem(), ItemUtil.QUIT_PRACTICE)) {
+        if (ItemUtil.equals(e.getItem(), ItemUtil.QUIT_PRACTICE)) {
             AbstractEvent.quitPractice(p);
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         }
@@ -151,7 +152,7 @@ public final class CompetitionListener implements Listener {
 
     @EventHandler
     public void onSpray(@NotNull PlayerInteractEvent e) {
-        if (e.getItem() != null && ItemUtil.isSameItem(e.getItem(), ItemUtil.SPRAY)) {
+        if (e.getItem() != null && ItemUtil.equals(e.getItem(), ItemUtil.SPRAY)) {
             e.setCancelled(true);
             Player p = e.getPlayer();
             if (e.getAction().equals(Action.RIGHT_CLICK_AIR)) {
@@ -196,7 +197,7 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onChangeSpray(@NotNull PlayerInteractEntityEvent e) {
         ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
-        if (ItemUtil.isSameItem(item, ItemUtil.SPRAY) && e.getRightClicked() instanceof ItemFrame frame) {
+        if (ItemUtil.equals(item, ItemUtil.SPRAY) && e.getRightClicked() instanceof ItemFrame frame) {
             if (!frame.getPersistentDataContainer().has(GRAFFITI)) return;
             e.setCancelled(true);
             Player p = e.getPlayer();
@@ -224,19 +225,19 @@ public final class CompetitionListener implements Listener {
         if (e.getItem() == null) return;
         if (ItemUtil.hasID(e.getItem())) e.setCancelled(true);
         Player p = e.getPlayer();
-        if (ItemUtil.isSameItem(e.getItem(), ItemUtil.MENU)) {
+        if (ItemUtil.equals(e.getItem(), ItemUtil.MENU)) {
             p.openInventory(new MenuGUI().getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        if (ItemUtil.isSameItem(e.getItem(), ItemUtil.CUSTOMIZE)) {
-            p.openInventory(new CustomizeMenuGUI().getInventory());
+        if (ItemUtil.equals(e.getItem(), ItemUtil.CUSTOMIZE)) {
+            p.openInventory(new CustomizeMenuGUI(p).getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        if (ItemUtil.isSameItem(e.getItem(), ItemUtil.OP_BOOK)) {
+        if (ItemUtil.equals(e.getItem(), ItemUtil.OP_BOOK)) {
             if (p.isOp()) {
-                p.openInventory(GUIManager.MENU_GUI.getInventory());
+                p.openInventory(new CompetitionMenuGUI().getInventory());
                 p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
                 return;
             }

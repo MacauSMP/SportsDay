@@ -35,7 +35,7 @@ public class CompetitorListGUI extends AbstractGUI implements IPageableGUI {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
-        getInventory().setItem(1, ItemUtil.addEffect(GUIButton.PLAYER_LIST));
+        getInventory().setItem(1, ItemUtil.addEffect(GUIButton.COMPETITOR_LIST));
         getInventory().setItem(2, GUIButton.START_COMPETITION);
         getInventory().setItem(3, GUIButton.END_COMPETITION);
         getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
@@ -58,27 +58,27 @@ public class CompetitorListGUI extends AbstractGUI implements IPageableGUI {
         }
     }
 
+    public static void updateGUI() {
+        for (CompetitorListGUI gui : HANDLER) {
+            gui.update();
+        }
+    }
+
     @Override
     public void onClick(@NotNull InventoryClickEvent event, Player p, @NotNull ItemStack item) {
         if (event.getInventory().getHolder() instanceof CompetitorListGUI gui) {
-            if (ItemUtil.isSameItem(item, "player_icon")) {
+            if (ItemUtil.equals(item, "player_icon")) {
                 SkullMeta meta = (SkullMeta) item.getItemMeta();
                 p.openInventory(new CompetitorProfileGUI(Competitions.getCompetitor(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
                 return;
             }
-            if (ItemUtil.isSameItem(item, GUIButton.NEXT_PAGE)) {
+            if (ItemUtil.equals(item, GUIButton.NEXT_PAGE)) {
                 p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
                 gui.nextPage();
-            } else if (ItemUtil.isSameItem(item, GUIButton.PREVIOUS_PAGE)) {
+            } else if (ItemUtil.equals(item, GUIButton.PREVIOUS_PAGE)) {
                 p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
                 gui.previousPage();
             }
-        }
-    }
-
-    public static void updateGUI() {
-        for (CompetitorListGUI gui : HANDLER) {
-            gui.update();
         }
     }
 

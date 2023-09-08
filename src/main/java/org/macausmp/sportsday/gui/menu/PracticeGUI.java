@@ -44,14 +44,14 @@ public class PracticeGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, Player p, ItemStack item) {
-        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
+        if (ItemUtil.equals(item, GUIButton.BACK)) {
             p.openInventory(new MenuGUI().getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
         if (Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStage() != Stage.STARTED) {
             String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING);
-            if (ItemUtil.isSameItem(item, "practice")) {
+            if (ItemUtil.equals(item, "practice")) {
                 for (IEvent event : Competitions.COMPETITIONS) {
                     if (event.getID().equals(id)) {
                         event.practice(p);

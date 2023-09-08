@@ -23,11 +23,9 @@ import java.util.Objects;
 
 public class ClothingColorGUI extends AbstractGUI {
     private static final int START_INDEX = 10;
-    private final Player player;
     private final EquipmentSlot slot;
     public ClothingColorGUI(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        super(27, Component.translatable("gui.customize.clothing.color.title"));
-        this.player = player;
+        super(27, Component.translatable("gui.customize.clothing.color.title"), player);
         this.slot = slot;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
@@ -42,7 +40,7 @@ public class ClothingColorGUI extends AbstractGUI {
         for (int i = 0; i < DyeColor.values().length; i++) {
             getInventory().setItem(i + START_INDEX, dye(Material.getMaterial(DyeColor.values()[i].name() + "_DYE")));
         }
-        if (player == null || slot == null) return;
+        if (slot == null) return;
         for (int i = START_INDEX; i < START_INDEX + 16; i++) {
             ItemStack dye = getInventory().getItem(i);
             Color color = PlayerCustomize.getClothColor(player, slot);
@@ -59,7 +57,7 @@ public class ClothingColorGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
-        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
+        if (ItemUtil.equals(item, GUIButton.BACK)) {
             p.openInventory(new ClothingCustomizeGUI(p).getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
@@ -67,7 +65,7 @@ public class ClothingColorGUI extends AbstractGUI {
         String s = item.getType().name();
         if (s.endsWith("_DYE")) {
             PlayerCustomize.setClothColor(p, slot, DyeColor.valueOf(s.substring(0, s.length() - 4)).getColor());
-        } else if (ItemUtil.isSameItem(item, reset())) {
+        } else if (ItemUtil.equals(item, reset())) {
             PlayerCustomize.setClothColor(p, slot, null);
         }
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));

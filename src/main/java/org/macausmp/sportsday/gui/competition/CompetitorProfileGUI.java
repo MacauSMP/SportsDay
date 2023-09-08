@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class CompetitorProfileGUI extends AbstractGUI {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
-        getInventory().setItem(1, GUIButton.PLAYER_LIST);
+        getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
         getInventory().setItem(2, GUIButton.START_COMPETITION);
         getInventory().setItem(3, GUIButton.END_COMPETITION);
         getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
@@ -47,7 +47,7 @@ public class CompetitorProfileGUI extends AbstractGUI {
 
     @Override
     public void onClick(@NotNull InventoryClickEvent e, Player p, ItemStack item) {
-        if (ItemUtil.isSameItem(item, unregister(data))) {
+        if (ItemUtil.equals(item, unregister(data))) {
             p.sendMessage(Competitions.leave(data.getPlayer()) ? Component.translatable("command.competition.unregister.success.other").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.GREEN) : Component.translatable("command.competition.unregister.failed.other").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.RED));
             p.closeInventory();
         }

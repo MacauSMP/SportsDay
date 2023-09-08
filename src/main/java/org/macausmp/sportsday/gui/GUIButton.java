@@ -18,7 +18,7 @@ import java.util.List;
 
 public final class GUIButton {
     public static final ItemStack COMPETITION_INFO = ItemUtil.item(Material.GOLD_BLOCK, "competition_info", "gui.info.title", "gui.info.lore");
-    public static final ItemStack PLAYER_LIST = ItemUtil.item(Material.PAPER, "player_list", "gui.competitor_list.title", "gui.competitor_list.lore");
+    public static final ItemStack COMPETITOR_LIST = ItemUtil.item(Material.PAPER, "competitor_list", "gui.competitor_list.title", "gui.competitor_list.lore");
     public static final ItemStack START_COMPETITION = ItemUtil.head(ItemUtil.START, "start_competitions", "gui.start.title", "gui.start.lore");
     public static final ItemStack END_COMPETITION = ItemUtil.item(Material.RED_CONCRETE, "end_competition", "gui.end.title", "gui.end.lore");
     public static final ItemStack COMPETITION_SETTINGS = ItemUtil.item(Material.REPEATER, "competition_settings", "gui.settings.title", "gui.settings.lore");
@@ -33,16 +33,6 @@ public final class GUIButton {
     public static final ItemStack OBSTACLE_COURSE = event(Material.OAK_FENCE_GATE, Competitions.OBSTACLE_COURSE);
     public static final ItemStack PARKOUR = event(Material.LEATHER_BOOTS, Competitions.PARKOUR);
     public static final ItemStack SUMO = event(Material.COD, Competitions.SUMO);
-    public static final ItemStack GUIDEBOOK = ItemUtil.item(Material.WRITABLE_BOOK, "guidebook", Component.translatable("gui.menu.guidebook.title").color(NamedTextColor.YELLOW), "gui.menu.guidebook.lore");
-    public static final ItemStack HOME = ItemUtil.item(Material.RED_BED, "home", Component.translatable("gui.menu.home.title").color(NamedTextColor.YELLOW), "gui.menu.home.lore");
-    public static final ItemStack PRACTICE = ItemUtil.item(Material.ARMOR_STAND, "practice", Component.translatable("gui.menu.practice.title").color(NamedTextColor.YELLOW), "gui.menu.practice.lore");
-    public static final ItemStack CLOTHING = customize(Material.LEATHER_CHESTPLATE, "clothing");
-    public static final ItemStack BOAT_TYPE = customize(Material.OAK_BOAT, "boat_type");
-    public static final ItemStack WEAPON_SKIN = customize(Material.BONE, "weapon_skin");
-    public static final ItemStack MUSICKIT = customize(Material.JUKEBOX, "musickit");
-    public static final ItemStack PROJECTILE_TRAIL = customize(Material.ARROW, "projectile_trail");
-    public static final ItemStack WALKING_EFFECT = customize(Material.NETHER_STAR, "walking_effect");
-    public static final ItemStack GRAFFITI_SPRAY = customize(Material.PAINTING, "graffiti_spray");
     public static final ItemStack BOARD = ItemUtil.item(Material.BLACK_STAINED_GLASS_PANE, null, "");
 
     private static @NotNull ItemStack event(Material material, IEvent event) {
@@ -56,15 +46,6 @@ public final class GUIButton {
             }
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "competition");
             meta.getPersistentDataContainer().set(ItemUtil.COMPETITION_ID, PersistentDataType.STRING, event.getID());
-        });
-        return stack;
-    }
-
-    private static @NotNull ItemStack customize(Material material, String customize) {
-        ItemStack stack = new ItemStack(material);
-        stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("gui.customize." + customize + ".title").color(NamedTextColor.YELLOW)));
-            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "customize_" + customize);
         });
         return stack;
     }

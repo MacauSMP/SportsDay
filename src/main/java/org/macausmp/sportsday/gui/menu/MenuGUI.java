@@ -5,6 +5,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -14,20 +15,22 @@ import org.macausmp.sportsday.competition.CompetitionListener;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.AbstractGUI;
-import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerCustomize;
 
 import java.util.Objects;
 
 public class MenuGUI extends AbstractGUI {
+    private static final ItemStack GUIDEBOOK = ItemUtil.item(Material.WRITABLE_BOOK, "guidebook", Component.translatable("gui.menu.guidebook.title").color(NamedTextColor.YELLOW), "gui.menu.guidebook.lore");
+    private static final ItemStack HOME = ItemUtil.item(Material.RED_BED, "home", Component.translatable("gui.menu.home.title").color(NamedTextColor.YELLOW), "gui.menu.home.lore");
+    private static final ItemStack PRACTICE = ItemUtil.item(Material.ARMOR_STAND, "practice", Component.translatable("gui.menu.practice.title").color(NamedTextColor.YELLOW), "gui.menu.practice.lore");
     private static final Book GUIDE_BOOK =  guidebook();
 
     public MenuGUI() {
         super(9, Component.translatable("gui.menu.title"));
-        getInventory().setItem(0, GUIButton.GUIDEBOOK);
-        getInventory().setItem(1, GUIButton.HOME);
-        getInventory().setItem(2, GUIButton.PRACTICE);
+        getInventory().setItem(0, GUIDEBOOK);
+        getInventory().setItem(1, HOME);
+        getInventory().setItem(2, PRACTICE);
     }
 
     @Override
@@ -37,9 +40,9 @@ public class MenuGUI extends AbstractGUI {
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-        if (ItemUtil.isSameItem(item, GUIButton.GUIDEBOOK)) {
+        if (ItemUtil.equals(item, GUIDEBOOK)) {
             p.openBook(GUIDE_BOOK);
-        } else if (ItemUtil.isSameItem(item, GUIButton.HOME)) {
+        } else if (ItemUtil.equals(item, HOME)) {
             if (Competitions.getCurrentEvent() == null) {
                 p.teleport(p.getWorld().getSpawnLocation());
                 p.playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:entity.bat.takeoff"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f), net.kyori.adventure.sound.Sound.Emitter.self());
@@ -48,7 +51,7 @@ public class MenuGUI extends AbstractGUI {
                 p.getInventory().setItem(3, ItemUtil.MENU);
                 p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
             }
-        } else if (ItemUtil.isSameItem(item, GUIButton.PRACTICE)) {
+        } else if (ItemUtil.equals(item, PRACTICE)) {
             if (Competitions.getCurrentEvent() == null) {
                 p.openInventory(new PracticeGUI().getInventory());
             }

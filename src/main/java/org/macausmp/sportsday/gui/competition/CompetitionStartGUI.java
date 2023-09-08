@@ -21,7 +21,7 @@ public class CompetitionStartGUI extends AbstractGUI {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
-        getInventory().setItem(1, GUIButton.PLAYER_LIST);
+        getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
         getInventory().setItem(2, ItemUtil.addEffect(GUIButton.START_COMPETITION));
         getInventory().setItem(3, GUIButton.END_COMPETITION);
         getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
@@ -46,7 +46,7 @@ public class CompetitionStartGUI extends AbstractGUI {
 
     @Override
     public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
-        if (ItemUtil.isSameItem(item, "start_competition")) {
+        if (ItemUtil.equals(item, "start_competition")) {
             boolean b = Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING));
             p.playSound(Sound.sound(Key.key(b ? "minecraft:entity.arrow.hit_player" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
         }

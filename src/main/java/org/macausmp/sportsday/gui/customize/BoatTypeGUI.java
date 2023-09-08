@@ -22,16 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BoatTypeGUI extends AbstractGUI {
-    private final Player player;
-
     public BoatTypeGUI(Player player) {
-        super(18, Component.translatable("gui.customize.boat_type.title"));
-        this.player = player;
+        super(18, Component.translatable("gui.customize.boat_type.title"), player);
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
         }
         getInventory().setItem(8, GUIButton.BACK);
-        update();
     }
 
     @Override
@@ -44,7 +40,6 @@ public class BoatTypeGUI extends AbstractGUI {
         getInventory().setItem(14, boat(Material.DARK_OAK_BOAT));
         getInventory().setItem(15, boat(Material.MANGROVE_BOAT));
         getInventory().setItem(16, boat(Material.CHERRY_BOAT));
-        if (player == null) return;
         Boat.Type type = PlayerCustomize.getBoatType(player);
         if (type == null) return;
         for (int i = 9; i < getInventory().getSize(); i++) {
@@ -63,8 +58,8 @@ public class BoatTypeGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
-            p.openInventory(new CustomizeMenuGUI().getInventory());
+        if (ItemUtil.equals(item, GUIButton.BACK)) {
+            p.openInventory(new CustomizeMenuGUI(p).getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
@@ -76,7 +71,7 @@ public class BoatTypeGUI extends AbstractGUI {
     }
 
     private @NotNull ItemStack boat(Material material) {
-        return ItemUtil.item(material, "boat", "gui.select");
+        return ItemUtil.item(material, "boat", null, "gui.select");
     }
 
     @Contract(pure = true)

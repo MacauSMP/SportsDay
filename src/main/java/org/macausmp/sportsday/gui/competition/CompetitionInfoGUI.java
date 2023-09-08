@@ -13,18 +13,24 @@ import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CompetitionInfoGUI extends AbstractGUI {
+    private static final List<CompetitionInfoGUI> HANDLER = new ArrayList<>();
+
     public CompetitionInfoGUI() {
         super(36, Component.translatable("gui.info.title"));
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
         getInventory().setItem(0, ItemUtil.addEffect(GUIButton.COMPETITION_INFO));
-        getInventory().setItem(1, GUIButton.PLAYER_LIST);
+        getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
         getInventory().setItem(2, GUIButton.START_COMPETITION);
         getInventory().setItem(3, GUIButton.END_COMPETITION);
         getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
         getInventory().setItem(5, GUIButton.VERSION);
+        HANDLER.add(this);
     }
 
     @Override
@@ -32,6 +38,13 @@ public class CompetitionInfoGUI extends AbstractGUI {
         getInventory().setItem(18, status());
         getInventory().setItem(27, player());
     }
+
+    public static void updateGUI() {
+        for (CompetitionInfoGUI gui : HANDLER) {
+            gui.update();
+        }
+    }
+
 
     @Override
     public void onClick(InventoryClickEvent e, Player p, ItemStack item) {

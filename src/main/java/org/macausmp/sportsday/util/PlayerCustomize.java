@@ -142,16 +142,6 @@ public final class PlayerCustomize {
     public static void setWeaponSkin(@NotNull OfflinePlayer player, @NotNull Material type) {
         CONFIG.set(player.getUniqueId() + ".weapon_skin", type.name());
     }
-
-    public static @Nullable CustomizeMusickit getMusickit(@NotNull OfflinePlayer player) {
-        String source = CONFIG.getString(player.getUniqueId() + ".musickit");
-        return source != null ? CustomizeMusickit.valueOf(source) : null;
-    }
-
-    public static void setMusickit(@NotNull OfflinePlayer player, CustomizeMusickit musickit) {
-        CONFIG.set(player.getUniqueId() + ".musickit", musickit != null ? musickit.name() : null);
-    }
-
     public static @Nullable CustomizeParticleEffect getProjectileTrail(@NotNull OfflinePlayer player) {
         String source = CONFIG.getString(player.getUniqueId() + ".projectile_trail");
         return source != null ? CustomizeParticleEffect.valueOf(source) : null;
@@ -178,4 +168,14 @@ public final class PlayerCustomize {
     public static void setGraffitiSpray(@NotNull OfflinePlayer player, CustomizeGraffitiSpray graffiti) {
         CONFIG.set(player.getUniqueId() + ".graffiti_spray", graffiti != null ? graffiti.name() : null);
     }
+
+    public static @Nullable CustomizeMusickit getMusickit(@NotNull OfflinePlayer player) {
+        String source = CONFIG.getString(player.getUniqueId() + ".musickit");
+        return source != null ? CustomizeMusickit.valueOf(source) : null;
+    }
+
+    public static void setMusickit(@NotNull OfflinePlayer player, CustomizeMusickit musickit) {
+        CONFIG.set(player.getUniqueId() + ".musickit", musickit != null ? musickit.name() : null);
+    }
+
 }

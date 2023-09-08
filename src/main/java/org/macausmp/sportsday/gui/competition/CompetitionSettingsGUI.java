@@ -13,17 +13,21 @@ import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.gui.GUIManager;
 import org.macausmp.sportsday.util.ItemUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CompetitionSettingsGUI extends AbstractGUI {
+    private static final List<CompetitionSettingsGUI> HANDLER = new ArrayList<>();
+
     public CompetitionSettingsGUI() {
         super(54, Component.translatable("gui.settings.title"));
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i + 9, GUIButton.BOARD);
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
-        getInventory().setItem(1, GUIButton.PLAYER_LIST);
+        getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
         getInventory().setItem(2, GUIButton.START_COMPETITION);
         getInventory().setItem(3, GUIButton.END_COMPETITION);
         getInventory().setItem(4, ItemUtil.addEffect(GUIButton.COMPETITION_SETTINGS));
@@ -34,6 +38,7 @@ public class CompetitionSettingsGUI extends AbstractGUI {
         getInventory().setItem(21, GUIButton.OBSTACLE_COURSE);
         getInventory().setItem(22, GUIButton.PARKOUR);
         getInventory().setItem(23, GUIButton.SUMO);
+        HANDLER.add(this);
     }
 
     @Override
@@ -46,15 +51,21 @@ public class CompetitionSettingsGUI extends AbstractGUI {
         getInventory().setItem(32, status(Competitions.SUMO));
     }
 
+    public static void updateGUI() {
+        for (CompetitionSettingsGUI gui : HANDLER) {
+            gui.update();
+        }
+    }
+
     @Override
     public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
         String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING);
-        if (ItemUtil.isSameItem(item, "status_toggle")) {
+        if (ItemUtil.equals(item, "status_toggle")) {
             for (IEvent event : Competitions.COMPETITIONS) {
                 if (event.getID().equals(id)) {
                     PLUGIN.getConfig().set(event.getID() + ".enable", !event.isEnable());
                     PLUGIN.saveConfig();
-                    GUIManager.COMPETITION_SETTINGS_GUI.update();
+                    updateGUI();
                     p.playSound(Sound.sound(Key.key(event.isEnable() ? "minecraft:entity.arrow.hit_player" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
                     return;
                 }

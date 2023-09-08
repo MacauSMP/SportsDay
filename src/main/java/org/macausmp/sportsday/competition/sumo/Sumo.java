@@ -14,8 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.*;
-import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;

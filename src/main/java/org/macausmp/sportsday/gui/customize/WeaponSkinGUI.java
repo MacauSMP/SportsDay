@@ -20,16 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WeaponSkinGUI extends AbstractGUI {
-    private final Player player;
-
     public WeaponSkinGUI(Player player) {
-        super(18, Component.translatable("gui.customize.weapon_skin.title"));
-        this.player = player;
+        super(18, Component.translatable("gui.customize.weapon_skin.title"), player);
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
         }
         getInventory().setItem(8, GUIButton.BACK);
-        update();
     }
 
     @Override
@@ -41,7 +37,6 @@ public class WeaponSkinGUI extends AbstractGUI {
         getInventory().setItem(13, weapon(Material.DEAD_BUSH));
         getInventory().setItem(14, weapon(Material.SUGAR_CANE));
         getInventory().setItem(15, weapon(Material.COD));
-        if (player == null) return;
         Material weapon = PlayerCustomize.getWeaponSkin(player);
         if (weapon == null) return;
         for (int i = 9; i < 17; i++) {
@@ -60,12 +55,12 @@ public class WeaponSkinGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
-            p.openInventory(new CustomizeMenuGUI().getInventory());
+        if (ItemUtil.equals(item, GUIButton.BACK)) {
+            p.openInventory(new CustomizeMenuGUI(p).getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        if (ItemUtil.isSameItem(item, "weapon")) {
+        if (ItemUtil.equals(item, "weapon")) {
             PlayerCustomize.setWeaponSkin(p, item.getType());
             p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
             update();

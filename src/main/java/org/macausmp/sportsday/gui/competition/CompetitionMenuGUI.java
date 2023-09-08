@@ -12,7 +12,7 @@ public class CompetitionMenuGUI extends AbstractGUI {
     public CompetitionMenuGUI() {
         super(45, Component.translatable("gui.menu.title"));
         getInventory().setItem(10, GUIButton.COMPETITION_INFO);
-        getInventory().setItem(13, GUIButton.PLAYER_LIST);
+        getInventory().setItem(13, GUIButton.COMPETITOR_LIST);
         getInventory().setItem(16, GUIButton.START_COMPETITION);
         getInventory().setItem(28, GUIButton.END_COMPETITION);
         getInventory().setItem(31, GUIButton.COMPETITION_SETTINGS);

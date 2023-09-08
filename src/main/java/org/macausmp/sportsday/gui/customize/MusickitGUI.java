@@ -25,17 +25,14 @@ import java.util.List;
 public class MusickitGUI extends AbstractGUI {
     private static final NamespacedKey MUSICKIT = NamespacedKey.fromString("musickit", PLUGIN);
     private static final int START_INDEX = 10;
-    private final Player player;
 
     public MusickitGUI(Player player) {
-        super(54, Component.translatable("gui.customize.musickit.title"));
-        this.player = player;
+        super(54, Component.translatable("gui.customize.musickit.title"), player);
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
         }
         getInventory().setItem(8, GUIButton.BACK);
         getInventory().setItem(9, reset());
-        update();
     }
 
     @Override
@@ -43,7 +40,6 @@ public class MusickitGUI extends AbstractGUI {
         for (int i = 0; i < CustomizeMusickit.values().length; i++) {
             getInventory().setItem(i + START_INDEX, musickit(CustomizeMusickit.values()[i]));
         }
-        if (player == null) return;
         CustomizeMusickit musickit = PlayerCustomize.getMusickit(player);
         if (musickit == null) return;
         for (int i = START_INDEX; i < getInventory().getSize(); i++) {
@@ -64,12 +60,12 @@ public class MusickitGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.isSameItem(item, GUIButton.BACK)) {
-            p.openInventory(new CustomizeMenuGUI().getInventory());
+        if (ItemUtil.equals(item, GUIButton.BACK)) {
+            p.openInventory(new CustomizeMenuGUI(p).getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        if (ItemUtil.isSameItem(item, "musickit")) {
+        if (ItemUtil.equals(item, "musickit")) {
             CustomizeMusickit musickit = CustomizeMusickit.values()[e.getSlot() - START_INDEX];
             if (e.isRightClick()) {
                 p.stopAllSounds();
@@ -78,7 +74,7 @@ public class MusickitGUI extends AbstractGUI {
             } else {
                 PlayerCustomize.setMusickit(p, musickit);
             }
-        } else if (ItemUtil.isSameItem(item, reset())) {
+        } else if (ItemUtil.equals(item, reset())) {
             PlayerCustomize.setMusickit(p, null);
         }
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
