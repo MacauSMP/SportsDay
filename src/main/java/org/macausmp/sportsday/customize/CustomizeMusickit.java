@@ -1,8 +1,9 @@
-package org.macausmp.sportsday.util;
+package org.macausmp.sportsday.customize;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.KeyPattern;
 import net.kyori.adventure.text.Component;
+import org.macausmp.sportsday.util.TextUtil;
 
 public enum CustomizeMusickit {
     TAKE_ON_ME("customize.musickit.take_on_me", "take_on_me"),

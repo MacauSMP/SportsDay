@@ -45,7 +45,6 @@ public class CompetitionInfoGUI extends AbstractGUI {
         }
     }
 
-
     @Override
     public void onClick(InventoryClickEvent e, Player p, ItemStack item) {
     }

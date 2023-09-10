@@ -48,7 +48,7 @@ public class CompetitionStartGUI extends AbstractGUI {
     public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
         if (ItemUtil.equals(item, "start_competition")) {
             boolean b = Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING));
-            p.playSound(Sound.sound(Key.key(b ? "minecraft:entity.arrow.hit_player" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+            if (!b) p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
         }
     }
 

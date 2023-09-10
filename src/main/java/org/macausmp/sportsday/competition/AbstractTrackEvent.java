@@ -132,11 +132,11 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
             Location loc = p.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
             if (loc.getBlock().getType() == FINISH_LINE) {
-                p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
                 p.teleport(getLocation());
                 p.setBedSpawnLocation(getLocation(), true);
                 p.sendMessage(Component.translatable("competitor.practice.finished").args(getName()));
                 onCompletedLap(p);
+                p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
             }
         }
     }

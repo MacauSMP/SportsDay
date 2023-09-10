@@ -28,16 +28,16 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.competition.sumo.SumoRound;
+import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
+import org.macausmp.sportsday.customize.CustomizeParticleEffect;
+import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
 import org.macausmp.sportsday.gui.competition.CompetitionMenuGUI;
 import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
 import org.macausmp.sportsday.gui.customize.CustomizeMenuGUI;
 import org.macausmp.sportsday.gui.customize.GraffitiSprayGUI;
 import org.macausmp.sportsday.gui.menu.MenuGUI;
-import org.macausmp.sportsday.util.CustomizeGraffitiSpray;
-import org.macausmp.sportsday.util.CustomizeParticleEffect;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.PlayerCustomize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,13 +130,15 @@ public final class CompetitionListener implements Listener {
 
     @EventHandler
     public void onPlace(@NotNull BlockPlaceEvent e) {
-        if (e.getPlayer().getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(e.getPlayer())) return;
+        Player p = e.getPlayer();
+        if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
         e.setCancelled(true);
     }
 
     @EventHandler
     public void onBreak(@NotNull BlockBreakEvent e) {
-        if (e.getPlayer().getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(e.getPlayer())) return;
+        Player p = e.getPlayer();
+        if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
         e.setCancelled(true);
     }
 
@@ -171,7 +173,7 @@ public final class CompetitionListener implements Listener {
                     Location loc = b.getLocation().add(f.getDirection());
                     ItemStack map = new ItemStack(Material.FILLED_MAP);
                     map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.getId())));
-                    Bukkit.getServer().playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:use_spray"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f), p);
+                    Bukkit.getServer().playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:use_spray"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f));
                     new BukkitRunnable() {
                         @Override
                         public void run() {
@@ -209,7 +211,7 @@ public final class CompetitionListener implements Listener {
             if (graffiti == null || Bukkit.getMap(graffiti.getId()) == null) return;
             ItemStack map = new ItemStack(Material.FILLED_MAP);
             map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.getId())));
-            Bukkit.getServer().playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:use_spray"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f), p);
+            Bukkit.getServer().playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:use_spray"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f));
             new BukkitRunnable() {
                 @Override
                 public void run() {

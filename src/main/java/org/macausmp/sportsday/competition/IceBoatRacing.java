@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.PlayerCustomize;
+import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.spigotmc.event.entity.EntityDismountEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
 
@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class IceBoatRacing extends AbstractTrackEvent {
+    private static final Material SPRING_BLOCK = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("ice_boat_racing.spring_block")));
     private final HashMap<Player, Boat> boatMap = new HashMap<>();
 
     public IceBoatRacing() {
@@ -56,7 +57,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
     private void bounce(@NotNull Player p) {
         Location loc = p.getLocation().clone();
         loc.setY(loc.getY() - 0.5f);
-        if (loc.getBlock().getType() == Material.IRON_TRAPDOOR) boatMap.get(p).setVelocity(new Vector(0f, 1.0f, 0f));
+        if (loc.getBlock().getType() == SPRING_BLOCK && !SPRING_BLOCK.isAir()) boatMap.get(p).setVelocity(new Vector(0f, 1.0f, 0f));
     }
 
     @Override

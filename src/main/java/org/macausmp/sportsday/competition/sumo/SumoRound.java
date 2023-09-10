@@ -27,7 +27,7 @@ public class SumoRound {
     }
 
     public boolean contain(@NotNull Player player) {
-        return getCompetitors().contains(player);
+        return competitors.contains(player);
     }
 
     public RoundStatus getStatus() {

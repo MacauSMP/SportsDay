@@ -43,6 +43,7 @@ ice_boat_racing:
     yaw: 0
   ready_command: "fill 0 0 0 0 0 0 barrier"
   start_command: "fill 0 0 0 0 0 0 air"
+  spring_block: SLIME_BLOCK
 # 擲標槍
 javelin_throw:
   enable: true

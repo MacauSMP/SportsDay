@@ -1,10 +1,11 @@
-package org.macausmp.sportsday.util;
+package org.macausmp.sportsday.customize;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.util.TextUtil;
 
 public enum CustomizeParticleEffect {
     GLOW("customize.particle.glow", new ParticleBuilder(Particle.GLOW), Material.GLOWSTONE_DUST),

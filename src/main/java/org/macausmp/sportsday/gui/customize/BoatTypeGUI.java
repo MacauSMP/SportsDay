@@ -10,12 +10,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
@@ -74,7 +73,6 @@ public class BoatTypeGUI extends AbstractGUI {
         return ItemUtil.item(material, "boat", null, "gui.select");
     }
 
-    @Contract(pure = true)
     private boolean isBoat(@NotNull Material material) {
         return switch (material) {
             case ACACIA_BOAT, BIRCH_BOAT, CHERRY_BOAT, DARK_OAK_BOAT, JUNGLE_BOAT, MANGROVE_BOAT, OAK_BOAT, SPRUCE_BOAT -> true;

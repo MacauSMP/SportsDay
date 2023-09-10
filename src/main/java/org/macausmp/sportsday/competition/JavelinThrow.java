@@ -20,7 +20,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.*;
+import org.macausmp.sportsday.customize.CustomizeParticleEffect;
+import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.util.PlayerHolder;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.*;
 

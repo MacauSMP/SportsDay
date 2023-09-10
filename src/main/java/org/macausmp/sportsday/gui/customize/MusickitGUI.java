@@ -12,11 +12,11 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.customize.CustomizeMusickit;
+import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.util.CustomizeMusickit;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;

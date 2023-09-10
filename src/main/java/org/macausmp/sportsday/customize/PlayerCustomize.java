@@ -1,4 +1,4 @@
-package org.macausmp.sportsday.util;
+package org.macausmp.sportsday.customize;
 
 import org.bukkit.Color;
 import org.bukkit.Material;

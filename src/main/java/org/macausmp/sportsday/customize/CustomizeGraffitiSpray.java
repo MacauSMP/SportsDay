@@ -1,6 +1,7 @@
-package org.macausmp.sportsday.util;
+package org.macausmp.sportsday.customize;
 
 import net.kyori.adventure.text.Component;
+import org.macausmp.sportsday.util.TextUtil;
 
 public enum CustomizeGraffitiSpray {
     GGWP("customize.graffiti_spray.ggwp", 0),

@@ -12,8 +12,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
+import org.macausmp.sportsday.customize.CustomizeMusickit;
+import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
-import org.macausmp.sportsday.util.*;
+import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.util.ItemUtil;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.*;
 
@@ -94,7 +98,7 @@ public abstract class AbstractEvent implements IEvent {
             public void run() {
                 if (i % 5 == 0 || (i <= 5 && i > 0)) {
                     Bukkit.getServer().sendActionBar(Component.translatable("event.start.countdown").args(Component.text(i)).color(NamedTextColor.GREEN));
-                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER,  1f, 0.5f));
+                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 0.5f));
                 }
                 if (i-- == 0) {
                     this.cancel();
@@ -157,19 +161,19 @@ public abstract class AbstractEvent implements IEvent {
 
     /**
      * Called when the event sets up
-     * @see IEvent#setup()
+     * @see #setup()
      */
     protected abstract void onSetup();
 
     /**
      * Called when the event starts
-     * @see IEvent#start()
+     * @see #start()
      */
     protected abstract void onStart();
 
     /**
      * Called when the event ends
-     * @see IEvent#end(boolean)
+     * @see #end(boolean)
      */
     protected abstract void onEnd(boolean force);
 
@@ -196,8 +200,8 @@ public abstract class AbstractEvent implements IEvent {
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(8, ItemUtil.QUIT_PRACTICE);
         p.sendMessage(Component.translatable("competitor.practice.teleport.venue").args(name));
-        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         onPractice(p);
+        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
     }
 
     protected abstract void onPractice(Player p);

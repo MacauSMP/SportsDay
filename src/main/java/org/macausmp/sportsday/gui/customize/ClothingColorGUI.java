@@ -13,10 +13,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.PlayerCustomize;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.Objects;
@@ -41,7 +41,7 @@ public class ClothingColorGUI extends AbstractGUI {
             getInventory().setItem(i + START_INDEX, dye(Material.getMaterial(DyeColor.values()[i].name() + "_DYE")));
         }
         if (slot == null) return;
-        for (int i = START_INDEX; i < START_INDEX + 16; i++) {
+        for (int i = START_INDEX; i < START_INDEX + DyeColor.values().length; i++) {
             ItemStack dye = getInventory().getItem(i);
             Color color = PlayerCustomize.getClothColor(player, slot);
             if (color == null || DyeColor.getByColor(color) == null) return;
