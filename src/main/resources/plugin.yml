@@ -19,6 +19,9 @@ commands:
   unregister:
     usage: "/register"
     description: "Unregister as a competitor"
+  menu:
+    usage: "/menu"
+    description: "Open menu gui"
   customize:
     usage: "/customize"
     description: "Open customize gui"

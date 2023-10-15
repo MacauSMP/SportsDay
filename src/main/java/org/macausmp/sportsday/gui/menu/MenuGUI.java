@@ -11,7 +11,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.AbstractTrackEvent;
-import org.macausmp.sportsday.competition.CompetitionListener;
+import org.macausmp.sportsday.CompetitionListener;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.customize.PlayerCustomize;

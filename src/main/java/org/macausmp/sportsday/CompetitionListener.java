@@ -1,4 +1,4 @@
-package org.macausmp.sportsday.competition;
+package org.macausmp.sportsday;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -25,7 +25,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.SportsDay;
+import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.competition.sumo.SumoRound;
 import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;

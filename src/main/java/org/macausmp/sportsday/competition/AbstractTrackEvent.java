@@ -98,8 +98,8 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                     Bukkit.broadcast(Component.translatable("event.track.competitor.completed_lap").args(p.displayName()).color(NamedTextColor.YELLOW));
                 } else {
                     record.put(data, time / 20f);
-                    leaderboard.add(Competitions.getCompetitor(p.getUniqueId()));
                     p.setGameMode(GameMode.SPECTATOR);
+                    leaderboard.add(Competitions.getCompetitor(p.getUniqueId()));
                     onRaceFinish(p);
                     Bukkit.broadcast(Component.translatable("event.track.competitor.completed_all").args(p.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW));
                     if (leaderboard.size() == getCompetitors().size()) {

@@ -10,13 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CommandManager implements CommandExecutor {
+public final class CommandManager implements CommandExecutor {
     private final SportsDay plugin = SportsDay.getInstance();
     private static final List<IPluginCommand> COMMANDS = new ArrayList<>();
     private static final IPluginCommand COMPETITION = new CompetitionCommand();
     private static final IPluginCommand COMPETITIONGUI = new CompetitionGUICommand();
     private static final IPluginCommand REGISTER = new RegisterCommand();
     private static final IPluginCommand UNREGISTER = new UnregisterCommand();
+    private static final IPluginCommand MENU = new MenuCommand();
     private static final IPluginCommand CUSTOMIZE = new CustomizeCommand();
     private static final IPluginCommand PING = new PingCommand();
 
@@ -25,6 +26,7 @@ public class CommandManager implements CommandExecutor {
         COMMANDS.add(COMPETITIONGUI);
         COMMANDS.add(REGISTER);
         COMMANDS.add(UNREGISTER);
+        COMMANDS.add(MENU);
         COMMANDS.add(CUSTOMIZE);
         COMMANDS.add(PING);
         for (IPluginCommand command : COMMANDS) {

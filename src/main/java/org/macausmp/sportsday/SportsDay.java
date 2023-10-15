@@ -20,7 +20,6 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.command.CommandManager;
-import org.macausmp.sportsday.competition.CompetitionListener;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.GUIListener;

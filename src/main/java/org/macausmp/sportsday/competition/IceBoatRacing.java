@@ -118,6 +118,11 @@ public class IceBoatRacing extends AbstractTrackEvent {
         if (!e.getVehicle().getPassengers().isEmpty()) e.setCancelled(true);
     }
 
+    /**
+     * Create a new boat at player's spawnpoint and put player on it
+     * @param p The player
+     * @return A new boat containing the player
+     */
     private @NotNull Boat boat(@NotNull Player p) {
         Boat boat = getWorld().spawn(Objects.requireNonNull(p.getBedSpawnLocation()), Boat.class);
         Boat.Type type = PlayerCustomize.getBoatType(p);

@@ -11,7 +11,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
-import org.macausmp.sportsday.competition.Stage;
 import org.macausmp.sportsday.gui.AbstractGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -49,7 +48,7 @@ public class PracticeGUI extends AbstractGUI {
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        if (Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStage() != Stage.STARTED) {
+        if (Competitions.getCurrentEvent() == null) {
             String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING);
             if (ItemUtil.equals(item, "practice")) {
                 for (IEvent event : Competitions.COMPETITIONS) {
