@@ -46,6 +46,7 @@ public class ClothingTrimGUI extends AbstractGUI {
 
     @Override
     public void update() {
+        if (slot == null) return;
         getInventory().setItem(9, material(Material.QUARTZ));
         getInventory().setItem(17, material(Material.IRON_INGOT));
         getInventory().setItem(18, material(Material.NETHERITE_INGOT));

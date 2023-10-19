@@ -17,5 +17,7 @@ Macau SMP SportsDay papermc plugin
 > * `<number>`
 * `/unregister`
 > Unregister as a competitor
+* `/menu`
+> Open main menu
 * `/customize`
 > Open your customize menu
