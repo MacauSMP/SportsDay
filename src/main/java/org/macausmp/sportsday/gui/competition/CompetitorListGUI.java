@@ -36,13 +36,12 @@ public class CompetitorListGUI extends AbstractGUI implements IPageableGUI {
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
         getInventory().setItem(1, ItemUtil.addEffect(GUIButton.COMPETITOR_LIST));
-        getInventory().setItem(2, GUIButton.START_COMPETITION);
-        getInventory().setItem(3, GUIButton.END_COMPETITION);
-        getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
-        getInventory().setItem(5, GUIButton.VERSION);
+        getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
+        getInventory().setItem(3, GUIButton.VERSION);
         getInventory().setItem(9, GUIButton.PREVIOUS_PAGE);
         getInventory().setItem(13, pages());
         getInventory().setItem(17, GUIButton.NEXT_PAGE);
+        update();
         HANDLER.add(this);
     }
 

@@ -1,5 +1,7 @@
 package org.macausmp.sportsday.gui.competition;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -26,17 +28,18 @@ public class CompetitionInfoGUI extends AbstractGUI {
         }
         getInventory().setItem(0, ItemUtil.addEffect(GUIButton.COMPETITION_INFO));
         getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
-        getInventory().setItem(2, GUIButton.START_COMPETITION);
-        getInventory().setItem(3, GUIButton.END_COMPETITION);
-        getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
-        getInventory().setItem(5, GUIButton.VERSION);
+        getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
+        getInventory().setItem(3, GUIButton.VERSION);
+        getInventory().setItem(18, GUIButton.START_COMPETITION);
+        getInventory().setItem(19, GUIButton.END_COMPETITION);
+        update();
         HANDLER.add(this);
     }
 
     @Override
     public void update() {
-        getInventory().setItem(18, status());
-        getInventory().setItem(27, player());
+        getInventory().setItem(27, status());
+        getInventory().setItem(28, player());
     }
 
     public static void updateGUI() {
@@ -47,6 +50,19 @@ public class CompetitionInfoGUI extends AbstractGUI {
 
     @Override
     public void onClick(InventoryClickEvent e, Player p, ItemStack item) {
+        if (ItemUtil.equals(item, GUIButton.START_COMPETITION)) {
+            if (Competitions.getCurrentEvent() != null && Competitions.getCurrentEvent().getStage() != Stage.ENDED) {
+                p.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
+                p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+                return;
+            }
+            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+            p.openInventory(new CompetitionStartGUI().getInventory());
+        } else if (ItemUtil.equals(item, GUIButton.END_COMPETITION)) {
+            boolean b = Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStage() == Stage.ENDED;
+            p.playSound(Sound.sound(Key.key(b ? "minecraft:entity.enderman.teleport" : "minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+            Competitions.forceEnd(p);
+        }
     }
 
     private @NotNull ItemStack status() {

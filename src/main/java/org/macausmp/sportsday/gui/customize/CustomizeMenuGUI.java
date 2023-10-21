@@ -25,8 +25,12 @@ import java.util.List;
 import java.util.Objects;
 
 public class CustomizeMenuGUI extends AbstractGUI {
+    private final Player player;
+
     public CustomizeMenuGUI(Player player) {
-        super(45, Component.translatable("gui.customize.title"), player);
+        super(45, Component.translatable("gui.customize.title"));
+        this.player = player;
+        update();
     }
 
     @Override

@@ -125,7 +125,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         Competitions.getOnlineCompetitors().forEach(d -> {
             d.getPlayer().getInventory().clear();
             PlayerCustomize.suitUp(d.getPlayer());
-            d.getPlayer().getInventory().setItem(3, ItemUtil.MENU);
+            d.getPlayer().getInventory().setItem(0, ItemUtil.MENU);
             d.getPlayer().getInventory().setItem(4, ItemUtil.CUSTOMIZE);
         });
         Competitions.save();

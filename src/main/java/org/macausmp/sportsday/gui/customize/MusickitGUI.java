@@ -21,18 +21,22 @@ import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MusickitGUI extends AbstractGUI {
-    private static final NamespacedKey MUSICKIT = NamespacedKey.fromString("musickit", PLUGIN);
+    private static final NamespacedKey MUSICKIT = Objects.requireNonNull(NamespacedKey.fromString("musickit", PLUGIN));
     private static final int START_INDEX = 10;
+    private final Player player;
 
     public MusickitGUI(Player player) {
-        super(54, Component.translatable("gui.customize.musickit.title"), player);
+        super(54, Component.translatable("gui.customize.musickit.title"));
+        this.player = player;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
         }
         getInventory().setItem(8, GUIButton.BACK);
         getInventory().setItem(9, reset());
+        update();
     }
 
     @Override

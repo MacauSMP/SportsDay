@@ -48,7 +48,7 @@ public class MenuGUI extends AbstractGUI {
                 p.playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:entity.bat.takeoff"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f));
                 p.getInventory().clear();
                 PlayerCustomize.suitUp(p);
-                p.getInventory().setItem(3, ItemUtil.MENU);
+                p.getInventory().setItem(0, ItemUtil.MENU);
                 p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
             }
         } else if (ItemUtil.equals(item, PRACTICE)) {

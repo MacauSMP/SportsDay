@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.competition.AbstractEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.AbstractGUI;
@@ -29,6 +30,7 @@ public class PracticeGUI extends AbstractGUI {
         getInventory().setItem(12, GUIButton.OBSTACLE_COURSE);
         getInventory().setItem(13, GUIButton.PARKOUR);
         getInventory().setItem(14, GUIButton.SUMO);
+        update();
     }
 
     @Override
@@ -53,6 +55,9 @@ public class PracticeGUI extends AbstractGUI {
             if (ItemUtil.equals(item, "practice")) {
                 for (IEvent event : Competitions.COMPETITIONS) {
                     if (event.getID().equals(id)) {
+                        if (AbstractEvent.inPractice(p)) {
+                            AbstractEvent.quitPractice(p);
+                        }
                         event.practice(p);
                         return;
                     }

@@ -30,11 +30,13 @@ import java.util.Objects;
 
 public class ClothingTrimGUI extends AbstractGUI {
     private static final FileConfiguration CONFIG = PLUGIN.getConfigManager().getPlayerdataConfig();
+    private final Player player;
     private final EquipmentSlot slot;
     private final String source;
 
     public ClothingTrimGUI(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        super(54, Component.translatable("gui.customize.clothing.trim.title"), player);
+        super(54, Component.translatable("gui.customize.clothing.trim.title"));
+        this.player = player;
         this.slot = slot;
         this.source = player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim";
         for (int i = 0; i < 9; i++) {
@@ -46,7 +48,6 @@ public class ClothingTrimGUI extends AbstractGUI {
 
     @Override
     public void update() {
-        if (slot == null) return;
         getInventory().setItem(9, material(Material.QUARTZ));
         getInventory().setItem(17, material(Material.IRON_INGOT));
         getInventory().setItem(18, material(Material.NETHERITE_INGOT));
@@ -67,7 +68,6 @@ public class ClothingTrimGUI extends AbstractGUI {
         for (int i = 10; i < 44; i++) {
             if (i % 9 == 1 || i % 9 == 2 || i % 9 == 6 || i % 9 == 7) getInventory().setItem(i, pattern(iterator.next()));
         }
-        if (source == null) return;
         String material = CONFIG.getString(source + ".material");
         if (material != null) {
             for (int i = 9; i < 54; i++) {

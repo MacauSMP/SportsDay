@@ -30,7 +30,6 @@ public final class ItemUtil {
     public static final ItemStack QUIT_PRACTICE = ItemUtil.item(Material.BARRIER, "quit_practice", "item.quit_practice", "item.quit_practice_lore");
     public static final ItemStack CUSTOMIZE = ItemUtil.item(Material.CHEST, "customize", "item.customize", "item.customize_lore1", "item.customize_lore2");
     public static final ItemStack SPRAY = ItemUtil.item(Material.DRAGON_BREATH, "graffiti_spray", "item.spray", "item.spray_lore1", "item.spray_lore2", "item.spray_lore3");
-
     public static final String START = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0";
 
     public static @NotNull ItemStack item(@NotNull ItemStack stack, String id, Object display, Object... lore) {

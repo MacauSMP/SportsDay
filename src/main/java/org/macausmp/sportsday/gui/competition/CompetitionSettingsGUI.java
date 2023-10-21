@@ -28,16 +28,15 @@ public class CompetitionSettingsGUI extends AbstractGUI {
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
         getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
-        getInventory().setItem(2, GUIButton.START_COMPETITION);
-        getInventory().setItem(3, GUIButton.END_COMPETITION);
-        getInventory().setItem(4, ItemUtil.addEffect(GUIButton.COMPETITION_SETTINGS));
-        getInventory().setItem(5, GUIButton.VERSION);
+        getInventory().setItem(2, ItemUtil.addEffect(GUIButton.COMPETITION_SETTINGS));
+        getInventory().setItem(3, GUIButton.VERSION);
         getInventory().setItem(18, GUIButton.ELYTRA_RACING);
         getInventory().setItem(19, GUIButton.ICE_BOAT_RACING);
         getInventory().setItem(20, GUIButton.JAVELIN_THROW);
         getInventory().setItem(21, GUIButton.OBSTACLE_COURSE);
         getInventory().setItem(22, GUIButton.PARKOUR);
         getInventory().setItem(23, GUIButton.SUMO);
+        update();
         HANDLER.add(this);
     }
 

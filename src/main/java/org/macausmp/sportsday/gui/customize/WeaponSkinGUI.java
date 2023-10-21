@@ -20,12 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WeaponSkinGUI extends AbstractGUI {
+    private final Player player;
+
     public WeaponSkinGUI(Player player) {
-        super(18, Component.translatable("gui.customize.weapon_skin.title"), player);
+        super(18, Component.translatable("gui.customize.weapon_skin.title"));
+        this.player = player;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
         }
         getInventory().setItem(8, GUIButton.BACK);
+        update();
     }
 
     @Override

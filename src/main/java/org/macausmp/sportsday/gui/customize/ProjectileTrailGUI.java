@@ -22,14 +22,17 @@ import java.util.List;
 
 public class ProjectileTrailGUI extends AbstractGUI {
     private static final int START_INDEX = 10;
+    private final Player player;
 
     public ProjectileTrailGUI(Player player) {
-        super(54, Component.translatable("gui.customize.projectile_trail.title"), player);
+        super(54, Component.translatable("gui.customize.projectile_trail.title"));
+        this.player = player;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
         }
         getInventory().setItem(8, GUIButton.BACK);
         getInventory().setItem(9, reset());
+        update();
     }
 
     @Override

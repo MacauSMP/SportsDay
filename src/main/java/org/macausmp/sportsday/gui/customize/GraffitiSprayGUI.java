@@ -21,9 +21,10 @@ import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class GraffitiSprayGUI extends AbstractGUI {
-    private static final NamespacedKey GRAFFITI_SPRAY = NamespacedKey.fromString("graffiti_spray", PLUGIN);
+    private static final NamespacedKey GRAFFITI_SPRAY = Objects.requireNonNull(NamespacedKey.fromString("graffiti_spray", PLUGIN));
     private static final int START_INDEX = 10;
     private final Player player;
 
@@ -43,7 +44,6 @@ public class GraffitiSprayGUI extends AbstractGUI {
         for (int i = 0; i < CustomizeGraffitiSpray.values().length; i++) {
             getInventory().setItem(i + START_INDEX, graffiti(CustomizeGraffitiSpray.values()[i]));
         }
-        if (player == null) return;
         CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(player);
         if (graffiti == null) return;
         for (int i = START_INDEX; i < getInventory().getSize(); i++) {

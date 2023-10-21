@@ -139,7 +139,7 @@ public abstract class AbstractEvent implements IEvent {
                     Competitions.getOnlineCompetitors().forEach(d -> {
                         d.getPlayer().getInventory().clear();
                         PlayerCustomize.suitUp(d.getPlayer());
-                        d.getPlayer().getInventory().setItem(3, ItemUtil.MENU);
+                        d.getPlayer().getInventory().setItem(0, ItemUtil.MENU);
                         d.getPlayer().getInventory().setItem(4, ItemUtil.CUSTOMIZE);
                     });
                     getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
@@ -211,9 +211,10 @@ public abstract class AbstractEvent implements IEvent {
         PRACTICE.remove(p);
         if (p.isInsideVehicle()) Objects.requireNonNull(p.getVehicle()).remove();
         p.teleport(p.getWorld().getSpawnLocation());
+        p.setBedSpawnLocation(p.getWorld().getSpawnLocation(), true);
         p.getInventory().clear();
         PlayerCustomize.suitUp(p);
-        p.getInventory().setItem(3, ItemUtil.MENU);
+        p.getInventory().setItem(0, ItemUtil.MENU);
         p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
     }
 

@@ -10,13 +10,11 @@ import org.macausmp.sportsday.gui.GUIButton;
 
 public class CompetitionMenuGUI extends AbstractGUI {
     public CompetitionMenuGUI() {
-        super(45, Component.translatable("gui.menu.title"));
+        super(27, Component.translatable("gui.menu.title"));
         getInventory().setItem(10, GUIButton.COMPETITION_INFO);
-        getInventory().setItem(13, GUIButton.COMPETITOR_LIST);
-        getInventory().setItem(16, GUIButton.START_COMPETITION);
-        getInventory().setItem(28, GUIButton.END_COMPETITION);
-        getInventory().setItem(31, GUIButton.COMPETITION_SETTINGS);
-        getInventory().setItem(34, GUIButton.VERSION);
+        getInventory().setItem(12, GUIButton.COMPETITOR_LIST);
+        getInventory().setItem(14, GUIButton.COMPETITION_SETTINGS);
+        getInventory().setItem(16, GUIButton.VERSION);
     }
 
     @Override

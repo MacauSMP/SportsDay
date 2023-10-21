@@ -23,9 +23,12 @@ import java.util.Objects;
 
 public class ClothingColorGUI extends AbstractGUI {
     private static final int START_INDEX = 10;
+    private final Player player;
     private final EquipmentSlot slot;
+
     public ClothingColorGUI(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        super(27, Component.translatable("gui.customize.clothing.color.title"), player);
+        super(27, Component.translatable("gui.customize.clothing.color.title"));
+        this.player = player;
         this.slot = slot;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
@@ -40,7 +43,6 @@ public class ClothingColorGUI extends AbstractGUI {
         for (int i = 0; i < DyeColor.values().length; i++) {
             getInventory().setItem(i + START_INDEX, dye(Material.getMaterial(DyeColor.values()[i].name() + "_DYE")));
         }
-        if (slot == null) return;
         for (int i = START_INDEX; i < START_INDEX + DyeColor.values().length; i++) {
             ItemStack dye = getInventory().getItem(i);
             Color color = PlayerCustomize.getClothColor(player, slot);

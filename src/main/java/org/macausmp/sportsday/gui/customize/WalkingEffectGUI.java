@@ -22,14 +22,17 @@ import java.util.List;
 
 public class WalkingEffectGUI extends AbstractGUI {
     private static final int START_INDEX = 10;
+    private final Player player;
 
     public WalkingEffectGUI(Player player) {
-        super(54, Component.translatable("gui.customize.walking_effect.title"), player);
+        super(54, Component.translatable("gui.customize.walking_effect.title"));
+        this.player = player;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
         }
         getInventory().setItem(8, GUIButton.BACK);
         getInventory().setItem(9, reset());
+        update();
     }
 
     @Override

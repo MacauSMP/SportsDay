@@ -33,10 +33,8 @@ public class CompetitorProfileGUI extends AbstractGUI {
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
         getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
-        getInventory().setItem(2, GUIButton.START_COMPETITION);
-        getInventory().setItem(3, GUIButton.END_COMPETITION);
-        getInventory().setItem(4, GUIButton.COMPETITION_SETTINGS);
-        getInventory().setItem(5, GUIButton.VERSION);
+        getInventory().setItem(2, GUIButton.COMPETITION_SETTINGS);
+        getInventory().setItem(3, GUIButton.VERSION);
         getInventory().setItem(18, icon(data.getUUID()));
         getInventory().setItem(19, unregister(data));
     }

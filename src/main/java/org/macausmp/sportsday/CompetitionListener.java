@@ -56,7 +56,7 @@ public final class CompetitionListener implements Listener {
     public void onJoin(@NotNull PlayerJoinEvent e) {
         Player p = e.getPlayer();
         PlayerCustomize.suitUp(p);
-        p.getInventory().setItem(3, ItemUtil.MENU);
+        p.getInventory().setItem(0, ItemUtil.MENU);
         p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
         IEvent current = Competitions.getCurrentEvent();
         if (current == null || current.getStage() != Stage.STARTED) return;

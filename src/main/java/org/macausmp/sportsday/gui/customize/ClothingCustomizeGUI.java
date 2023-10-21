@@ -30,9 +30,11 @@ import java.util.Objects;
 public class ClothingCustomizeGUI extends AbstractGUI {
     private static final String[] MATERIAL = {"LEATHER", "CHAINMAIL", "IRON", "GOLDEN", "DIAMOND", "NETHERITE"};
     private static final String[] ARMOR = {"HELMET", "CHESTPLATE", "LEGGINGS", "BOOTS"};
+    private final Player player;
 
     public ClothingCustomizeGUI(Player player) {
-        super(45, Component.translatable("gui.customize.clothing.title"), player);
+        super(45, Component.translatable("gui.customize.clothing.title"));
+        this.player = player;
         for (int i = 0; i < 9; i++) {
             getInventory().setItem(i, GUIButton.BOARD);
         }
@@ -41,6 +43,7 @@ public class ClothingCustomizeGUI extends AbstractGUI {
         getInventory().setItem(26, reset("gui.customize.clothing.chest"));
         getInventory().setItem(35, reset("gui.customize.clothing.legs"));
         getInventory().setItem(44, reset("gui.customize.clothing.feet"));
+        update();
     }
 
     @Override
