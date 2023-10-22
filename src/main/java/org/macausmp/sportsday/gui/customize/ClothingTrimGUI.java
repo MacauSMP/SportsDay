@@ -17,7 +17,7 @@ import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-public class ClothingTrimGUI extends AbstractGUI {
+public class ClothingTrimGUI extends PluginGUI {
     private static final FileConfiguration CONFIG = PLUGIN.getConfigManager().getPlayerdataConfig();
     private final Player player;
     private final EquipmentSlot slot;

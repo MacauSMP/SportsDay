@@ -18,7 +18,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ClothingCustomizeGUI extends AbstractGUI {
+public class ClothingCustomizeGUI extends PluginGUI {
     private static final String[] MATERIAL = {"LEATHER", "CHAINMAIL", "IRON", "GOLDEN", "DIAMOND", "NETHERITE"};
     private static final String[] ARMOR = {"HELMET", "CHESTPLATE", "LEGGINGS", "BOOTS"};
     private final Player player;

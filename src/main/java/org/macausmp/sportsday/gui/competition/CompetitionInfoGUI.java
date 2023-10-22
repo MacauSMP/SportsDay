@@ -11,14 +11,14 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.Stage;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompetitionInfoGUI extends AbstractGUI {
+public class CompetitionInfoGUI extends PluginGUI {
     private static final List<CompetitionInfoGUI> HANDLER = new ArrayList<>();
 
     public CompetitionInfoGUI() {

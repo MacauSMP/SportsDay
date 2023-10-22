@@ -143,6 +143,15 @@ public final class CompetitionListener implements Listener {
     }
 
     @EventHandler
+    public void onDrop(@NotNull PlayerDropItemEvent e) {
+        Player p = e.getPlayer();
+        if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
+        if (ItemUtil.equals(e.getItemDrop().getItemStack(), ItemUtil.MENU) || ItemUtil.equals(e.getItemDrop().getItemStack(), ItemUtil.CUSTOMIZE)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onQuitPractice(@NotNull PlayerInteractEvent e) {
         if (e.getItem() == null) return;
         Player p = e.getPlayer();
@@ -173,7 +182,7 @@ public final class CompetitionListener implements Listener {
                     Location loc = b.getLocation().add(f.getDirection());
                     ItemStack map = new ItemStack(Material.FILLED_MAP);
                     map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.getId())));
-                    Bukkit.getServer().playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:use_spray"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f));
+                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:use_spray"), Sound.Source.MASTER, 1f, 1f));
                     new BukkitRunnable() {
                         @Override
                         public void run() {
@@ -211,7 +220,7 @@ public final class CompetitionListener implements Listener {
             if (graffiti == null || Bukkit.getMap(graffiti.getId()) == null) return;
             ItemStack map = new ItemStack(Material.FILLED_MAP);
             map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.getId())));
-            Bukkit.getServer().playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:use_spray"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f));
+            Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:use_spray"), Sound.Source.MASTER, 1f, 1f));
             new BukkitRunnable() {
                 @Override
                 public void run() {

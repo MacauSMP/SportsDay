@@ -44,8 +44,8 @@ public final class GUIButton {
                 lore.add(TextUtil.text(Component.translatable("event.track.laps").args(Component.text((e.getMaxLaps()))).color(NamedTextColor.YELLOW)));
                 meta.lore(lore);
             }
-            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "competition");
-            meta.getPersistentDataContainer().set(ItemUtil.COMPETITION_ID, PersistentDataType.STRING, event.getID());
+            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "event");
+            meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID());
         });
         return stack;
     }

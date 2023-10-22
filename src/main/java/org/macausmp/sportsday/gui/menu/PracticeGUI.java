@@ -12,12 +12,12 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.AbstractEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
-public class PracticeGUI extends AbstractGUI {
+public class PracticeGUI extends PluginGUI {
     public PracticeGUI() {
         super(27, Component.translatable("gui.menu.practice.title"));
         for (int i = 0; i < 9; i++) {
@@ -51,7 +51,7 @@ public class PracticeGUI extends AbstractGUI {
             return;
         }
         if (Competitions.getCurrentEvent() == null) {
-            String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING);
+            String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING);
             if (ItemUtil.equals(item, "practice")) {
                 for (IEvent event : Competitions.COMPETITIONS) {
                     if (event.getID().equals(id)) {
@@ -71,7 +71,7 @@ public class PracticeGUI extends AbstractGUI {
         stack.editMeta(meta -> {
             meta.displayName(TextUtil.text(Component.translatable("gui.menu.practice").args(event.getName())));
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "practice");
-            meta.getPersistentDataContainer().set(ItemUtil.COMPETITION_ID, PersistentDataType.STRING, event.getID());
+            meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID());
         });
         return stack;
     }

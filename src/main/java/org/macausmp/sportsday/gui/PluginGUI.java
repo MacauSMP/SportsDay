@@ -2,15 +2,22 @@ package org.macausmp.sportsday.gui;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 
-public abstract class AbstractGUI implements IPluginGUI {
+/**
+ * Represents a plugin gui
+ */
+public abstract class PluginGUI implements InventoryHolder {
     protected static final SportsDay PLUGIN = SportsDay.getInstance();
     private final Inventory inventory;
 
-    public AbstractGUI(int size, Component title) {
+    public PluginGUI(int size, Component title) {
         inventory = Bukkit.createInventory(this, size, title);
     }
 
@@ -22,4 +29,15 @@ public abstract class AbstractGUI implements IPluginGUI {
     public final @NotNull Inventory getInventory() {
         return inventory;
     }
+
+    /**
+     * Update GUI content
+     */
+    public abstract void update();
+
+    /**
+     * Listener call from {@link GUIListener}
+     * @param event event given from {@link GUIListener}
+     */
+    public abstract void onClick(InventoryClickEvent event, Player player, ItemStack item);
 }

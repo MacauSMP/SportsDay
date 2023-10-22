@@ -5,10 +5,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 
-public class CompetitionMenuGUI extends AbstractGUI {
+public class CompetitionMenuGUI extends PluginGUI {
     public CompetitionMenuGUI() {
         super(27, Component.translatable("gui.menu.title"));
         getInventory().setItem(10, GUIButton.COMPETITION_INFO);

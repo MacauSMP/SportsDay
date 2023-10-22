@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.CompetitorData;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class CompetitorProfileGUI extends AbstractGUI {
+public class CompetitorProfileGUI extends PluginGUI {
     private final CompetitorData data;
 
     public CompetitorProfileGUI(@NotNull CompetitorData data) {

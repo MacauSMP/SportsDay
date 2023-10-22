@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -20,7 +20,7 @@ import org.macausmp.sportsday.util.TextUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoatTypeGUI extends AbstractGUI {
+public class BoatTypeGUI extends PluginGUI {
     private final Player player;
 
     public BoatTypeGUI(Player player) {

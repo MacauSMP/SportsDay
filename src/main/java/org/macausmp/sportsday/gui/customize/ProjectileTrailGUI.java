@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -20,7 +20,7 @@ import org.macausmp.sportsday.util.TextUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProjectileTrailGUI extends AbstractGUI {
+public class ProjectileTrailGUI extends PluginGUI {
     private static final int START_INDEX = 10;
     private final Player player;
 

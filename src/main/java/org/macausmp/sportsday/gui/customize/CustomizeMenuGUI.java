@@ -16,7 +16,7 @@ import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
 import org.macausmp.sportsday.customize.CustomizeMusickit;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CustomizeMenuGUI extends AbstractGUI {
+public class CustomizeMenuGUI extends PluginGUI {
     private final Player player;
 
     public CustomizeMenuGUI(Player player) {

@@ -10,11 +10,11 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 
-public class CompetitionStartGUI extends AbstractGUI {
+public class CompetitionStartGUI extends PluginGUI {
     public CompetitionStartGUI() {
         super(54, Component.translatable("gui.start.title"));
         for (int i = 0; i < 9; i++) {
@@ -46,14 +46,14 @@ public class CompetitionStartGUI extends AbstractGUI {
     @Override
     public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
         if (ItemUtil.equals(item, "start_competition")) {
-            boolean b = Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING));
+            boolean b = Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
             if (!b) p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
         }
     }
 
     private @NotNull ItemStack start(@NotNull IEvent event) {
         ItemStack stack = ItemUtil.head(ItemUtil.START, "start_competition", "gui.start_competition");
-        stack.editMeta(meta -> meta.getPersistentDataContainer().set(ItemUtil.COMPETITION_ID, PersistentDataType.STRING, event.getID()));
+        stack.editMeta(meta -> meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID()));
         return stack;
     }
 }

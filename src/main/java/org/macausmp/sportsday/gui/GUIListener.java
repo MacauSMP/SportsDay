@@ -19,7 +19,7 @@ public final class GUIListener implements Listener {
     public void onClick(@NotNull InventoryClickEvent e) {
         if (e.getWhoClicked() instanceof Player p) {
             if (!p.isOp()) e.setCancelled(true);
-            if (e.getInventory().getHolder() instanceof AbstractGUI gui) {
+            if (e.getInventory().getHolder() instanceof PluginGUI gui) {
                 e.setCancelled(true);
                 ItemStack item = e.getCurrentItem();
                 if (item != null && ItemUtil.hasID(item) && e.getClickedInventory() != null && e.getClickedInventory().getType() != InventoryType.PLAYER) {

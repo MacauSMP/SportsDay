@@ -26,7 +26,7 @@ public class ScoreboardHandler {
                 Scoreboard scoreboard = plugin.getServer().getScoreboardManager().getNewScoreboard();
                 Objective o = scoreboard.registerNewObjective("sportsday", Criteria.DUMMY, Component.translatable("scoreboard.title").color(NamedTextColor.GOLD));
                 o.setDisplaySlot(DisplaySlot.SIDEBAR);
-                Entry comp = new Entry(o, "competition", "scoreboard.competition");
+                Entry event = new Entry(o, "competition", "scoreboard.competition");
                 Entry stage = new Entry(o, "stage", "scoreboard.stage");
                 Entry count = new Entry(o, "competitor_count", "scoreboard.competitor_count").setScore(8);
                 Entry number = new Entry(o, "number", "scoreboard.number");
@@ -41,13 +41,13 @@ public class ScoreboardHandler {
                     @Override
                     public void run() {
                         if (Competitions.getCurrentEvent() != null) {
-                            comp.suffix(Competitions.getCurrentEvent().getName());
+                            event.suffix(Competitions.getCurrentEvent().getName());
                             stage.suffix(Competitions.getCurrentEvent().getStage().getName());
-                            comp.setScore(11);
+                            event.setScore(11);
                             stage.setScore(10);
                             line.setScore(9);
                         } else {
-                            comp.resetScore();
+                            event.resetScore();
                             stage.resetScore();
                             line.resetScore();
                         }

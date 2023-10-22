@@ -11,14 +11,14 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompetitionSettingsGUI extends AbstractGUI {
+public class CompetitionSettingsGUI extends PluginGUI {
     private static final List<CompetitionSettingsGUI> HANDLER = new ArrayList<>();
 
     public CompetitionSettingsGUI() {
@@ -58,7 +58,7 @@ public class CompetitionSettingsGUI extends AbstractGUI {
 
     @Override
     public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
-        String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.COMPETITION_ID, PersistentDataType.STRING);
+        String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING);
         if (ItemUtil.equals(item, "status_toggle")) {
             for (IEvent event : Competitions.COMPETITIONS) {
                 if (event.getID().equals(id)) {
@@ -74,7 +74,7 @@ public class CompetitionSettingsGUI extends AbstractGUI {
 
     private @NotNull ItemStack status(@NotNull IEvent event) {
         ItemStack stack = ItemUtil.item(event.isEnable() ? Material.LIME_DYE : Material.BARRIER, "status_toggle", event.isEnable() ? "gui.enabled" : "gui.disabled", "gui.toggle");
-        stack.editMeta(meta -> meta.getPersistentDataContainer().set(ItemUtil.COMPETITION_ID, PersistentDataType.STRING, event.getID()));
+        stack.editMeta(meta -> meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID()));
         return stack;
     }
 }

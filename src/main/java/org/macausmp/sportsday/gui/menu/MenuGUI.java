@@ -10,17 +10,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.AbstractTrackEvent;
 import org.macausmp.sportsday.CompetitionListener;
+import org.macausmp.sportsday.competition.AbstractTrackEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
-import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.Objects;
 
-public class MenuGUI extends AbstractGUI {
+public class MenuGUI extends PluginGUI {
     private static final ItemStack GUIDEBOOK = ItemUtil.item(Material.WRITABLE_BOOK, "guidebook", Component.translatable("gui.menu.guidebook.title").color(NamedTextColor.YELLOW), "gui.menu.guidebook.lore");
     private static final ItemStack HOME = ItemUtil.item(Material.RED_BED, "home", Component.translatable("gui.menu.home.title").color(NamedTextColor.YELLOW), "gui.menu.home.lore");
     private static final ItemStack PRACTICE = ItemUtil.item(Material.ARMOR_STAND, "practice", Component.translatable("gui.menu.practice.title").color(NamedTextColor.YELLOW), "gui.menu.practice.lore");
@@ -45,11 +44,7 @@ public class MenuGUI extends AbstractGUI {
         } else if (ItemUtil.equals(item, HOME)) {
             if (Competitions.getCurrentEvent() == null) {
                 p.teleport(p.getWorld().getSpawnLocation());
-                p.playSound(net.kyori.adventure.sound.Sound.sound(Key.key("minecraft:entity.bat.takeoff"), net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f));
-                p.getInventory().clear();
-                PlayerCustomize.suitUp(p);
-                p.getInventory().setItem(0, ItemUtil.MENU);
-                p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+                p.playSound(Sound.sound(Key.key("minecraft:entity.bat.takeoff"), Sound.Source.MASTER, 1f, 1f));
             }
         } else if (ItemUtil.equals(item, PRACTICE)) {
             if (Competitions.getCurrentEvent() == null) {

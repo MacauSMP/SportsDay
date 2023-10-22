@@ -14,7 +14,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
 import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.macausmp.sportsday.gui.AbstractGUI;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class GraffitiSprayGUI extends AbstractGUI {
+public class GraffitiSprayGUI extends PluginGUI {
     private static final NamespacedKey GRAFFITI_SPRAY = Objects.requireNonNull(NamespacedKey.fromString("graffiti_spray", PLUGIN));
     private static final int START_INDEX = 10;
     private final Player player;
