@@ -5,8 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.gui.PluginGUI;
 
 public class CompetitionMenuGUI extends PluginGUI {
     public CompetitionMenuGUI() {

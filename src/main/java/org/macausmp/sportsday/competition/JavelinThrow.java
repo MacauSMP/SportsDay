@@ -23,8 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerHolder;
-import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.*;
 
@@ -62,12 +62,10 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     }
 
     private static @NotNull ItemStack trident() {
-        ItemStack trident = new ItemStack(Material.TRIDENT);
+        String display = "item.sportsday.javelin";
+        Component lore = Component.translatable("enchantment.sportsday.range").args(Component.translatable("enchantment.level.5")).color(NamedTextColor.GRAY);
+        ItemStack trident = ItemUtil.setBind(ItemUtil.item(Material.TRIDENT, null, display, lore));
         trident.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("item.sportsday.javelin")));
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("enchantment.sportsday.range").args(Component.translatable("enchantment.level.5")).color(NamedTextColor.GRAY)));
-            meta.lore(lore);
             meta.setUnbreakable(true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             trident.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);

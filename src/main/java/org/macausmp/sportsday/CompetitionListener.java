@@ -17,6 +17,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
@@ -68,6 +69,9 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
+        if (AbstractEvent.inPractice(p)) {
+            AbstractEvent.quitPractice(p);
+        }
         if (!Competitions.containPlayer(p)) return;
         CompetitionInfoGUI.updateGUI();
         CompetitorListGUI.updateGUI();
@@ -143,12 +147,32 @@ public final class CompetitionListener implements Listener {
     }
 
     @EventHandler
-    public void onDrop(@NotNull PlayerDropItemEvent e) {
+    public void onDropItem(@NotNull PlayerDropItemEvent e) {
         Player p = e.getPlayer();
         if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
-        if (ItemUtil.equals(e.getItemDrop().getItemStack(), ItemUtil.MENU) || ItemUtil.equals(e.getItemDrop().getItemStack(), ItemUtil.CUSTOMIZE)) {
+        if (!ItemUtil.isBind(e.getItemDrop().getItemStack())) return;
+        e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onMoveItem(@NotNull InventoryClickEvent e) {
+        if (e.getWhoClicked() instanceof Player p && e.getClickedInventory() != null) {
+            if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
+            ItemStack item = e.getHotbarButton() == -1 ? e.getCurrentItem() : p.getInventory().getItem(e.getHotbarButton());
+            if (item == null) return;
+            if (!ItemUtil.isBind(item)) return;
             e.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onSwapItem(@NotNull PlayerSwapHandItemsEvent e) {
+        Player p = e.getPlayer();
+        if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
+        ItemStack item = e.getOffHandItem();
+        if (item == null) return;
+        if (!ItemUtil.isBind(item)) return;
+        e.setCancelled(true);
     }
 
     @EventHandler

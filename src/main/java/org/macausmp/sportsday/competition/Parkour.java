@@ -37,8 +37,11 @@ public class Parkour extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onPractice(Player p) {
-
+    protected void onPractice(@NotNull Player p) {
+        p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
+        p.getInventory().setHelmet(null);
+        p.getInventory().setChestplate(null);
+        p.getInventory().setLeggings(null);
     }
 
     @Override

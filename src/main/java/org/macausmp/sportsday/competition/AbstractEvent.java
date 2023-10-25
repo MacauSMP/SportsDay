@@ -74,6 +74,11 @@ public abstract class AbstractEvent implements IEvent {
 
     @Override
     public void setup() {
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            if (AbstractEvent.inPractice(p)) {
+                AbstractEvent.quitPractice(p);
+            }
+        });
         PRACTICE.clear();
         EVENT_TASKS.forEach(BukkitTask::cancel);
         EVENT_TASKS.clear();
@@ -197,6 +202,7 @@ public abstract class AbstractEvent implements IEvent {
         PRACTICE.put(p, this);
         p.teleport(location);
         p.setBedSpawnLocation(location, true);
+        p.setCollidable(false);
         p.getInventory().clear();
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(8, ItemUtil.QUIT_PRACTICE);
@@ -205,13 +211,14 @@ public abstract class AbstractEvent implements IEvent {
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
     }
 
-    protected abstract void onPractice(Player p);
+    protected abstract void onPractice(@NotNull Player p);
 
-    public static void quitPractice(Player p) {
+    public static void quitPractice(@NotNull Player p) {
         PRACTICE.remove(p);
         if (p.isInsideVehicle()) Objects.requireNonNull(p.getVehicle()).remove();
         p.teleport(p.getWorld().getSpawnLocation());
         p.setBedSpawnLocation(p.getWorld().getSpawnLocation(), true);
+        p.setCollidable(true);
         p.getInventory().clear();
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(0, ItemUtil.MENU);

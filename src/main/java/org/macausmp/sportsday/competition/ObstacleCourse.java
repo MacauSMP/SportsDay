@@ -2,6 +2,7 @@ package org.macausmp.sportsday.competition;
 
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.NotNull;
 
 public class ObstacleCourse extends AbstractTrackEvent {
     public ObstacleCourse() {
@@ -26,7 +27,7 @@ public class ObstacleCourse extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onPractice(Player p) {
+    protected void onPractice(@NotNull Player p) {
 
     }
 }

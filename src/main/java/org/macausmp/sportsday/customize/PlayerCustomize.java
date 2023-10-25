@@ -4,7 +4,6 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -18,6 +17,7 @@ import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.SportsDay;
+import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -66,10 +66,9 @@ public final class PlayerCustomize {
     private static @Nullable ItemStack cloth(@NotNull Player player, @NotNull EquipmentSlot slot) {
         String source = CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".item");
         if (source == null) return null;
-        ItemStack cloth = new ItemStack(Objects.requireNonNull(Material.getMaterial(source)));
+        ItemStack cloth = ItemUtil.setBind(new ItemStack(Objects.requireNonNull(Material.getMaterial(source))));
         if (cloth.getItemMeta() instanceof ColorableArmorMeta) cloth.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(PlayerCustomize.getClothColor(player, slot)));
         cloth.editMeta(ArmorMeta.class, meta -> {
-            meta.addEnchant(Enchantment.BINDING_CURSE, 1, true);
             meta.setUnbreakable(true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);

@@ -10,8 +10,8 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
-import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
 public class CompetitionStartGUI extends PluginGUI {

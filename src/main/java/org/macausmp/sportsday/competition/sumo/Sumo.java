@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.util.CompetitorData;
-import org.macausmp.sportsday.util.TextUtil;
+import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +96,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     @Override
-    protected void onPractice(Player p) {
+    protected void onPractice(@NotNull Player p) {
     }
 
     @EventHandler
@@ -193,11 +193,10 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     private @NotNull ItemStack weapon(@NotNull Player p) {
-        ItemStack weapon = new ItemStack(Material.BLAZE_ROD);
+        ItemStack weapon = ItemUtil.setBind(ItemUtil.item(Material.BLAZE_ROD, null, "item.sportsday.kb_stick"));
         Material material = PlayerCustomize.getWeaponSkin(p);
         if (material != null) weapon.setType(material);
         weapon.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("item.sportsday.kb_stick")));
             meta.addEnchant(Enchantment.KNOCKBACK, 1, false);
             meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
         });
