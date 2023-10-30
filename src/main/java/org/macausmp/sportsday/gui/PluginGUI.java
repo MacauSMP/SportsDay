@@ -8,6 +8,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.CompetitionListener;
 import org.macausmp.sportsday.SportsDay;
 
 /**
@@ -36,8 +37,8 @@ public abstract class PluginGUI implements InventoryHolder {
     public abstract void update();
 
     /**
-     * Listener call from {@link GUIListener}
-     * @param event event given from {@link GUIListener}
+     * Listener call from {@link CompetitionListener#onClick(InventoryClickEvent)}
+     * @param event event given from {@link CompetitionListener#onClick(InventoryClickEvent)}
      */
-    public abstract void onClick(InventoryClickEvent event, Player player, ItemStack item);
+    public abstract void onClick(@NotNull InventoryClickEvent event, @NotNull Player player, @NotNull ItemStack item);
 }

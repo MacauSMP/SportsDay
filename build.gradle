@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'org.macausmp'
-version = '2.7.4-BETA'
+version = '2.7.5-BETA'
 
 repositories {
     mavenCentral()

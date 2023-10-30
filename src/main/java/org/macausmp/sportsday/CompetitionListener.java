@@ -32,6 +32,7 @@ import org.macausmp.sportsday.competition.sumo.SumoRound;
 import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
 import org.macausmp.sportsday.gui.competition.CompetitionMenuGUI;
 import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
@@ -150,18 +151,23 @@ public final class CompetitionListener implements Listener {
     public void onDropItem(@NotNull PlayerDropItemEvent e) {
         Player p = e.getPlayer();
         if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
-        if (!ItemUtil.isBind(e.getItemDrop().getItemStack())) return;
-        e.setCancelled(true);
+        if (ItemUtil.isBind(e.getItemDrop().getItemStack())) e.setCancelled(true);
     }
 
     @EventHandler
-    public void onMoveItem(@NotNull InventoryClickEvent e) {
-        if (e.getWhoClicked() instanceof Player p && e.getClickedInventory() != null) {
-            if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
-            ItemStack item = e.getHotbarButton() == -1 ? e.getCurrentItem() : p.getInventory().getItem(e.getHotbarButton());
-            if (item == null) return;
-            if (!ItemUtil.isBind(item)) return;
+    public void onClick(@NotNull InventoryClickEvent e) {
+        if (!(e.getWhoClicked() instanceof Player p) || e.getClickedInventory() == null) return;
+        if (e.getInventory().getHolder() instanceof PluginGUI gui) {
             e.setCancelled(true);
+            ItemStack item = e.getCurrentItem();
+            if (item == null || !ItemUtil.hasID(item)) return;
+            gui.onClick(e, p, item);
+        } else {
+            if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
+            ItemStack current = e.getCurrentItem();
+            ItemStack button = e.getHotbarButton() == -1 ? null : p.getInventory().getItem(e.getHotbarButton());
+            if (current != null && ItemUtil.isBind(current)) e.setCancelled(true);
+            if (button != null && ItemUtil.isBind(button)) e.setCancelled(true);
         }
     }
 
@@ -171,8 +177,7 @@ public final class CompetitionListener implements Listener {
         if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
         ItemStack item = e.getOffHandItem();
         if (item == null) return;
-        if (!ItemUtil.isBind(item)) return;
-        e.setCancelled(true);
+        if (ItemUtil.isBind(item)) e.setCancelled(true);
     }
 
     @EventHandler

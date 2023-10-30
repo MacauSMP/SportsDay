@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.command.CommandManager;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.macausmp.sportsday.gui.GUIListener;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.ScoreboardHandler;
 
@@ -100,7 +99,6 @@ public final class SportsDay extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(Competitions.OBSTACLE_COURSE, this);
         getServer().getPluginManager().registerEvents(Competitions.PARKOUR, this);
         getServer().getPluginManager().registerEvents(Competitions.SUMO, this);
-        getServer().getPluginManager().registerEvents(new GUIListener(), this);
     }
 
     private void setGameRules() {

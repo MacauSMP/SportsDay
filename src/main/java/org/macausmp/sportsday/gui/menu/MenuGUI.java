@@ -37,7 +37,7 @@ public class MenuGUI extends PluginGUI {
     }
 
     @Override
-    public void onClick(InventoryClickEvent e, @NotNull Player p, ItemStack item) {
+    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         if (ItemUtil.equals(item, GUIDEBOOK)) {
             p.openBook(GUIDE_BOOK);

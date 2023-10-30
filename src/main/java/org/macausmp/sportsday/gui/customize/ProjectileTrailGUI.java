@@ -57,7 +57,7 @@ public class ProjectileTrailGUI extends PluginGUI {
     }
 
     @Override
-    public void onClick(InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (ItemUtil.equals(item, GUIButton.BACK)) {
             p.openInventory(new CustomizeMenuGUI(p).getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));

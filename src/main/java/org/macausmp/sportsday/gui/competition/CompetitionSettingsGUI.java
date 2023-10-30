@@ -5,20 +5,18 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompetitionSettingsGUI extends PluginGUI {
+public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
     private static final List<CompetitionSettingsGUI> HANDLER = new ArrayList<>();
 
     public CompetitionSettingsGUI() {
@@ -57,7 +55,7 @@ public class CompetitionSettingsGUI extends PluginGUI {
     }
 
     @Override
-    public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
+    public void onClick(@NotNull Player p, @NotNull ItemStack item) {
         String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING);
         if (ItemUtil.equals(item, "status_toggle")) {
             for (IEvent event : Competitions.COMPETITIONS) {

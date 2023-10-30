@@ -44,7 +44,7 @@ public class PracticeGUI extends PluginGUI {
     }
 
     @Override
-    public void onClick(InventoryClickEvent e, Player p, ItemStack item) {
+    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (ItemUtil.equals(item, GUIButton.BACK)) {
             p.openInventory(new MenuGUI().getInventory());
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));

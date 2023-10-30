@@ -2,13 +2,11 @@ package org.macausmp.sportsday.gui.competition;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.gui.PluginGUI;
 
-public class CompetitionMenuGUI extends PluginGUI {
+public class CompetitionMenuGUI extends AbstractCompetitionGUI {
     public CompetitionMenuGUI() {
         super(27, Component.translatable("gui.menu.title"));
         getInventory().setItem(10, GUIButton.COMPETITION_INFO);
@@ -22,6 +20,6 @@ public class CompetitionMenuGUI extends PluginGUI {
     }
 
     @Override
-    public void onClick(@NotNull InventoryClickEvent e, Player p, ItemStack item) {
+    public void onClick(@NotNull Player p, @NotNull ItemStack item) {
     }
 }

@@ -6,13 +6,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.CompetitorData;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -22,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class CompetitorProfileGUI extends PluginGUI {
+public class CompetitorProfileGUI extends AbstractCompetitionGUI {
     private final CompetitorData data;
 
     public CompetitorProfileGUI(@NotNull CompetitorData data) {
@@ -44,7 +42,7 @@ public class CompetitorProfileGUI extends PluginGUI {
     }
 
     @Override
-    public void onClick(@NotNull InventoryClickEvent e, Player p, ItemStack item) {
+    public void onClick(@NotNull Player p, @NotNull ItemStack item) {
         if (ItemUtil.equals(item, unregister(data))) {
             p.sendMessage(Competitions.leave(data.getPlayer()) ? Component.translatable("command.competition.unregister.success.other").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.GREEN) : Component.translatable("command.competition.unregister.failed.other").args(Component.text(data.getPlayer().getName())).color(NamedTextColor.RED));
             p.closeInventory();

@@ -6,19 +6,17 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.Stage;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompetitionInfoGUI extends PluginGUI {
+public class CompetitionInfoGUI extends AbstractCompetitionGUI {
     private static final List<CompetitionInfoGUI> HANDLER = new ArrayList<>();
 
     public CompetitionInfoGUI() {
@@ -49,7 +47,7 @@ public class CompetitionInfoGUI extends PluginGUI {
     }
 
     @Override
-    public void onClick(InventoryClickEvent e, Player p, ItemStack item) {
+    public void onClick(@NotNull Player p, @NotNull ItemStack item) {
         if (ItemUtil.equals(item, GUIButton.START_COMPETITION)) {
             if (Competitions.getCurrentEvent() != null && Competitions.getCurrentEvent().getStage() != Stage.ENDED) {
                 p.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));

@@ -8,7 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -16,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.Pageable;
-import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -25,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class CompetitorListGUI extends PluginGUI implements Pageable {
+public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageable {
     private static final List<CompetitorListGUI> HANDLER = new ArrayList<>();
     private int page = 0;
 
@@ -64,20 +62,18 @@ public class CompetitorListGUI extends PluginGUI implements Pageable {
     }
 
     @Override
-    public void onClick(@NotNull InventoryClickEvent event, Player p, @NotNull ItemStack item) {
-        if (event.getInventory().getHolder() instanceof CompetitorListGUI gui) {
-            if (ItemUtil.equals(item, "player_icon")) {
-                SkullMeta meta = (SkullMeta) item.getItemMeta();
-                p.openInventory(new CompetitorProfileGUI(Competitions.getCompetitor(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
-                return;
-            }
-            if (ItemUtil.equals(item, GUIButton.NEXT_PAGE)) {
-                p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
-                gui.nextPage();
-            } else if (ItemUtil.equals(item, GUIButton.PREVIOUS_PAGE)) {
-                p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
-                gui.previousPage();
-            }
+    public void onClick(@NotNull Player p, @NotNull ItemStack item) {
+        if (ItemUtil.equals(item, "player_icon")) {
+            SkullMeta meta = (SkullMeta) item.getItemMeta();
+            p.openInventory(new CompetitorProfileGUI(Competitions.getCompetitor(Objects.requireNonNull(meta.getOwningPlayer()).getUniqueId())).getInventory());
+            return;
+        }
+        if (ItemUtil.equals(item, GUIButton.NEXT_PAGE)) {
+            p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
+            nextPage();
+        } else if (ItemUtil.equals(item, GUIButton.PREVIOUS_PAGE)) {
+            p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
+            previousPage();
         }
     }
 

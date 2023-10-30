@@ -4,17 +4,15 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-public class CompetitionStartGUI extends PluginGUI {
+public class CompetitionStartGUI extends AbstractCompetitionGUI {
     public CompetitionStartGUI() {
         super(54, Component.translatable("gui.start.title"));
         for (int i = 0; i < 9; i++) {
@@ -44,7 +42,7 @@ public class CompetitionStartGUI extends PluginGUI {
     }
 
     @Override
-    public void onClick(@NotNull InventoryClickEvent e, Player p, @NotNull ItemStack item) {
+    public void onClick(@NotNull Player p, @NotNull ItemStack item) {
         if (ItemUtil.equals(item, "start_competition")) {
             boolean b = Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
             if (!b) p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
