@@ -4,9 +4,9 @@ import net.kyori.adventure.text.Component;
 import org.macausmp.sportsday.util.TextUtil;
 
 /**
- * Represents the competition stage
+ * Represents the competition status
  */
-public enum Stage {
+public enum Status {
     IDLE("competition.status.idle"),
     COMING("competition.status.coming"),
     STARTED("competition.status.started"),
@@ -14,7 +14,7 @@ public enum Stage {
 
     private final Component name;
 
-    Stage(String code) {
+    Status(String code) {
         this.name = TextUtil.convert(Component.translatable(code));
     }
 

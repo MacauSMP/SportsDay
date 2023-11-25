@@ -18,17 +18,17 @@ import java.util.*;
 public final class Competitions {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
     private static final FileConfiguration COMPETITOR_CONFIG = PLUGIN.getConfigManager().getCompetitorConfig();
-    public static final List<IEvent> COMPETITIONS = new ArrayList<>();
+    public static final Set<IEvent> EVENTS = new LinkedHashSet<>();
     public static final IEvent ELYTRA_RACING = register(new ElytraRacing());
     public static final IEvent ICE_BOAT_RACING = register(new IceBoatRacing());
     public static final IEvent JAVELIN_THROW = register(new JavelinThrow());
     public static final IEvent OBSTACLE_COURSE = register(new ObstacleCourse());
     public static final IEvent PARKOUR = register(new Parkour());
     public static final IEvent SUMO = register(new Sumo());
-    private static final List<CompetitorData> COMPETITORS = new ArrayList<>();
     private static IEvent CURRENT_EVENT;
+    private static final Set<CompetitorData> COMPETITORS = new HashSet<>();
+    private static final Set<Integer> REGISTERED_NUMBER_LIST = new HashSet<>();
     private static int NUMBER = 1;
-    private static final List<Integer> REGISTERED_NUMBER_LIST = new ArrayList<>();
 
     /**
      * Register competition event
@@ -36,7 +36,7 @@ public final class Competitions {
      * @return Competition event after registered
      */
     private static <T extends IEvent> T register(T competition) {
-        COMPETITIONS.add(competition);
+        EVENTS.add(competition);
         return competition;
     }
 
@@ -67,11 +67,11 @@ public final class Competitions {
      * @return True if competition successfully started
      */
     public static boolean start(CommandSender sender, String id) {
-        if (getCurrentEvent() != null && getCurrentEvent().getStage() != Stage.ENDED) {
+        if (getCurrentEvent() != null && getCurrentEvent().getStatus() != Status.ENDED) {
             sender.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
             return false;
         }
-        for (IEvent event : COMPETITIONS) {
+        for (IEvent event : EVENTS) {
             if (event.getID().equals(id)) {
                 if (!event.isEnable()) {
                     sender.sendMessage(Component.translatable("command.competition.disabled").color(NamedTextColor.RED));
@@ -96,7 +96,7 @@ public final class Competitions {
      * @param sender who end the competition
      */
     public static void forceEnd(CommandSender sender) {
-        if (getCurrentEvent() != null && getCurrentEvent().getStage() != Stage.ENDED) {
+        if (getCurrentEvent() != null && getCurrentEvent().getStatus() != Status.ENDED) {
             getCurrentEvent().end(true);
             sender.sendMessage(Component.translatable("command.competition.end.success").color(NamedTextColor.GREEN));
         } else {
@@ -148,8 +148,8 @@ public final class Competitions {
             for (CompetitorData data : COMPETITORS) {
                 if (data.getUUID().equals(competitor.getUniqueId())) {
                     COMPETITOR_CONFIG.set(data.getUUID().toString(), null);
-                    REGISTERED_NUMBER_LIST.remove((Integer) data.getNumber());
-                    if (getCurrentEvent() != null) ((AbstractEvent) getCurrentEvent()).getCompetitors().remove(data);
+                    REGISTERED_NUMBER_LIST.remove(data.getNumber());
+                    if (getCurrentEvent() != null) getCurrentEvent().getCompetitors().remove(data);
                     COMPETITORS.remove(data);
                     CompetitionInfoGUI.updateGUI();
                     CompetitorListGUI.updateGUI();
@@ -167,9 +167,7 @@ public final class Competitions {
      * @return Unoccupied competitor number
      */
     public static int genNumber() {
-        COMPETITORS.forEach(data -> {
-            if (!REGISTERED_NUMBER_LIST.contains(data.getNumber())) REGISTERED_NUMBER_LIST.add(data.getNumber());
-        });
+        COMPETITORS.forEach(data -> REGISTERED_NUMBER_LIST.add(data.getNumber()));
         while (REGISTERED_NUMBER_LIST.contains(NUMBER)) {
             NUMBER++;
         }
@@ -178,23 +176,19 @@ public final class Competitions {
     }
 
     /**
-     * Get list of registered competitors
-     * @return list of registered competitors
+     * Gets a view of all registered competitors
+     * @return a view of registered competitors
      */
-    public static List<CompetitorData> getCompetitors() {
+    public static Collection<CompetitorData> getCompetitors() {
         return COMPETITORS;
     }
 
     /**
-     * Get list of online registered competitors
-     * @return list of online registered competitors
+     * Gets a view of all currently logged in registered competitors
+     * @return a view of currently online registered competitors
      */
-    public static @NotNull List<CompetitorData> getOnlineCompetitors() {
-        List<CompetitorData> list = new ArrayList<>();
-        for (CompetitorData d : COMPETITORS) {
-            if (d.getOfflinePlayer().isOnline()) list.add(d);
-        }
-        return list;
+    public static @NotNull Collection<CompetitorData> getOnlineCompetitors() {
+        return COMPETITORS.stream().filter(d -> d.getOfflinePlayer().isOnline()).toList();
     }
 
     /**

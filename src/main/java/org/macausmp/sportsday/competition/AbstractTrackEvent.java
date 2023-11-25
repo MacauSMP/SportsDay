@@ -55,7 +55,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {
-                if (getStage() != Stage.STARTED) {
+                if (getStatus() != Status.STARTED) {
                     cancel();
                     return;
                 }
@@ -83,7 +83,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     public void onEvent(@NotNull PlayerMoveEvent e) {
         IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
-        if (event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) {
+        if (event == this && getStatus() == Status.STARTED && Competitions.containPlayer(p)) {
             CompetitorData data = Competitions.getCompetitor(p.getUniqueId());
             if (leaderboard.contains(data) || !lapMap.containsKey(data)) return;
             Location loc = p.getLocation().clone();

@@ -48,10 +48,8 @@ public class IceBoatRacing extends AbstractTrackEvent {
 
     @EventHandler
     public void onMove(@NotNull PlayerMoveEvent e) {
-        IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
-        boolean b = event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
-        if ((b || AbstractEvent.inPractice(p)) && boatMap.get(p) != null) bounce(p);
+        if ((checkStatus(p) && getStatus() == Status.STARTED || inPractice(p, this)) && boatMap.get(p) != null) bounce(p);
     }
 
     private void bounce(@NotNull Player p) {
@@ -75,9 +73,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onDismount(@NotNull EntityDismountEvent e) {
         if (e.getEntity() instanceof Player p && e.getDismounted() instanceof Boat) {
-            IEvent event = Competitions.getCurrentEvent();
-            boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
-            if (bl || AbstractEvent.inPractice(p)) {
+            if (checkStatus(p) || inPractice(p, this)) {
                 e.setCancelled(true);
             } else {
                 boatMap.remove(p);
@@ -88,18 +84,14 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onMount(@NotNull EntityMountEvent e) {
         if (e.getEntity() instanceof Player p && e.getMount() instanceof Boat b) {
-            IEvent event = Competitions.getCurrentEvent();
-            boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
-            if (bl || AbstractEvent.inPractice(p)) boatMap.put(p, b);
+            if (checkStatus(p) || inPractice(p, this)) boatMap.put(p, b);
         }
     }
 
     @EventHandler
     public void onDeath(@NotNull PlayerDeathEvent e) {
-        IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
-        boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
-        if ((bl || AbstractEvent.inPractice(p)) && boatMap.get(p) != null) {
+        if ((checkStatus(p) || inPractice(p, this)) && boatMap.get(p) != null) {
             boatMap.get(p).remove();
             boatMap.put(p, boat(p));
         }
@@ -108,9 +100,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onFall(@NotNull EntityDamageEvent e) {
         if (!(e.getEntity() instanceof Player p)) return;
-        IEvent event = Competitions.getCurrentEvent();
-        boolean bl = event == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
-        if ((bl || AbstractEvent.inPractice(p)) && boatMap.get(p) != null && e.getCause().equals(EntityDamageEvent.DamageCause.FALL)) e.setCancelled(true);
+        if ((checkStatus(p) || inPractice(p, this)) && boatMap.get(p) != null && e.getCause().equals(EntityDamageEvent.DamageCause.FALL)) e.setCancelled(true);
     }
 
     @EventHandler
@@ -130,5 +120,9 @@ public class IceBoatRacing extends AbstractTrackEvent {
         boat.setInvulnerable(true);
         boat.addPassenger(p);
         return boat;
+    }
+
+    private boolean checkStatus(Player p) {
+        return Competitions.getCurrentEvent() == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
     }
 }

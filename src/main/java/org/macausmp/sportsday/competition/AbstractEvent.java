@@ -25,14 +25,14 @@ import java.util.*;
 public abstract class AbstractEvent implements IEvent {
     protected static final SportsDay PLUGIN = SportsDay.getInstance();
     private static final List<BukkitTask> EVENT_TASKS = new ArrayList<>();
+    private static final Map<Player, IEvent> PRACTICE = new HashMap<>();
     private final String id;
     private final Component name;
     private final int least;
     private final Location location;
     private final World world;
-    private Stage stage = Stage.IDLE;
-    private final List<CompetitorData> competitors = new ArrayList<>();
-    private static final Map<Player, IEvent> PRACTICE = new HashMap<>();
+    private Status status = Status.IDLE;
+    private final Collection<CompetitorData> competitors = new HashSet<>();
 
     public AbstractEvent(String id) {
         this.id = id;
@@ -74,17 +74,13 @@ public abstract class AbstractEvent implements IEvent {
 
     @Override
     public void setup() {
-        Bukkit.getOnlinePlayers().forEach(p -> {
-            if (AbstractEvent.inPractice(p)) {
-                AbstractEvent.quitPractice(p);
-            }
-        });
+        Bukkit.getOnlinePlayers().forEach(AbstractEvent::leavePractice);
         PRACTICE.clear();
         EVENT_TASKS.forEach(BukkitTask::cancel);
         EVENT_TASKS.clear();
         competitors.clear();
         getLeaderboard().clear();
-        setStage(Stage.COMING);
+        setStatus(Status.COMING);
         competitors.addAll(Competitions.getOnlineCompetitors());
         competitors.forEach(data -> {
             Player p = data.getPlayer();
@@ -120,7 +116,7 @@ public abstract class AbstractEvent implements IEvent {
 
     @Override
     public void start() {
-        setStage(Stage.STARTED);
+        setStatus(Status.STARTED);
         onStart();
         Bukkit.getServer().sendActionBar(Component.translatable("event.start.broadcast"));
         Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
@@ -128,15 +124,15 @@ public abstract class AbstractEvent implements IEvent {
 
     @Override
     public void end(boolean force) {
-        setStage(Stage.ENDED);
+        setStatus(Status.ENDED);
         onEnd(force);
         EVENT_TASKS.forEach(BukkitTask::cancel);
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {
-                if (stage == Stage.ENDED) {
+                if (status == Status.ENDED) {
                     Competitions.setCurrentEvent(null);
-                    setStage(Stage.IDLE);
+                    setStatus(Status.IDLE);
                     Bukkit.getOnlinePlayers().forEach(p -> {
                         p.teleport(location);
                         p.setGameMode(GameMode.ADVENTURE);
@@ -184,36 +180,49 @@ public abstract class AbstractEvent implements IEvent {
     protected abstract void onEnd(boolean force);
 
     @Override
-    public final Stage getStage() {
-        return stage;
+    public final Status getStatus() {
+        return status;
     }
 
     /**
-     * Set the current event stage
-     * @param stage new stage
+     * Set the current event status
+     * @param status new status
      */
-    protected void setStage(Stage stage) {
-        this.stage = stage;
+    protected void setStatus(Status status) {
+        this.status = status;
         CompetitionInfoGUI.updateGUI();
     }
 
+    public final Collection<CompetitorData> getCompetitors() {
+        return competitors;
+    }
+
     @Override
-    public void practice(@NotNull Player p) {
+    public void joinPractice(@NotNull Player p) {
         PRACTICE.put(p, this);
         p.teleport(location);
         p.setBedSpawnLocation(location, true);
         p.setCollidable(false);
         p.getInventory().clear();
         PlayerCustomize.suitUp(p);
-        p.getInventory().setItem(8, ItemUtil.QUIT_PRACTICE);
+        p.getInventory().setItem(8, ItemUtil.LEAVE_PRACTICE);
         p.sendMessage(Component.translatable("competitor.practice.teleport.venue").args(name));
         onPractice(p);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
     }
 
+    /**
+     * Called when a player participates in practice
+     * @param p Who going to practice this event
+     */
     protected abstract void onPractice(@NotNull Player p);
 
-    public static void quitPractice(@NotNull Player p) {
+    /**
+     * Let players leave this practice
+     * @param p Who leave practicing this event
+     */
+    public static void leavePractice(@NotNull Player p) {
+        if (!PRACTICE.containsKey(p)) return;
         PRACTICE.remove(p);
         if (p.isInsideVehicle()) Objects.requireNonNull(p.getVehicle()).remove();
         p.teleport(p.getWorld().getSpawnLocation());
@@ -225,25 +234,26 @@ public abstract class AbstractEvent implements IEvent {
         p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
     }
 
+    /**
+     * Check if player is practicing at specified event
+     * @param p Who going to be checked
+     * @param event The specified event
+     * @return True if player is practicing at specified event
+     * @param <T> The event type
+     */
     public static <T extends IEvent> boolean inPractice(Player p, T event) {
         return PRACTICE.containsKey(p) && PRACTICE.get(p).equals(event);
     }
 
-    public static boolean inPractice(Player p) {
-        return PRACTICE.containsKey(p);
-    }
-
+    /**
+     * Get the event the player is practice on
+     * @param p Who is practicing
+     * @return Event the player is practice on
+     * @param <T> The event type
+     */
     public static <T extends IEvent> T getPracticeEvent(Player p) {
         //noinspection unchecked
         return (T) PRACTICE.get(p);
-    }
-
-    /**
-     * Get the list of {@link CompetitorData} of current event
-     * @return list of {@link CompetitorData} of current event
-     */
-    public final List<CompetitorData> getCompetitors() {
-        return competitors;
     }
 
     /**

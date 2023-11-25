@@ -39,11 +39,14 @@ public final class GUIButton {
         ItemStack stack = new ItemStack(material);
         stack.editMeta(meta -> {
             meta.displayName(event.getName());
+            List<Component> lore = new ArrayList<>();
             if (event instanceof ITrackEvent e) {
-                List<Component> lore = new ArrayList<>();
+                lore.add(TextUtil.text(Component.translatable("event.type.track").color(NamedTextColor.GRAY)));
                 lore.add(TextUtil.text(Component.translatable("event.track.laps").args(Component.text((e.getMaxLaps()))).color(NamedTextColor.YELLOW)));
-                meta.lore(lore);
+            } else {
+                lore.add(TextUtil.text(Component.translatable("event.type.field").color(NamedTextColor.GRAY)));
             }
+            meta.lore(lore);
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "event");
             meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID());
         });

@@ -4,29 +4,23 @@ import net.kyori.adventure.text.Component;
 import org.macausmp.sportsday.util.TextUtil;
 
 public enum CustomizeGraffitiSpray {
-    GGWP("customize.graffiti_spray.ggwp", 0),
-    DISMAL("customize.graffiti_spray.d", 1),
-    CRAZY("customize.graffiti_spray.c", 2),
-    BADASS("customize.graffiti_spray.b", 3),
-    APOCALYPTIC("customize.graffiti_spray.a", 4),
-    SAVAGE("customize.graffiti_spray.s", 5),
-    SICK_SKILLS("customize.graffiti_spray.ss", 6),
-    SMOKIN_SEXY_STYLE("customize.graffiti_spray.sss", 7),
+    GGWP("customize.graffiti_spray.ggwp"),
+    DISMAL("customize.graffiti_spray.d"),
+    CRAZY("customize.graffiti_spray.c"),
+    BADASS("customize.graffiti_spray.b"),
+    APOCALYPTIC("customize.graffiti_spray.a"),
+    SAVAGE("customize.graffiti_spray.s"),
+    SICK_SKILLS("customize.graffiti_spray.ss"),
+    SMOKIN_SEXY_STYLE("customize.graffiti_spray.sss"),
     ;
 
     private final Component name;
-    private final int id;
 
-    CustomizeGraffitiSpray(String code, int id) {
+    CustomizeGraffitiSpray(String code) {
         this.name = TextUtil.text(Component.translatable(code));
-        this.id = id;
     }
 
     public Component getName() {
         return name;
-    }
-
-    public int getId() {
-        return id;
     }
 }

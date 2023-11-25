@@ -6,20 +6,20 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SumoRound {
+public class SumoMatch {
     private final List<Player> competitors = new ArrayList<>();
-    private RoundStatus status = RoundStatus.IDLE;
+    private MatchStatus status = MatchStatus.IDLE;
     private Player winner;
     private Player loser;
 
-    public SumoRound(Player p1, Player p2) {
+    public SumoMatch(Player p1, Player p2) {
         this.competitors.addAll(List.of(p1, p2));
     }
 
     public void setResult(Player winner, Player loser) {
         this.winner = winner;
         this.loser = loser;
-        setStatus(RoundStatus.END);
+        setStatus(MatchStatus.END);
     }
 
     public List<Player> getCompetitors() {
@@ -30,11 +30,11 @@ public class SumoRound {
         return competitors.contains(player);
     }
 
-    public RoundStatus getStatus() {
+    public MatchStatus getStatus() {
         return status;
     }
 
-    public void setStatus(RoundStatus status) {
+    public void setStatus(MatchStatus status) {
         this.status = status;
     }
 
@@ -46,7 +46,7 @@ public class SumoRound {
         return loser;
     }
 
-    public enum RoundStatus {
+    public enum MatchStatus {
         IDLE,
         COMING,
         STARTED,

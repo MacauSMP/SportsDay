@@ -2,17 +2,17 @@ package org.macausmp.sportsday.competition;
 
 public interface IFieldEvent extends IEvent {
     /**
-     * Called when the round starts
+     * Called when the match starts
      */
-    void onRoundStart();
+    void onMatchStart();
 
     /**
-     * Called when the round ends
+     * Called when the match ends
      */
-    void onRoundEnd();
+    void onMatchEnd();
 
     /**
-     * Called when entering the next round
+     * Called when entering the next match
      */
-    void nextRound();
+    void nextMatch();
 }

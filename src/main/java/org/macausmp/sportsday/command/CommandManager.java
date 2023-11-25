@@ -2,13 +2,13 @@ package org.macausmp.sportsday.command;
 
 import org.macausmp.sportsday.SportsDay;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public final class CommandManager {
     private final SportsDay plugin = SportsDay.getInstance();
-    private static final List<IPluginCommand> COMMANDS = new ArrayList<>();
+    private static final Set<IPluginCommand> COMMANDS = new HashSet<>();
     private static final IPluginCommand COMPETITION = new CompetitionCommand();
     private static final IPluginCommand COMPETITIONGUI = new CompetitionGUICommand();
     private static final IPluginCommand REGISTER = new RegisterCommand();

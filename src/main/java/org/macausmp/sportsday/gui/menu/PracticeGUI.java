@@ -53,12 +53,10 @@ public class PracticeGUI extends PluginGUI {
         if (Competitions.getCurrentEvent() == null) {
             String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING);
             if (ItemUtil.equals(item, "practice")) {
-                for (IEvent event : Competitions.COMPETITIONS) {
+                for (IEvent event : Competitions.EVENTS) {
                     if (event.getID().equals(id)) {
-                        if (AbstractEvent.inPractice(p)) {
-                            AbstractEvent.quitPractice(p);
-                        }
-                        event.practice(p);
+                        AbstractEvent.leavePractice(p);
+                        event.joinPractice(p);
                         return;
                     }
                 }

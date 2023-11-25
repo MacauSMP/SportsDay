@@ -52,7 +52,7 @@ public class Parkour extends AbstractTrackEvent {
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
         IEvent event = Competitions.getCurrentEvent();
-        if (event != this || getStage() != Stage.STARTED) return;
+        if (event != this || getStatus() != Status.STARTED) return;
         Player p = e.getPlayer();
         if (getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()))) return;
         addRunnable(new BukkitRunnable() {

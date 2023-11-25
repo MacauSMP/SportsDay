@@ -47,9 +47,8 @@ public class ElytraRacing extends AbstractTrackEvent {
 
     @EventHandler
     public void onUseFirework(@NotNull PlayerInteractEvent e) {
-        IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
-        if ((event == this && getStage() == Stage.STARTED && Competitions.containPlayer(p)) || inPractice(p, this)) {
+        if (Competitions.getCurrentEvent() == this && getStatus() == Status.STARTED && Competitions.containPlayer(p) || inPractice(p, this)) {
             if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
         }
     }

@@ -11,13 +11,14 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
-    private static final List<CompetitionSettingsGUI> HANDLER = new ArrayList<>();
+    private static final Set<CompetitionSettingsGUI> HANDLER = new HashSet<>();
 
     public CompetitionSettingsGUI() {
         super(54, Component.translatable("gui.settings.title"));
@@ -49,16 +50,14 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
     }
 
     public static void updateGUI() {
-        for (CompetitionSettingsGUI gui : HANDLER) {
-            gui.update();
-        }
+        HANDLER.forEach(PluginGUI::update);
     }
 
     @Override
     public void onClick(@NotNull Player p, @NotNull ItemStack item) {
         String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING);
         if (ItemUtil.equals(item, "status_toggle")) {
-            for (IEvent event : Competitions.COMPETITIONS) {
+            for (IEvent event : Competitions.EVENTS) {
                 if (event.getID().equals(id)) {
                     PLUGIN.getConfig().set(event.getID() + ".enable", !event.isEnable());
                     PLUGIN.saveConfig();

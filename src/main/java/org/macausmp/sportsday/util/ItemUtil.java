@@ -27,7 +27,7 @@ public final class ItemUtil {
     public static final NamespacedKey BIND = Objects.requireNonNull(NamespacedKey.fromString("bind", PLUGIN));
     public static final ItemStack OP_BOOK = addEffect(item(Material.KNOWLEDGE_BOOK, "competition_book", "item.op_book", "item.op_book_lore"));
     public static final ItemStack MENU = setBind(item(Material.COMPASS, "menu", "item.menu", "item.menu_lore"));
-    public static final ItemStack QUIT_PRACTICE = setBind(item(Material.BARRIER, "quit_practice", "item.quit_practice", "item.quit_practice_lore"));
+    public static final ItemStack LEAVE_PRACTICE = setBind(item(Material.BARRIER, "leave_practice", "item.leave_practice", "item.leave_practice_lore"));
     public static final ItemStack CUSTOMIZE = setBind(item(Material.CHEST, "customize", "item.customize", "item.customize_lore1", "item.customize_lore2"));
     public static final ItemStack SPRAY = setBind(item(Material.DRAGON_BREATH, "graffiti_spray", "item.spray", "item.spray_lore1", "item.spray_lore2", "item.spray_lore3"));
     public static final String START = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0";

@@ -13,10 +13,7 @@ import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.CompetitorData;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.TextUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -50,17 +47,13 @@ public class CompetitorProfileGUI extends AbstractCompetitionGUI {
     }
 
     private @NotNull ItemStack icon(UUID uuid) {
-        ItemStack icon = new ItemStack(Material.PLAYER_HEAD);
-        icon.editMeta(SkullMeta.class, meta -> {
-            OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-            Component online = Component.translatable(player.isOnline() ? "competitor.online" : "competitor.offline");
-            meta.displayName(TextUtil.text(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online)));
-            meta.setOwningPlayer(player);
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("competitor.number").args(Component.text(Competitions.getCompetitor(uuid).getNumber()))).color(NamedTextColor.YELLOW));
-            lore.add(TextUtil.text(Component.translatable("competitor.score").args(Component.text(Competitions.getCompetitor(uuid).getScore()))).color(NamedTextColor.YELLOW));
-            meta.lore(lore);
-        });
+        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+        Component online = Component.translatable(player.isOnline() ? "competitor.online" : "competitor.offline");
+        Component display = Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online);
+        Component number = Component.translatable("competitor.number").args(Component.text(Competitions.getCompetitor(uuid).getNumber())).color(NamedTextColor.YELLOW);
+        Component score = Component.translatable("competitor.score").args(Component.text(Competitions.getCompetitor(uuid).getScore())).color(NamedTextColor.YELLOW);
+        ItemStack icon = ItemUtil.item(Material.PLAYER_HEAD, null, display, number, score);
+        icon.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(player));
         return icon;
     }
 

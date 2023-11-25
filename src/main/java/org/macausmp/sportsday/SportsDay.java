@@ -11,9 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
@@ -35,10 +33,10 @@ public final class SportsDay extends JavaPlugin implements Listener {
     public static Team COMPETITOR;
     public static Team REFEREE;
     public static Team AUDIENCE;
-    private static BossBar BOSSBAR;
+    static BossBar BOSSBAR;
     private ConfigManager configManager;
     private CommandManager commandManager;
-    private ScoreboardHandler scoreboardHandler;
+    ScoreboardHandler scoreboardHandler;
 
     public static SportsDay getInstance() {
         return instance;
@@ -152,7 +150,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
                         header = Component.translatable("tablist.title").appendNewline();
                         if (Competitions.getCurrentEvent() != null) {
                             Component cn = Competitions.getCurrentEvent().getName();
-                            Component sn = Competitions.getCurrentEvent().getStage().getName();
+                            Component sn = Competitions.getCurrentEvent().getStatus().getName();
                             competition = Component.translatable("tablist.current").args(cn, sn);
                         } else {
                             competition = Component.translatable("tablist.idle");
@@ -169,13 +167,5 @@ public final class SportsDay extends JavaPlugin implements Listener {
                 }.runTaskTimer(instance, 0L, 20L);
             }
         }.runTaskLater(this, d);
-    }
-
-    @EventHandler
-    public void onJoin(@NotNull PlayerJoinEvent e) {
-        Player p = e.getPlayer();
-        scoreboardHandler.setScoreboard(p);
-        BOSSBAR.addViewer(p);
-        if (!p.hasPlayedBefore()) SportsDay.AUDIENCE.addPlayer(p);
     }
 }

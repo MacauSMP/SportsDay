@@ -5,8 +5,10 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.macausmp.sportsday.util.CompetitorData;
 import org.macausmp.sportsday.util.PlayerHolder;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -66,10 +68,16 @@ public interface IEvent extends Listener {
     void end(boolean force);
 
     /**
-     * Get the current event stage
-     * @return Current stage of event
+     * Get the current event status
+     * @return Current status of event
      */
-    Stage getStage();
+    Status getStatus();
+
+    /**
+     * Gets a view of {@link CompetitorData} of current event
+     * @return a view of {@link CompetitorData} of current event
+     */
+    Collection<CompetitorData> getCompetitors();
 
     /**
      * Get the leaderboard of event
@@ -81,5 +89,5 @@ public interface IEvent extends Listener {
      * Teleport player to event location and sets up practice environment for the player
      * @param player Who going to practice this event
      */
-    void practice(Player player);
+    void joinPractice(Player player);
 }

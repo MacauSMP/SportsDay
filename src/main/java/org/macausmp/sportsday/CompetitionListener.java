@@ -28,7 +28,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.competition.sumo.Sumo;
-import org.macausmp.sportsday.competition.sumo.SumoRound;
+import org.macausmp.sportsday.competition.sumo.SumoMatch;
 import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
@@ -41,27 +41,30 @@ import org.macausmp.sportsday.gui.customize.GraffitiSprayGUI;
 import org.macausmp.sportsday.gui.menu.MenuGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 public final class CompetitionListener implements Listener {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
-    private static final List<UUID> SPAWNPOINT_LIST = new ArrayList<>();
+    private static final Set<UUID> SPAWNPOINT_SET = new HashSet<>();
     public static final Material CHECKPOINT = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("checkpoint_block")));
     public static final Material DEATH = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("death_block")));
     public static final NamespacedKey GRAFFITI = Objects.requireNonNull(NamespacedKey.fromString("graffiti_frame", PLUGIN));
-    private static final List<UUID> EASTER_TRIGGER = new ArrayList<>();
+    private static final Set<UUID> EASTER_TRIGGER = new HashSet<>();
 
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent e) {
         Player p = e.getPlayer();
+        PLUGIN.scoreboardHandler.setScoreboard(p);
+        SportsDay.BOSSBAR.addViewer(p);
+        if (!p.hasPlayedBefore()) SportsDay.AUDIENCE.addPlayer(p);
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(0, ItemUtil.MENU);
         p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
         IEvent current = Competitions.getCurrentEvent();
-        if (current == null || current.getStage() != Stage.STARTED) return;
+        if (current == null || current.getStatus() != Status.STARTED) return;
         if (!Competitions.containPlayer(p)) return;
         CompetitionInfoGUI.updateGUI();
         CompetitorListGUI.updateGUI();
@@ -70,9 +73,7 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
-        if (AbstractEvent.inPractice(p)) {
-            AbstractEvent.quitPractice(p);
-        }
+        AbstractEvent.leavePractice(p);
         if (!Competitions.containPlayer(p)) return;
         CompetitionInfoGUI.updateGUI();
         CompetitorListGUI.updateGUI();
@@ -88,18 +89,18 @@ public final class CompetitionListener implements Listener {
             p.spawnParticle(effect.getParticle(), loc, 1, 0.3f, 0.3f, 0.3f, effect.getData());
         }
         IEvent current = Competitions.getCurrentEvent();
-        if ((current instanceof ITrackEvent && current.getStage() == Stage.STARTED && Competitions.containPlayer(p)) || AbstractEvent.getPracticeEvent(p) instanceof ITrackEvent) {
+        if (current instanceof ITrackEvent && current.getStatus() == Status.STARTED && Competitions.containPlayer(p) || AbstractEvent.getPracticeEvent(p) instanceof ITrackEvent) {
             Location loc = e.getTo().clone();
             loc.setY(loc.getY() - 0.5f);
             spawnpoint(p, loc);
-            if (SPAWNPOINT_LIST.contains(p.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() != CHECKPOINT) SPAWNPOINT_LIST.remove(p.getUniqueId());
+            if (SPAWNPOINT_SET.contains(p.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() != CHECKPOINT) SPAWNPOINT_SET.remove(p.getUniqueId());
             if (loc.getWorld().getBlockAt(loc).getType() == DEATH) p.setHealth(0);
         }
     }
 
     public static void spawnpoint(@NotNull Player player, @NotNull Location loc) {
-        if (!SPAWNPOINT_LIST.contains(player.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() == CHECKPOINT) {
-            SPAWNPOINT_LIST.add(player.getUniqueId());
+        if (!SPAWNPOINT_SET.contains(player.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() == CHECKPOINT) {
+            SPAWNPOINT_SET.add(player.getUniqueId());
             player.setBedSpawnLocation(player.getLocation(), true);
             player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
             player.sendActionBar(Component.text("Checkpoint").color(NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
@@ -111,8 +112,8 @@ public final class CompetitionListener implements Listener {
         if (e.getEntity() instanceof Player player && e.getDamager() instanceof Player damager) {
             IEvent current = Competitions.getCurrentEvent();
             if (current == Competitions.SUMO) {
-                SumoRound round = ((Sumo) current).getSumoStage().getCurrentRound();
-                boolean b = round != null && round.getStatus() == SumoRound.RoundStatus.STARTED && round.contain(player) && round.contain(damager);
+                SumoMatch match = ((Sumo) current).getSumoStage().getCurrentMatch();
+                boolean b = match != null && match.getStatus() == SumoMatch.MatchStatus.STARTED && match.contain(player) && match.contain(damager);
                 if (b || AbstractEvent.inPractice(player, Competitions.SUMO)) {
                     e.setDamage(0);
                 } else {
@@ -128,7 +129,7 @@ public final class CompetitionListener implements Listener {
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
             IEvent current = Competitions.getCurrentEvent();
-            if (current == null || !Competitions.containPlayer(player) || current.getStage() == Stage.STARTED) return;
+            if (current == null || !Competitions.containPlayer(player) || current.getStatus() == Status.STARTED) return;
             e.setCancelled(true);
         }
     }
@@ -184,8 +185,8 @@ public final class CompetitionListener implements Listener {
     public void onQuitPractice(@NotNull PlayerInteractEvent e) {
         if (e.getItem() == null) return;
         Player p = e.getPlayer();
-        if (ItemUtil.equals(e.getItem(), ItemUtil.QUIT_PRACTICE)) {
-            AbstractEvent.quitPractice(p);
+        if (ItemUtil.equals(e.getItem(), ItemUtil.LEAVE_PRACTICE)) {
+            AbstractEvent.leavePractice(p);
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         }
     }
@@ -204,13 +205,13 @@ public final class CompetitionListener implements Listener {
                     return;
                 }
                 CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(p);
-                if (graffiti == null || Bukkit.getMap(graffiti.getId()) == null) return;
+                if (graffiti == null || Bukkit.getMap(graffiti.ordinal()) == null) return;
                 Block b = p.getTargetBlockExact(4);
                 BlockFace f = p.getTargetBlockFace(4);
                 if (b != null && b.getType().isOccluding() && f != null) {
                     Location loc = b.getLocation().add(f.getDirection());
                     ItemStack map = new ItemStack(Material.FILLED_MAP);
-                    map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.getId())));
+                    map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.ordinal())));
                     Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:use_spray"), Sound.Source.MASTER, 1f, 1f));
                     new BukkitRunnable() {
                         @Override
@@ -246,9 +247,9 @@ public final class CompetitionListener implements Listener {
                 return;
             }
             CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(p);
-            if (graffiti == null || Bukkit.getMap(graffiti.getId()) == null) return;
+            if (graffiti == null || Bukkit.getMap(graffiti.ordinal()) == null) return;
             ItemStack map = new ItemStack(Material.FILLED_MAP);
-            map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.getId())));
+            map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.ordinal())));
             Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:use_spray"), Sound.Source.MASTER, 1f, 1f));
             new BukkitRunnable() {
                 @Override

@@ -15,6 +15,7 @@ import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class CompetitionCommand implements IPluginCommand {
@@ -27,7 +28,7 @@ public class CompetitionCommand implements IPluginCommand {
                         Competitions.start(sender, args[1]);
                     } else {
                         StringBuilder sb = new StringBuilder("(");
-                        Competitions.COMPETITIONS.forEach(c -> sb.append(c.getID()).append("|"));
+                        Competitions.EVENTS.forEach(c -> sb.append(c.getID()).append("|"));
                         sender.sendMessage("/competition start " + sb.replace(sb.length(), sb.length(), ")"));
                     }
                 }
@@ -118,15 +119,13 @@ public class CompetitionCommand implements IPluginCommand {
                     sender.sendMessage(Component.translatable("gui.info.title"));
                     boolean b = Competitions.getCurrentEvent() != null;
                     sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getName() : TextUtil.convert(Component.translatable("gui.none"))));
-                    if (b) sender.sendMessage(Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(Competitions.getCurrentEvent().getStage().getName()));
+                    if (b) sender.sendMessage(Component.translatable("competition.status").color(NamedTextColor.GREEN).args(Competitions.getCurrentEvent().getStatus().getName()));
                     sender.sendMessage(Component.translatable("competition.competitors.total").color(NamedTextColor.GREEN).args(Component.text(Competitions.getCompetitors().size()).color(NamedTextColor.YELLOW)));
                     List<String> pl = new ArrayList<>();
-                    Competitions.getCompetitors().forEach(d -> pl.add(d.getName()));
+                    Competitions.getCompetitors().stream().sorted(Comparator.comparingInt(CompetitorData::getNumber)).forEach(d -> pl.add(d.getName()));
                     sender.sendMessage(Component.translatable("competition.competitors.list").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(pl.toArray())).color(NamedTextColor.YELLOW)));
                     List<String> cl = new ArrayList<>();
-                    for (IEvent c : Competitions.COMPETITIONS) {
-                        if (c.isEnable()) cl.add(c.getID().toUpperCase());
-                    }
+                    Competitions.EVENTS.stream().filter(IEvent::isEnable).forEach(c -> cl.add(c.getID().toUpperCase()));
                     sender.sendMessage(Component.translatable("competition.enabled").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(cl.toArray())).color(NamedTextColor.YELLOW)));
                 }
                 default -> sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));
@@ -153,14 +152,8 @@ public class CompetitionCommand implements IPluginCommand {
             l.add("info");
         } else if (args.length == 2) {
             switch (args[0]) {
-                case "start" -> Competitions.COMPETITIONS.forEach(c -> {
-                    if (c.isEnable()) l.add(c.getID());
-                });
-                case "join" -> {
-                    for (Player p : Bukkit.getOnlinePlayers()) {
-                        if (!Competitions.containPlayer(p)) l.add(p.getName());
-                    }
-                }
+                case "start" -> Competitions.EVENTS.stream().filter(IEvent::isEnable).forEach(c -> l.add(c.getID()));
+                case "join" -> Bukkit.getOnlinePlayers().stream().filter(p -> !Competitions.containPlayer(p)).forEach(p -> l.add(p.getName()));
                 case "leave", "score" -> Competitions.getCompetitors().forEach(d -> l.add(d.getName()));
             }
         }

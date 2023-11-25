@@ -6,10 +6,12 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
+
+import java.util.Objects;
 
 public abstract class AbstractCompetitionGUI extends PluginGUI {
     public AbstractCompetitionGUI(int size, Component title) {
@@ -18,20 +20,23 @@ public abstract class AbstractCompetitionGUI extends PluginGUI {
 
     @Override
     public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.equals(item, GUIButton.COMPETITION_INFO)) {
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-            p.openInventory(new CompetitionInfoGUI().getInventory());
-            return;
-        } else if (ItemUtil.equals(item, GUIButton.COMPETITOR_LIST)) {
-            p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
-            p.openInventory(new CompetitorListGUI().getInventory());
-            return;
-        } else if (ItemUtil.equals(item, GUIButton.COMPETITION_SETTINGS)) {
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-            p.openInventory(new CompetitionSettingsGUI().getInventory());
-            return;
+        switch (Objects.requireNonNull(item.getItemMeta().getPersistentDataContainer().get(ItemUtil.ITEM_ID, PersistentDataType.STRING))) {
+            case "competition_info":
+                p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+                p.openInventory(new CompetitionInfoGUI().getInventory());
+                break;
+            case "competitor_list":
+                p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
+                p.openInventory(new CompetitorListGUI().getInventory());
+                break;
+            case "competition_settings":
+                p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+                p.openInventory(new CompetitionSettingsGUI().getInventory());
+                break;
+            default:
+                onClick(p, item);
+                break;
         }
-        onClick(p, item);
     }
 
     protected abstract void onClick(@NotNull Player p, @NotNull ItemStack item);

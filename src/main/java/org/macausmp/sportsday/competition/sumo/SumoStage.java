@@ -12,35 +12,35 @@ public class SumoStage {
     public static final SumoStage QUARTER_FINAL = new SumoStage(Component.translatable("event.sumo.quarter_final"), SEMI_FINAL);
     public static final SumoStage ELIMINATE = new SumoStage(Component.translatable("event.sumo.eliminate"), QUARTER_FINAL);
 
-    private final List<SumoRound> roundList = new ArrayList<>();
+    private final List<SumoMatch> matchList = new ArrayList<>();
     private final Component name;
     private final SumoStage nextStage;
-    private SumoRound currentRound;
-    private int roundIndex = 0;
+    private SumoMatch currentMatch;
+    private int matchIndex = 0;
 
     public SumoStage(Component name, SumoStage nextStage) {
         this.name = name;
         this.nextStage = nextStage;
     }
 
-    public void nextRound() {
-        currentRound = roundList.get(roundIndex++);
+    public void nextMatch() {
+        currentMatch = matchList.get(matchIndex++);
     }
 
-    public List<SumoRound> getRoundList() {
-        return roundList;
+    public List<SumoMatch> getMatchList() {
+        return matchList;
     }
 
-    public int getRoundRemaining() {
-        return roundList.size() - roundIndex;
+    public boolean hasNextMatch() {
+        return matchList.size() - matchIndex > 0;
     }
 
-    public int getRoundIndex() {
-        return roundIndex;
+    public int getMatchIndex() {
+        return matchIndex;
     }
 
-    public void resetRoundIndex() {
-        roundIndex = 0;
+    public void resetMatchIndex() {
+        matchIndex = 0;
     }
 
     public Component getName() {
@@ -55,13 +55,13 @@ public class SumoStage {
         return nextStage;
     }
 
-    public SumoRound getCurrentRound() {
-        return currentRound;
+    public SumoMatch getCurrentMatch() {
+        return currentMatch;
     }
 
     public void resetStage() {
-        roundList.clear();
-        currentRound = null;
-        roundIndex = 0;
+        matchList.clear();
+        currentMatch = null;
+        matchIndex = 0;
     }
 }

@@ -10,21 +10,18 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.Pageable;
+import org.macausmp.sportsday.gui.PluginGUI;
+import org.macausmp.sportsday.util.CompetitorData;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.TextUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageable {
-    private static final List<CompetitorListGUI> HANDLER = new ArrayList<>();
+    private static final Set<CompetitorListGUI> HANDLER = new HashSet<>();
     private int page = 0;
 
     public CompetitorListGUI() {
@@ -51,14 +48,12 @@ public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageabl
         }
         for (int i = 0; i < getSize(); i++) {
             if (i >= Competitions.getCompetitors().size()) break;
-            getInventory().setItem(i + getStartSlot(), icon(Competitions.getCompetitors().get(i + getPage() * getSize()).getUUID()));
+            getInventory().setItem(i + getStartSlot(), icon(Competitions.getCompetitors().stream().sorted(Comparator.comparingInt(CompetitorData::getNumber)).toList().get(i + getPage() * getSize()).getUUID()));
         }
     }
 
     public static void updateGUI() {
-        for (CompetitorListGUI gui : HANDLER) {
-            gui.update();
-        }
+        HANDLER.forEach(PluginGUI::update);
     }
 
     @Override
@@ -82,20 +77,14 @@ public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageabl
     }
 
     private @NotNull ItemStack icon(UUID uuid) {
-        ItemStack icon = new ItemStack(Material.PLAYER_HEAD);
-        icon.editMeta(SkullMeta.class, meta -> {
-            OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-            Component online = Component.translatable(player.isOnline() ? "competitor.online" : "competitor.offline");
-            meta.displayName(TextUtil.text(Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online)));
-            meta.setOwningPlayer(player);
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("competitor.number").args(Component.text(Competitions.getCompetitor(uuid).getNumber()))).color(NamedTextColor.YELLOW));
-            lore.add(TextUtil.text(Component.translatable("competitor.score").args(Component.text(Competitions.getCompetitor(uuid).getScore()))).color(NamedTextColor.YELLOW));
-            lore.add(Component.text(""));
-            lore.add(TextUtil.text(Component.translatable("gui.competitor_profile.detail").args(Component.text(player.getName()))).color(NamedTextColor.YELLOW));
-            meta.lore(lore);
-            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "player_icon");
-        });
+        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+        Component online = Component.translatable(player.isOnline() ? "competitor.online" : "competitor.offline");
+        Component display = Component.translatable(Objects.requireNonNull(player.getName()) + " (%s)").args(online);
+        Component number = Component.translatable("competitor.number").args(Component.text(Competitions.getCompetitor(uuid).getNumber())).color(NamedTextColor.YELLOW);
+        Component score = Component.translatable("competitor.score").args(Component.text(Competitions.getCompetitor(uuid).getScore())).color(NamedTextColor.YELLOW);
+        Component detail = Component.translatable("gui.competitor_profile.detail").args(Component.text(player.getName())).color(NamedTextColor.YELLOW);
+        ItemStack icon = ItemUtil.item(Material.PLAYER_HEAD, "player_icon", display, number, score, "", detail);
+        icon.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(player));
         return icon;
     }
 
@@ -116,7 +105,9 @@ public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageabl
 
     @Override
     public int getMaxPage() throws ArithmeticException {
-        return Competitions.getCompetitors().isEmpty() ? 1 : Competitions.getCompetitors().size() % getSize() == 0 ? Competitions.getCompetitors().size() / getSize() : Competitions.getCompetitors().size() / getSize() + 1;
+        if (Competitions.getCompetitors().isEmpty()) return 1;
+        int i = Competitions.getCompetitors().size();
+        return i % getSize() == 0 ? i / getSize() : i / getSize() + 1;
     }
 
     @Override

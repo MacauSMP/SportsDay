@@ -27,7 +27,7 @@ public class ScoreboardHandler {
                 Objective o = scoreboard.registerNewObjective("sportsday", Criteria.DUMMY, Component.translatable("scoreboard.title").color(NamedTextColor.GOLD));
                 o.setDisplaySlot(DisplaySlot.SIDEBAR);
                 Entry event = new Entry(o, "competition", "scoreboard.competition");
-                Entry stage = new Entry(o, "stage", "scoreboard.stage");
+                Entry status = new Entry(o, "status", "scoreboard.status");
                 Entry count = new Entry(o, "competitor_count", "scoreboard.competitor_count").setScore(8);
                 Entry number = new Entry(o, "number", "scoreboard.number");
                 Entry score = new Entry(o, "score", "scoreboard.score");
@@ -42,13 +42,13 @@ public class ScoreboardHandler {
                     public void run() {
                         if (Competitions.getCurrentEvent() != null) {
                             event.suffix(Competitions.getCurrentEvent().getName());
-                            stage.suffix(Competitions.getCurrentEvent().getStage().getName());
+                            status.suffix(Competitions.getCurrentEvent().getStatus().getName());
                             event.setScore(11);
-                            stage.setScore(10);
+                            status.setScore(10);
                             line.setScore(9);
                         } else {
                             event.resetScore();
-                            stage.resetScore();
+                            status.resetScore();
                             line.resetScore();
                         }
                         count.suffix(Component.translatable("%s/%s").args(Component.text(Competitions.getOnlineCompetitors().size()), Component.text(plugin.getServer().getOnlinePlayers().size())));

@@ -9,15 +9,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.Stage;
+import org.macausmp.sportsday.competition.Status;
 import org.macausmp.sportsday.gui.GUIButton;
+import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CompetitionInfoGUI extends AbstractCompetitionGUI {
-    private static final List<CompetitionInfoGUI> HANDLER = new ArrayList<>();
+    private static final Set<CompetitionInfoGUI> HANDLER = new HashSet<>();
 
     public CompetitionInfoGUI() {
         super(36, Component.translatable("gui.info.title"));
@@ -41,15 +42,13 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
     }
 
     public static void updateGUI() {
-        for (CompetitionInfoGUI gui : HANDLER) {
-            gui.update();
-        }
+        HANDLER.forEach(PluginGUI::update);
     }
 
     @Override
     public void onClick(@NotNull Player p, @NotNull ItemStack item) {
         if (ItemUtil.equals(item, GUIButton.START_COMPETITION)) {
-            if (Competitions.getCurrentEvent() != null && Competitions.getCurrentEvent().getStage() != Stage.ENDED) {
+            if (Competitions.getCurrentEvent() != null && Competitions.getCurrentEvent().getStatus() != Status.ENDED) {
                 p.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
                 p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
                 return;
@@ -57,7 +56,7 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
             p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             p.openInventory(new CompetitionStartGUI().getInventory());
         } else if (ItemUtil.equals(item, GUIButton.END_COMPETITION)) {
-            boolean b = Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStage() == Stage.ENDED;
+            boolean b = Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStatus() == Status.ENDED;
             p.playSound(Sound.sound(Key.key(b ? "minecraft:entity.enderman.teleport" : "minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
             Competitions.forceEnd(p);
         }
@@ -66,7 +65,7 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
     private @NotNull ItemStack status() {
         boolean b = Competitions.getCurrentEvent() != null;
         Component display = Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getName() : Component.translatable("gui.none"));
-        Component lore = Component.translatable("competition.stage").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getStage().getName() : Stage.IDLE.getName());
+        Component lore = Component.translatable("competition.status").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getStatus().getName() : Status.IDLE.getName());
         return ItemUtil.item(Material.BEACON, null, display, lore);
     }
 
