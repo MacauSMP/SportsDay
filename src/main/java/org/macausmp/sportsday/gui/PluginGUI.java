@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -41,4 +42,9 @@ public abstract class PluginGUI implements InventoryHolder {
      * @param event event given from {@link CompetitionListener#onClick(InventoryClickEvent)}
      */
     public abstract void onClick(@NotNull InventoryClickEvent event, @NotNull Player player, @NotNull ItemStack item);
+
+    /**
+     * Listener call from {@link CompetitionListener#onClose(InventoryCloseEvent)}
+     */
+    public void onClose() {}
 }

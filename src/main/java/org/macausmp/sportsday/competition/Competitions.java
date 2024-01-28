@@ -14,6 +14,7 @@ import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
 import org.macausmp.sportsday.util.CompetitorData;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class Competitions {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
@@ -43,10 +44,10 @@ public final class Competitions {
     public static void load() {
         COMPETITORS.clear();
         Set<String> keys = COMPETITOR_CONFIG.getKeys(false);
-        for (String s : keys) {
-            UUID uuid = UUID.fromString(s);
-            int number = COMPETITOR_CONFIG.getInt(s + ".number");
-            int score = COMPETITOR_CONFIG.getInt((s + ".score"));
+        for (String key : keys) {
+            UUID uuid = UUID.fromString(key);
+            int number = COMPETITOR_CONFIG.getInt(key + ".number");
+            int score = COMPETITOR_CONFIG.getInt((key + ".score"));
             COMPETITORS.add(new CompetitorData(uuid, number, score));
         }
     }
@@ -144,12 +145,12 @@ public final class Competitions {
      * @return True if competitor successfully removed from the competitor list
      */
     public static boolean leave(OfflinePlayer competitor) {
-        if (containPlayer(competitor)) {
+        if (isCompetitor(competitor)) {
             for (CompetitorData data : COMPETITORS) {
                 if (data.getUUID().equals(competitor.getUniqueId())) {
+                    if (competitor.isOnline() && getCurrentEvent() != null) getCurrentEvent().onDisqualification(data);
                     COMPETITOR_CONFIG.set(data.getUUID().toString(), null);
                     REGISTERED_NUMBER_LIST.remove(data.getNumber());
-                    if (getCurrentEvent() != null) getCurrentEvent().getCompetitors().remove(data);
                     COMPETITORS.remove(data);
                     CompetitionInfoGUI.updateGUI();
                     CompetitorListGUI.updateGUI();
@@ -188,15 +189,15 @@ public final class Competitions {
      * @return a view of currently online registered competitors
      */
     public static @NotNull Collection<CompetitorData> getOnlineCompetitors() {
-        return COMPETITORS.stream().filter(d -> d.getOfflinePlayer().isOnline()).toList();
+        return COMPETITORS.stream().filter(data -> data.getOfflinePlayer().isOnline()).collect(Collectors.toSet());
     }
 
     /**
-     * Return true if the player is in competition player list
-     * @param player player who presence in competition player list is to be tested
-     * @return True if the player is in competition player list
+     * Checks if this player is in competitor list
+     * @param player Specified player
+     * @return True if the player is in competitor list
      */
-    public static boolean containPlayer(OfflinePlayer player) {
+    public static boolean isCompetitor(OfflinePlayer player) {
         for (CompetitorData data : COMPETITORS) {
             if (data.getUUID().equals(player.getUniqueId())) return true;
         }
@@ -206,7 +207,7 @@ public final class Competitions {
     /**
      * Get competitor data by uuid
      *
-     * <p>Plugins should check that {@link #containPlayer(OfflinePlayer)} returns <code>true</code> before calling this method.</p>
+     * <p>Plugins should check that {@link #isCompetitor(OfflinePlayer)} returns <code>true</code> before calling this method.</p>
      *
      * @param uuid Player uuid
      * @return Competitor data

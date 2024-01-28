@@ -41,10 +41,8 @@ public class ScoreboardHandler {
                     @Override
                     public void run() {
                         if (Competitions.getCurrentEvent() != null) {
-                            event.suffix(Competitions.getCurrentEvent().getName());
-                            status.suffix(Competitions.getCurrentEvent().getStatus().getName());
-                            event.setScore(11);
-                            status.setScore(10);
+                            event.suffix(Competitions.getCurrentEvent().getName()).setScore(11);
+                            status.suffix(Competitions.getCurrentEvent().getStatus().getName()).setScore(10);
                             line.setScore(9);
                         } else {
                             event.resetScore();
@@ -52,11 +50,9 @@ public class ScoreboardHandler {
                             line.resetScore();
                         }
                         count.suffix(Component.translatable("%s/%s").args(Component.text(Competitions.getOnlineCompetitors().size()), Component.text(plugin.getServer().getOnlinePlayers().size())));
-                        if (Competitions.containPlayer(p)) {
-                            number.suffix(Component.text(Competitions.getCompetitor(p.getUniqueId()).getNumber()));
-                            score.suffix(Component.text(Competitions.getCompetitor(p.getUniqueId()).getScore()));
-                            number.setScore(7);
-                            score.setScore(6);
+                        if (Competitions.isCompetitor(p)) {
+                            number.suffix(Component.text(Competitions.getCompetitor(p.getUniqueId()).getNumber())).setScore(7);
+                            score.suffix(Component.text(Competitions.getCompetitor(p.getUniqueId()).getScore())).setScore(6);
                         } else {
                             number.resetScore();
                             score.resetScore();
@@ -71,11 +67,11 @@ public class ScoreboardHandler {
     }
 
     private @NotNull Score newline(@NotNull Objective o) {
-        StringBuilder sb = new StringBuilder(" ");
-        while (o.getScore(sb.toString()).isScoreSet()) {
-            sb.append(" ");
+        StringBuilder b = new StringBuilder(" ");
+        while (o.getScore(b.toString()).isScoreSet()) {
+            b.append(" ");
         }
-        return o.getScore(sb.toString());
+        return o.getScore(b.toString());
     }
 
     protected static class Entry {
@@ -90,8 +86,9 @@ public class ScoreboardHandler {
             this.team.addEntry(this.entry);
         }
 
-        public void suffix(Component suffix) {
+        public Entry suffix(Component suffix) {
             team.suffix(suffix);
+            return this;
         }
 
         public Entry setScore(int score) {

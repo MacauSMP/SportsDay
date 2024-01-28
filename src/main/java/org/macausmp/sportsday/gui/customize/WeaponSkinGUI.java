@@ -42,11 +42,10 @@ public class WeaponSkinGUI extends PluginGUI {
         getInventory().setItem(14, weapon(Material.SUGAR_CANE));
         getInventory().setItem(15, weapon(Material.COD));
         Material weapon = PlayerCustomize.getWeaponSkin(player);
-        if (weapon == null) return;
-        for (int i = 9; i < 17; i++) {
+        for (int i = 9; i < getInventory().getSize(); i++) {
             ItemStack stack = getInventory().getItem(i);
             if (stack == null) break;
-            if (weapon.equals(stack.getType())) {
+            if (weapon == null || weapon.equals(stack.getType())) {
                 List<Component> lore = new ArrayList<>();
                 lore.add(TextUtil.text(Component.translatable("gui.selected")));
                 stack.lore(lore);

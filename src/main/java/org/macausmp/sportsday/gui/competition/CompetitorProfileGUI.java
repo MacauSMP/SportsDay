@@ -14,10 +14,13 @@ import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.CompetitorData;
 import org.macausmp.sportsday.util.ItemUtil;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 public class CompetitorProfileGUI extends AbstractCompetitionGUI {
+    private static final Set<CompetitorProfileGUI> HANDLER = new HashSet<>();
     private final CompetitorData data;
 
     public CompetitorProfileGUI(@NotNull CompetitorData data) {
@@ -32,10 +35,18 @@ public class CompetitorProfileGUI extends AbstractCompetitionGUI {
         getInventory().setItem(3, GUIButton.VERSION);
         getInventory().setItem(18, icon(data.getUUID()));
         getInventory().setItem(19, unregister(data));
+        HANDLER.add(this);
     }
 
     @Override
     public void update() {
+        getInventory().setItem(18, icon(data.getUUID()));
+    }
+
+    public static void updateProfile(UUID uuid) {
+        for (CompetitorProfileGUI gui : HANDLER) {
+            if (gui.data.getUUID().equals(uuid)) gui.update();
+        }
     }
 
     @Override
@@ -61,5 +72,10 @@ public class CompetitorProfileGUI extends AbstractCompetitionGUI {
         Component display = Component.translatable("gui.competitor.unregister").args(Component.text(data.getName())).color(NamedTextColor.RED);
         Component lore = Component.translatable("gui.competitor.unregister_lore");
         return ItemUtil.item(Material.RED_CONCRETE, "unregister", display, lore);
+    }
+
+    @Override
+    public void onClose() {
+        HANDLER.remove(this);
     }
 }

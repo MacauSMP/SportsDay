@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.Status;
 import org.macausmp.sportsday.gui.GUIButton;
-import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.HashSet;
@@ -42,7 +41,7 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
     }
 
     public static void updateGUI() {
-        HANDLER.forEach(PluginGUI::update);
+        HANDLER.forEach(CompetitionInfoGUI::update);
     }
 
     @Override
@@ -64,7 +63,7 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
 
     private @NotNull ItemStack status() {
         boolean b = Competitions.getCurrentEvent() != null;
-        Component display = Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getName() : Component.translatable("gui.none"));
+        Component display = Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getName() : Component.translatable("gui.text.none"));
         Component lore = Component.translatable("competition.status").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getStatus().getName() : Status.IDLE.getName());
         return ItemUtil.item(Material.BEACON, null, display, lore);
     }
@@ -73,5 +72,10 @@ public class CompetitionInfoGUI extends AbstractCompetitionGUI {
         Component display = Component.translatable("competition.competitors.total").color(NamedTextColor.GREEN).args(Component.text(Competitions.getCompetitors().size()).color(NamedTextColor.YELLOW));
         Component lore = Component.translatable("competition.competitors.online").color(NamedTextColor.GREEN).args(Component.text(Competitions.getOnlineCompetitors().size()).color(NamedTextColor.YELLOW));
         return ItemUtil.item(Material.PAPER, null, display, lore);
+    }
+
+    @Override
+    public void onClose() {
+        HANDLER.remove(this);
     }
 }

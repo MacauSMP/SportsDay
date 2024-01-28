@@ -77,7 +77,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     public void onEnd(boolean force) {
         getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
         if (force) return;
-        leaderboard.sort((r1, r2) -> Double.compare(r2.getDistance(), r1.getDistance()));
+        Collections.sort(leaderboard);
         Component c = Component.text().build();
         for (int i = 0; i < leaderboard.size();) {
             ScoreResult result = leaderboard.get(i++);
@@ -115,7 +115,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     @EventHandler
     public void onArrived(@NotNull ProjectileHitEvent e) {
         if (e.getEntity().getShooter() instanceof Player p && e.getEntity() instanceof Trident trident) {
-            if (checkStatus(p)) {
+            if (checkStatus(p) && currentPlayer.getUUID().equals(p.getUniqueId())) {
                 ScoreResult result = resultMap.get(p.getUniqueId());
                 resultMap.remove(p.getUniqueId());
                 if (result == null) return;
@@ -125,7 +125,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
                 getWorld().strikeLightningEffect(trident.getLocation());
                 Bukkit.broadcast(Component.translatable("event.javelin.result").args(p.displayName(), Component.text(result.getDistance())));
                 onMatchEnd();
-            } else {
+            } else if (resultMap.containsKey(p.getUniqueId())) {
                 ScoreResult result = resultMap.get(p.getUniqueId());
                 resultMap.remove(p.getUniqueId());
                 if (result == null) return;
@@ -142,7 +142,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
         Player p = e.getPlayer();
         if (checkStatus(p)) {
             if (resultMap.containsKey(p.getUniqueId())) return;
-            if (currentPlayer != null && p.getUniqueId().equals(currentPlayer.getUUID())) {
+            if (currentPlayer != null && currentPlayer.getUUID().equals(p.getUniqueId())) {
                 reconnectTask.cancel();
                 p.getInventory().setItem(0, TRIDENT);
                 Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.player_reconnected").color(NamedTextColor.YELLOW));
@@ -158,7 +158,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
         Player p = e.getPlayer();
         if (checkStatus(p)) {
             if (resultMap.containsKey(p.getUniqueId())) return;
-            if (currentPlayer != null && p.getUniqueId().equals(currentPlayer.getUUID())) {
+            if (currentPlayer != null && currentPlayer.getUUID().equals(p.getUniqueId())) {
                 p.getInventory().clear();
                 reconnectTask = addRunnable(new BukkitRunnable() {
                     int i = PLUGIN.getConfig().getInt("reconnect_time");
@@ -176,7 +176,14 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     }
 
     private boolean checkStatus(Player p) {
-        return Competitions.getCurrentEvent() == this && getStatus() == Status.STARTED && Competitions.containPlayer(p);
+        return Competitions.getCurrentEvent() == this && getStatus() == Status.STARTED && Competitions.isCompetitor(p);
+    }
+
+    @Override
+    public void onDisqualification(@NotNull CompetitorData competitor) {
+        super.onDisqualification(competitor);
+        queue.remove(competitor);
+        if (currentPlayer != null && currentPlayer.getUUID().equals(competitor.getUUID())) onMatchEnd();
     }
 
     @Override
@@ -193,6 +200,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
     @Override
     public void onMatchStart() {
         Bukkit.getOnlinePlayers().forEach(p -> p.setGameMode(GameMode.SPECTATOR));
+        queue.removeIf(d -> !getCompetitors().contains(d));
         for (CompetitorData d : queue) {
             currentPlayer = d;
             if (d.getOfflinePlayer().isOnline()) {
@@ -243,7 +251,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
         }.runTaskTimer(PLUGIN, 0L, 20L));
     }
 
-    private static class ScoreResult implements PlayerHolder {
+    private static class ScoreResult implements PlayerHolder, Comparable<ScoreResult> {
         private final UUID uuid;
         private final Location loc;
         private double distance;
@@ -264,6 +272,11 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
         @Override
         public @NotNull UUID getUUID() {
             return uuid;
+        }
+
+        @Override
+        public int compareTo(@NotNull JavelinThrow.ScoreResult o) {
+            return Double.compare(o.distance, this.distance);
         }
     }
 }

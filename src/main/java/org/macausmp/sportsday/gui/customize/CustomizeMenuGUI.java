@@ -79,24 +79,22 @@ public class CustomizeMenuGUI extends PluginGUI {
     private @NotNull ItemStack boatType() {
         ItemStack stack = customize(Material.OAK_BOAT, "boat_type");
         Boat.Type type = PlayerCustomize.getBoatType(player);
-        if (type != null) {
-            List<Component> lore = new ArrayList<>();
-            Component c = getTypeName(Objects.requireNonNull(Material.getMaterial(type.name() + "_BOAT")));
-            lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())).append(c));
-            stack.lore(lore);
-        }
+        if (type == null) type = Boat.Type.OAK;
+        List<Component> lore = new ArrayList<>();
+        Component c = getTypeName(Objects.requireNonNull(Material.getMaterial(type.name() + "_BOAT")));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())).append(c));
+        stack.lore(lore);
         return stack;
     }
 
     private @NotNull ItemStack weaponSkin() {
         ItemStack stack = customize(Material.BONE, "weapon_skin");
         Material type = PlayerCustomize.getWeaponSkin(player);
-        if (type != null) {
-            List<Component> lore = new ArrayList<>();
-            Component c = getTypeName(type);
-            lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())).append(c));
-            stack.lore(lore);
-        }
+        if (type == null) type = Material.BLAZE_ROD;
+        List<Component> lore = new ArrayList<>();
+        Component c = getTypeName(type);
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())).append(c));
+        stack.lore(lore);
         return stack;
     }
 
@@ -107,44 +105,40 @@ public class CustomizeMenuGUI extends PluginGUI {
     private @NotNull ItemStack projectileTrail() {
         ItemStack stack = customize(Material.ARROW, "projectile_trail");
         CustomizeParticleEffect effect = PlayerCustomize.getProjectileTrail(player);
-        if (effect != null) {
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(effect.getName())));
-            stack.lore(lore);
-        }
+        List<Component> lore = new ArrayList<>();
+        Component c = effect != null ? effect.getName() : TextUtil.text(Component.translatable("gui.text.none"));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(c)));
+        stack.lore(lore);
         return stack;
     }
 
     private @NotNull ItemStack walkingEffect() {
         ItemStack stack = customize(Material.NETHER_STAR, "walking_effect");
         CustomizeParticleEffect effect = PlayerCustomize.getWalkingEffect(player);
-        if (effect != null) {
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(effect.getName())));
-            stack.lore(lore);
-        }
+        List<Component> lore = new ArrayList<>();
+        Component c = effect != null ? effect.getName() : TextUtil.text(Component.translatable("gui.text.none"));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(c)));
+        stack.lore(lore);
         return stack;
     }
 
     private @NotNull ItemStack graffitiSpray() {
         ItemStack stack = customize(Material.PAINTING, "graffiti_spray");
         CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(player);
-        if (graffiti != null) {
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(graffiti.getName())));
-            stack.lore(lore);
-        }
+        List<Component> lore = new ArrayList<>();
+        Component c = graffiti != null ? graffiti.getName() : TextUtil.text(Component.translatable("gui.text.none"));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(c)));
+        stack.lore(lore);
         return stack;
     }
 
     private @NotNull ItemStack musickit() {
         ItemStack stack = customize(Material.JUKEBOX, "musickit");
         CustomizeMusickit musickit = PlayerCustomize.getMusickit(player);
-        if (musickit != null) {
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(musickit.getName())));
-            stack.lore(lore);
-        }
+        List<Component> lore = new ArrayList<>();
+        Component c = musickit != null ? musickit.getName() : TextUtil.text(Component.translatable("gui.text.none"));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(c)));
+        stack.lore(lore);
         return stack;
     }
 

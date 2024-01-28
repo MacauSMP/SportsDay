@@ -13,10 +13,7 @@ import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.util.CompetitorData;
 import org.macausmp.sportsday.util.TextUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class CompetitionCommand implements IPluginCommand {
     @Override
@@ -27,9 +24,9 @@ public class CompetitionCommand implements IPluginCommand {
                     if (args.length >= 2) {
                         Competitions.start(sender, args[1]);
                     } else {
-                        StringBuilder sb = new StringBuilder("(");
-                        Competitions.EVENTS.forEach(c -> sb.append(c.getID()).append("|"));
-                        sender.sendMessage("/competition start " + sb.replace(sb.length(), sb.length(), ")"));
+                        StringJoiner joiner = new StringJoiner("|", "(", ")");
+                        Competitions.EVENTS.forEach(e -> joiner.add(e.getID()));
+                        sender.sendMessage("/competition start " + joiner);
                     }
                 }
                 case "end" -> Competitions.forceEnd(sender);
@@ -40,7 +37,7 @@ public class CompetitionCommand implements IPluginCommand {
                             sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
                             return;
                         }
-                        if (!Competitions.containPlayer(p)) {
+                        if (!Competitions.isCompetitor(p)) {
                             int number;
                             if (args.length >= 3) {
                                 try {
@@ -89,7 +86,7 @@ public class CompetitionCommand implements IPluginCommand {
                             sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
                             return;
                         }
-                        if (Competitions.containPlayer(p)) {
+                        if (Competitions.isCompetitor(p)) {
                             if (args.length == 2) {
                                 sender.sendMessage(Component.translatable("command.competition.score.query").args(Component.text(p.getName()), Component.text(Competitions.getCompetitor(p.getUniqueId()).getScore())).color(NamedTextColor.GREEN));
                                 return;
@@ -118,7 +115,7 @@ public class CompetitionCommand implements IPluginCommand {
                 case "info" -> {
                     sender.sendMessage(Component.translatable("gui.info.title"));
                     boolean b = Competitions.getCurrentEvent() != null;
-                    sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getName() : TextUtil.convert(Component.translatable("gui.none"))));
+                    sender.sendMessage(Component.translatable("competition.current").color(NamedTextColor.GREEN).args(b ? Competitions.getCurrentEvent().getName() : TextUtil.convert(Component.translatable("gui.text.none"))));
                     if (b) sender.sendMessage(Component.translatable("competition.status").color(NamedTextColor.GREEN).args(Competitions.getCurrentEvent().getStatus().getName()));
                     sender.sendMessage(Component.translatable("competition.competitors.total").color(NamedTextColor.GREEN).args(Component.text(Competitions.getCompetitors().size()).color(NamedTextColor.YELLOW)));
                     List<String> pl = new ArrayList<>();
@@ -153,7 +150,7 @@ public class CompetitionCommand implements IPluginCommand {
         } else if (args.length == 2) {
             switch (args[0]) {
                 case "start" -> Competitions.EVENTS.stream().filter(IEvent::isEnable).forEach(c -> l.add(c.getID()));
-                case "join" -> Bukkit.getOnlinePlayers().stream().filter(p -> !Competitions.containPlayer(p)).forEach(p -> l.add(p.getName()));
+                case "join" -> Bukkit.getOnlinePlayers().stream().filter(p -> !Competitions.isCompetitor(p)).forEach(p -> l.add(p.getName()));
                 case "leave", "score" -> Competitions.getCompetitors().forEach(d -> l.add(d.getName()));
             }
         }

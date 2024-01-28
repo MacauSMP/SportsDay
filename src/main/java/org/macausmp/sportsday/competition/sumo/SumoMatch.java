@@ -1,33 +1,56 @@
 package org.macausmp.sportsday.competition.sumo;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 public class SumoMatch {
-    private final List<Player> competitors = new ArrayList<>();
+    private final UUID[] competitors = new UUID[2];
     private MatchStatus status = MatchStatus.IDLE;
-    private Player winner;
-    private Player loser;
+    private UUID winner;
+    private UUID loser;
 
-    public SumoMatch(Player p1, Player p2) {
-        this.competitors.addAll(List.of(p1, p2));
+    public void setPlayer(Player player) {
+        if (isSet()) return;
+        competitors[competitors[0] == null ? 0 : 1] = player.getUniqueId();
     }
 
-    public void setResult(Player winner, Player loser) {
-        this.winner = winner;
-        this.loser = loser;
-        setStatus(MatchStatus.END);
+    public boolean isSet() {
+        return competitors[0] != null && competitors[1] != null;
     }
 
-    public List<Player> getCompetitors() {
-        return competitors;
+    public void setResult(Player loser) {
+        if (this.status == MatchStatus.END) return;
+        int i = indexOf(loser.getUniqueId());
+        if (i == -1) return;
+        this.winner = competitors[i ^ 1];
+        this.loser = competitors[i];
+        this.status = MatchStatus.END;
+    }
+
+    public Player[] getCompetitors() {
+        return new Player[]{Bukkit.getPlayer(competitors[0]), Bukkit.getPlayer(competitors[1])};
     }
 
     public boolean contain(@NotNull Player player) {
-        return competitors.contains(player);
+        if (!isSet()) return false;
+        return competitors[0].equals(player.getUniqueId()) || competitors[1].equals(player.getUniqueId());
+    }
+
+    public int indexOf(UUID uuid) {
+        if (!isSet()) return -1;
+        if (competitors[0].equals(uuid)) return 0;
+        if (competitors[1].equals(uuid)) return 1;
+        return -1;
+    }
+
+    public void forEachPlayer(@NotNull Consumer<Player> consumer) {
+        if (!isSet()) return;
+        consumer.accept(Bukkit.getPlayer(competitors[0]));
+        consumer.accept(Bukkit.getPlayer(competitors[1]));
     }
 
     public MatchStatus getStatus() {
@@ -39,11 +62,11 @@ public class SumoMatch {
     }
 
     public Player getWinner() {
-        return winner;
+        return winner != null ? Bukkit.getPlayer(winner) : null;
     }
 
     public Player getLoser() {
-        return loser;
+        return loser != null ? Bukkit.getPlayer(loser) : null;
     }
 
     public enum MatchStatus {

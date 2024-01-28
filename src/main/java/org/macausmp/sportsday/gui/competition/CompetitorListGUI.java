@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -14,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.Pageable;
-import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.CompetitorData;
 import org.macausmp.sportsday.util.ItemUtil;
 
@@ -53,7 +53,7 @@ public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageabl
     }
 
     public static void updateGUI() {
-        HANDLER.forEach(PluginGUI::update);
+        HANDLER.forEach(CompetitorListGUI::update);
     }
 
     @Override
@@ -73,7 +73,9 @@ public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageabl
     }
 
     private @NotNull ItemStack pages() {
-        return ItemUtil.item(Material.YELLOW_STAINED_GLASS_PANE, null, Component.translatable("book.pageIndicator").args(Component.text(getPage() + 1), Component.text(getMaxPage())));
+        ItemStack stack = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
+        stack.editMeta(meta -> meta.displayName(Component.translatable("book.pageIndicator").args(Component.text(getPage() + 1), Component.text(getMaxPage())).decoration(TextDecoration.ITALIC, false)));
+        return stack;
     }
 
     private @NotNull ItemStack icon(UUID uuid) {
@@ -86,6 +88,11 @@ public class CompetitorListGUI extends AbstractCompetitionGUI implements Pageabl
         ItemStack icon = ItemUtil.item(Material.PLAYER_HEAD, "player_icon", display, number, score, "", detail);
         icon.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(player));
         return icon;
+    }
+
+    @Override
+    public void onClose() {
+        HANDLER.remove(this);
     }
 
     public void nextPage() {

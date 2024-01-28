@@ -83,7 +83,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     public void onEvent(@NotNull PlayerMoveEvent e) {
         IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
-        if (event == this && getStatus() == Status.STARTED && Competitions.containPlayer(p)) {
+        if (event == this && getStatus() == Status.STARTED && Competitions.isCompetitor(p)) {
             CompetitorData data = Competitions.getCompetitor(p.getUniqueId());
             if (leaderboard.contains(data) || !lapMap.containsKey(data)) return;
             Location loc = p.getLocation().clone();
@@ -138,6 +138,15 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                 onCompletedLap(p);
                 p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
             }
+        }
+    }
+
+    @Override
+    public void onDisqualification(@NotNull CompetitorData competitor) {
+        super.onDisqualification(competitor);
+        if (leaderboard.size() == getCompetitors().size()) {
+            if (task != null && !task.isCancelled()) task.cancel();
+            end(false);
         }
     }
 

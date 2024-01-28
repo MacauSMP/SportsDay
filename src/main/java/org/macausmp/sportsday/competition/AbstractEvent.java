@@ -138,10 +138,11 @@ public abstract class AbstractEvent implements IEvent {
                         p.setGameMode(GameMode.ADVENTURE);
                     });
                     Competitions.getOnlineCompetitors().forEach(d -> {
-                        d.getPlayer().getInventory().clear();
-                        PlayerCustomize.suitUp(d.getPlayer());
-                        d.getPlayer().getInventory().setItem(0, ItemUtil.MENU);
-                        d.getPlayer().getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+                        Player p = d.getPlayer();
+                        p.getInventory().clear();
+                        PlayerCustomize.suitUp(p);
+                        p.getInventory().setItem(0, ItemUtil.MENU);
+                        p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
                     });
                     getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
                         if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI)) e.remove();
@@ -149,7 +150,7 @@ public abstract class AbstractEvent implements IEvent {
                 }
             }
         }.runTaskLater(PLUGIN, 100L));
-        if (!force) {
+        if (!force && !getLeaderboard().isEmpty()) {
             OfflinePlayer mvp = getLeaderboard().get(0).getOfflinePlayer();
             CustomizeMusickit musickit = PlayerCustomize.getMusickit(mvp);
             if (musickit != null) {
@@ -195,6 +196,17 @@ public abstract class AbstractEvent implements IEvent {
 
     public final Collection<CompetitorData> getCompetitors() {
         return competitors;
+    }
+
+    @Override
+    public void onDisqualification(@NotNull CompetitorData competitor) {
+        competitors.remove(competitor);
+        getLeaderboard().remove(competitor);
+        Player p = competitor.getPlayer();
+        p.getInventory().clear();
+        PlayerCustomize.suitUp(p);
+        p.getInventory().setItem(0, ItemUtil.MENU);
+        p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
     }
 
     @Override

@@ -30,12 +30,12 @@ import java.util.ResourceBundle;
 
 public final class SportsDay extends JavaPlugin implements Listener {
     private static SportsDay instance;
+    private ConfigManager configManager;
+    private CommandManager commandManager;
     public static Team COMPETITOR;
     public static Team REFEREE;
     public static Team AUDIENCE;
     static BossBar BOSSBAR;
-    private ConfigManager configManager;
-    private CommandManager commandManager;
     ScoreboardHandler scoreboardHandler;
 
     public static SportsDay getInstance() {

@@ -18,6 +18,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
@@ -36,6 +37,7 @@ import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
 import org.macausmp.sportsday.gui.competition.CompetitionMenuGUI;
 import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
+import org.macausmp.sportsday.gui.competition.CompetitorProfileGUI;
 import org.macausmp.sportsday.gui.customize.CustomizeMenuGUI;
 import org.macausmp.sportsday.gui.customize.GraffitiSprayGUI;
 import org.macausmp.sportsday.gui.menu.MenuGUI;
@@ -63,20 +65,25 @@ public final class CompetitionListener implements Listener {
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(0, ItemUtil.MENU);
         p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
-        IEvent current = Competitions.getCurrentEvent();
-        if (current == null || current.getStatus() != Status.STARTED) return;
-        if (!Competitions.containPlayer(p)) return;
+        if (!Competitions.isCompetitor(p)) return;
         CompetitionInfoGUI.updateGUI();
         CompetitorListGUI.updateGUI();
+        CompetitorProfileGUI.updateProfile(p.getUniqueId());
     }
 
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
         AbstractEvent.leavePractice(p);
-        if (!Competitions.containPlayer(p)) return;
-        CompetitionInfoGUI.updateGUI();
-        CompetitorListGUI.updateGUI();
+        if (!Competitions.isCompetitor(p)) return;
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                CompetitionInfoGUI.updateGUI();
+                CompetitorListGUI.updateGUI();
+                CompetitorProfileGUI.updateProfile(p.getUniqueId());
+            }
+        }.runTaskLater(PLUGIN, 1L);
     }
 
     @EventHandler
@@ -89,7 +96,7 @@ public final class CompetitionListener implements Listener {
             p.spawnParticle(effect.getParticle(), loc, 1, 0.3f, 0.3f, 0.3f, effect.getData());
         }
         IEvent current = Competitions.getCurrentEvent();
-        if (current instanceof ITrackEvent && current.getStatus() == Status.STARTED && Competitions.containPlayer(p) || AbstractEvent.getPracticeEvent(p) instanceof ITrackEvent) {
+        if (current instanceof ITrackEvent && current.getStatus() == Status.STARTED && Competitions.isCompetitor(p) || AbstractEvent.getPracticeEvent(p) instanceof ITrackEvent) {
             Location loc = e.getTo().clone();
             loc.setY(loc.getY() - 0.5f);
             spawnpoint(p, loc);
@@ -98,13 +105,12 @@ public final class CompetitionListener implements Listener {
         }
     }
 
-    public static void spawnpoint(@NotNull Player player, @NotNull Location loc) {
-        if (!SPAWNPOINT_SET.contains(player.getUniqueId()) && loc.getWorld().getBlockAt(loc).getType() == CHECKPOINT) {
-            SPAWNPOINT_SET.add(player.getUniqueId());
-            player.setBedSpawnLocation(player.getLocation(), true);
-            player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
-            player.sendActionBar(Component.text("Checkpoint").color(NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
-        }
+    private void spawnpoint(@NotNull Player player, @NotNull Location loc) {
+        if (loc.getWorld().getBlockAt(loc).getType() != CHECKPOINT || SPAWNPOINT_SET.contains(player.getUniqueId())) return;
+        SPAWNPOINT_SET.add(player.getUniqueId());
+        player.setBedSpawnLocation(player.getLocation(), true);
+        player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+        player.sendActionBar(Component.text("Checkpoint").color(NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
     }
 
     @EventHandler
@@ -129,7 +135,7 @@ public final class CompetitionListener implements Listener {
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
             IEvent current = Competitions.getCurrentEvent();
-            if (current == null || !Competitions.containPlayer(player) || current.getStatus() == Status.STARTED) return;
+            if (current == null || !Competitions.isCompetitor(player) || current.getStatus() == Status.STARTED) return;
             e.setCancelled(true);
         }
     }
@@ -173,6 +179,11 @@ public final class CompetitionListener implements Listener {
     }
 
     @EventHandler
+    public void onClose(@NotNull InventoryCloseEvent e) {
+        if (e.getInventory().getHolder() instanceof PluginGUI gui) gui.onClose();
+    }
+
+    @EventHandler
     public void onSwapItem(@NotNull PlayerSwapHandItemsEvent e) {
         Player p = e.getPlayer();
         if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
@@ -185,10 +196,9 @@ public final class CompetitionListener implements Listener {
     public void onQuitPractice(@NotNull PlayerInteractEvent e) {
         if (e.getItem() == null) return;
         Player p = e.getPlayer();
-        if (ItemUtil.equals(e.getItem(), ItemUtil.LEAVE_PRACTICE)) {
-            AbstractEvent.leavePractice(p);
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-        }
+        if (!ItemUtil.equals(e.getItem(), ItemUtil.LEAVE_PRACTICE)) return;
+        AbstractEvent.leavePractice(p);
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
     }
 
     @EventHandler
@@ -199,7 +209,9 @@ public final class CompetitionListener implements Listener {
             if (e.getAction().equals(Action.RIGHT_CLICK_AIR)) {
                 p.openInventory(new GraffitiSprayGUI(p).getInventory());
                 p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-            } else if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+                return;
+            }
+            if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
                 if (p.getCooldown(ItemUtil.SPRAY.getType()) > 0 && !p.isOp()) {
                     p.sendActionBar(Component.translatable("item.spray.cooldown").args(Component.text(p.getCooldown(ItemUtil.SPRAY.getType()) / 20f)).color(NamedTextColor.YELLOW));
                     return;
@@ -208,29 +220,28 @@ public final class CompetitionListener implements Listener {
                 if (graffiti == null || Bukkit.getMap(graffiti.ordinal()) == null) return;
                 Block b = p.getTargetBlockExact(4);
                 BlockFace f = p.getTargetBlockFace(4);
-                if (b != null && b.getType().isOccluding() && f != null) {
-                    Location loc = b.getLocation().add(f.getDirection());
-                    ItemStack map = new ItemStack(Material.FILLED_MAP);
-                    map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.ordinal())));
-                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:use_spray"), Sound.Source.MASTER, 1f, 1f));
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            if (!p.isOp()) p.setCooldown(ItemUtil.SPRAY.getType(), 600);
-                            ItemFrame frame = loc.getWorld().spawn(loc, ItemFrame.class);
-                            // Remove item frame that should not appear in an illegal position
-                            if (!frame.getLocation().add(frame.getFacing().getOppositeFace().getDirection()).getBlock().getType().isOccluding()) {
-                                frame.remove();
-                                return;
-                            }
-                            frame.setVisible(false);
-                            frame.setInvulnerable(true);
-                            frame.setFixed(true);
-                            frame.setItem(map, false);
-                            frame.getPersistentDataContainer().set(GRAFFITI, PersistentDataType.BOOLEAN, true);
+                if (b == null || !b.getType().isOccluding() || f == null) return;
+                Location loc = b.getLocation().add(f.getDirection());
+                ItemStack map = new ItemStack(Material.FILLED_MAP);
+                map.editMeta(MapMeta.class, meta -> meta.setMapView(Bukkit.getMap(graffiti.ordinal())));
+                Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:use_spray"), Sound.Source.MASTER, 1f, 1f));
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        if (!p.isOp()) p.setCooldown(ItemUtil.SPRAY.getType(), 600);
+                        ItemFrame frame = loc.getWorld().spawn(loc, ItemFrame.class);
+                        // Remove item frame that should not appear in an illegal position
+                        if (!frame.getLocation().add(frame.getFacing().getOppositeFace().getDirection()).getBlock().getType().isOccluding()) {
+                            frame.remove();
+                            return;
                         }
-                    }.runTaskLater(PLUGIN, 30L);
-                }
+                        frame.setVisible(false);
+                        frame.setInvulnerable(true);
+                        frame.setFixed(true);
+                        frame.setItem(map, false);
+                        frame.getPersistentDataContainer().set(GRAFFITI, PersistentDataType.BOOLEAN, true);
+                    }
+                }.runTaskLater(PLUGIN, 30L);
             }
         }
     }
@@ -303,7 +314,7 @@ public final class CompetitionListener implements Listener {
                         p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 40, 2, false, false));
                     } else if (i == 8) {
                         p.sendMessage(Component.translatable("item.op_book_easter_egg2"));
-                    } if (i == 10) {
+                    } if (i >= 10) {
                         p.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
                         p.setHealth(0);
                         p.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);

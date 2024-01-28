@@ -84,7 +84,13 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onMount(@NotNull EntityMountEvent e) {
         if (e.getEntity() instanceof Player p && e.getMount() instanceof Boat b) {
-            if (checkStatus(p) || inPractice(p, this)) boatMap.put(p, b);
+            if (checkStatus(p) || inPractice(p, this)) {
+                if (b.getPassengers().isEmpty()) {
+                    boatMap.put(p, b);
+                } else {
+                    e.setCancelled(true);
+                }
+            }
         }
     }
 
@@ -123,6 +129,6 @@ public class IceBoatRacing extends AbstractTrackEvent {
     }
 
     private boolean checkStatus(Player p) {
-        return Competitions.getCurrentEvent() == this && Competitions.containPlayer(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
+        return Competitions.getCurrentEvent() == this && Competitions.isCompetitor(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()));
     }
 }

@@ -86,8 +86,14 @@ public interface IEvent extends Listener {
     List<? extends PlayerHolder> getLeaderboard();
 
     /**
+     * Disqualification of competitor
+     * @param competitor Who is going to be disqualified
+     */
+    void onDisqualification(CompetitorData competitor);
+
+    /**
      * Teleport player to event location and sets up practice environment for the player
-     * @param player Who going to practice this event
+     * @param player Who is going to practice this event
      */
     void joinPractice(Player player);
 }
