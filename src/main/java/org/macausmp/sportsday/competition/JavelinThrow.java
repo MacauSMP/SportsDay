@@ -75,6 +75,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onEnd(boolean force) {
+        Competitions.getOnlineCompetitors().forEach(d -> d.getPlayer().getInventory().remove(TRIDENT));
         getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
         if (force) return;
         Collections.sort(leaderboard);
@@ -203,7 +204,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
         queue.removeIf(d -> !getCompetitors().contains(d));
         for (CompetitorData d : queue) {
             currentPlayer = d;
-            if (d.getOfflinePlayer().isOnline()) {
+            if (currentPlayer.isOnline()) {
                 currentPlayer.getPlayer().teleport(getLocation());
                 currentPlayer.getPlayer().setGameMode(GameMode.ADVENTURE);
                 queue.remove(d);

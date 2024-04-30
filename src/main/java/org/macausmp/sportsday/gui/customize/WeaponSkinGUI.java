@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -56,18 +57,17 @@ public class WeaponSkinGUI extends PluginGUI {
         }
     }
 
-    @Override
-    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.equals(item, GUIButton.BACK)) {
-            p.openInventory(new CustomizeMenuGUI(p).getInventory());
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-            return;
-        }
-        if (ItemUtil.equals(item, "weapon")) {
-            PlayerCustomize.setWeaponSkin(p, item.getType());
-            p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
-            update();
-        }
+    @ButtonHandler("back")
+    public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        p.openInventory(new CustomizeMenuGUI(p).getInventory());
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+    }
+
+    @ButtonHandler("weapon")
+    public void weapon(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        PlayerCustomize.setWeaponSkin(p, item.getType());
+        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+        update();
     }
 
     private @NotNull ItemStack weapon(Material material) {

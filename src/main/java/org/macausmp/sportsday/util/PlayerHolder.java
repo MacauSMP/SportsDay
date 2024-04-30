@@ -31,4 +31,13 @@ public interface PlayerHolder {
     default OfflinePlayer getOfflinePlayer() {
         return Bukkit.getOfflinePlayer(getUUID());
     }
+
+    /**
+     * Checks if this player is currently online
+     * @return true if they are online
+     * @see OfflinePlayer#isOnline()
+     */
+    default boolean isOnline() {
+        return getOfflinePlayer().isOnline();
+    }
 }

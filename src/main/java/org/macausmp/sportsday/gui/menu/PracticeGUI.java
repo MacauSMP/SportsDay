@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.AbstractEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
+import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -43,24 +44,19 @@ public class PracticeGUI extends PluginGUI {
         getInventory().setItem(23, practice(Competitions.SUMO));
     }
 
-    @Override
-    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.equals(item, GUIButton.BACK)) {
-            p.openInventory(new MenuGUI().getInventory());
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-            return;
-        }
+    @ButtonHandler("back")
+    public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        p.openInventory(new MenuGUI().getInventory());
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+    }
+
+    @ButtonHandler("practice")
+    public void practice(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (Competitions.getCurrentEvent() == null) {
-            String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING);
-            if (ItemUtil.equals(item, "practice")) {
-                for (IEvent event : Competitions.EVENTS) {
-                    if (event.getID().equals(id)) {
-                        AbstractEvent.leavePractice(p);
-                        event.joinPractice(p);
-                        return;
-                    }
-                }
-            }
+            IEvent event = Competitions.EVENTS.get(item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
+            if (event == null) return;
+            AbstractEvent.leavePractice(p);
+            event.joinPractice(p);
         }
     }
 

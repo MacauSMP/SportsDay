@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -58,28 +59,20 @@ public class BoatTypeGUI extends PluginGUI {
         }
     }
 
-    @Override
-    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.equals(item, GUIButton.BACK)) {
-            p.openInventory(new CustomizeMenuGUI(p).getInventory());
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-            return;
-        }
-        if (isBoat(item.getType())) {
-            PlayerCustomize.setBoatType(p, item.getType());
-            p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
-            update();
-        }
+    @ButtonHandler("back")
+    public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        p.openInventory(new CustomizeMenuGUI(p).getInventory());
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+    }
+
+    @ButtonHandler("boat")
+    public void boat(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        PlayerCustomize.setBoatType(p, item.getType());
+        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+        update();
     }
 
     private @NotNull ItemStack boat(Material material) {
         return ItemUtil.item(material, "boat", null, "gui.select");
-    }
-
-    private boolean isBoat(@NotNull Material material) {
-        return switch (material) {
-            case ACACIA_BOAT, BIRCH_BOAT, CHERRY_BOAT, DARK_OAK_BOAT, JUNGLE_BOAT, MANGROVE_BOAT, OAK_BOAT, SPRUCE_BOAT -> true;
-            default -> false;
-        };
     }
 }

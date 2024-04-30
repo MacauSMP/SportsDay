@@ -16,6 +16,7 @@ import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
 import org.macausmp.sportsday.customize.CustomizeMusickit;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -44,9 +45,8 @@ public class CustomizeMenuGUI extends PluginGUI {
         getInventory().setItem(34, musickit());
     }
 
-    @Override
+    @ButtonHandler
     public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         switch (e.getSlot()) {
             case 10 -> p.openInventory(new ClothingCustomizeGUI(p).getInventory());
             case 12 -> p.openInventory(new BoatTypeGUI(p).getInventory());
@@ -56,24 +56,29 @@ public class CustomizeMenuGUI extends PluginGUI {
             case 31 -> p.openInventory(new GraffitiSprayGUI(p).getInventory());
             case 34 -> p.openInventory(new MusickitGUI(p).getInventory());
         }
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
     }
 
     private @NotNull ItemStack clothing() {
         ItemStack stack = customize(Material.LEATHER_CHESTPLATE, "clothing");
-        ItemStack head = PlayerCustomize.getClothItem(player, EquipmentSlot.HEAD);
-        ItemStack chest = PlayerCustomize.getClothItem(player, EquipmentSlot.CHEST);
-        ItemStack legs = PlayerCustomize.getClothItem(player, EquipmentSlot.LEGS);
-        ItemStack feet = PlayerCustomize.getClothItem(player, EquipmentSlot.FEET);
+        Material head = getType(PlayerCustomize.getCloth(player, EquipmentSlot.HEAD));
+        Material chest = getType(PlayerCustomize.getCloth(player, EquipmentSlot.CHEST));
+        Material legs = getType(PlayerCustomize.getCloth(player, EquipmentSlot.LEGS));
+        Material feet = getType(PlayerCustomize.getCloth(player, EquipmentSlot.FEET));
         if (head != null || chest != null || legs != null || feet != null) {
             List<Component> lore = new ArrayList<>();
             lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())));
-            if (head != null) lore.add(getTypeName(head.getType()));
-            if (chest != null) lore.add(getTypeName(chest.getType()));
-            if (legs != null) lore.add(getTypeName(legs.getType()));
-            if (feet != null) lore.add(getTypeName(feet.getType()));
+            if (head != null) lore.add(getTypeName(head));
+            if (chest != null) lore.add(getTypeName(chest));
+            if (legs != null) lore.add(getTypeName(legs));
+            if (feet != null) lore.add(getTypeName(feet));
             stack.lore(lore);
         }
         return stack;
+    }
+
+    private Material getType(PlayerCustomize.Cloth cloth) {
+        return cloth != null ? cloth.getMaterial() : null;
     }
 
     private @NotNull ItemStack boatType() {

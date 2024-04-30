@@ -23,11 +23,11 @@ public class CompetitionCommand implements IPluginCommand {
                 case "start" -> {
                     if (args.length >= 2) {
                         Competitions.start(sender, args[1]);
-                    } else {
-                        StringJoiner joiner = new StringJoiner("|", "(", ")");
-                        Competitions.EVENTS.forEach(e -> joiner.add(e.getID()));
-                        sender.sendMessage("/competition start " + joiner);
+                        return;
                     }
+                    StringJoiner joiner = new StringJoiner("|", "(", ")");
+                    Competitions.EVENTS.keySet().forEach(joiner::add);
+                    sender.sendMessage("/competition start " + joiner);
                 }
                 case "end" -> Competitions.forceEnd(sender);
                 case "join" -> {
@@ -37,26 +37,26 @@ public class CompetitionCommand implements IPluginCommand {
                             sender.sendMessage(Component.translatable("argument.player.unknown").color(NamedTextColor.RED));
                             return;
                         }
-                        if (!Competitions.isCompetitor(p)) {
-                            int number;
-                            if (args.length >= 3) {
-                                try {
-                                    number = Integer.parseInt(args[2]);
-                                    if (number < 0) {
-                                        sender.sendMessage(Component.translatable("argument.number.negative").color(NamedTextColor.RED));
-                                        return;
-                                    }
-                                } catch (Exception e) {
-                                    sender.sendMessage(Component.translatable("parsing.int.invalid").args(Component.text(args[2])).color(NamedTextColor.RED));
+                        if (Competitions.isCompetitor(p)) {
+                            sender.sendMessage(Component.translatable("command.competition.register.failed.other").args(p.displayName()).color(NamedTextColor.RED));
+                            return;
+                        }
+                        int number;
+                        if (args.length >= 3) {
+                            try {
+                                number = Integer.parseInt(args[2]);
+                                if (number < 0) {
+                                    sender.sendMessage(Component.translatable("argument.number.negative").color(NamedTextColor.RED));
                                     return;
                                 }
-                            } else {
-                                number = Competitions.genNumber();
+                            } catch (Exception e) {
+                                sender.sendMessage(Component.translatable("parsing.int.invalid").args(Component.text(args[2])).color(NamedTextColor.RED));
+                                return;
                             }
-                            sender.sendMessage(Competitions.join(p, number) ? Component.translatable("command.competition.register.success.other").args(p.displayName(), Component.text(number)).color(NamedTextColor.GREEN) : Component.translatable("command.competition.register_number_occupied").args(Component.text(number)).color(NamedTextColor.RED));
                         } else {
-                            sender.sendMessage(Component.translatable("command.competition.register.failed.other").args(p.displayName()).color(NamedTextColor.RED));
+                            number = Competitions.genNumber();
                         }
+                        sender.sendMessage(Competitions.join(p, number) ? Component.translatable("command.competition.register.success.other").args(p.displayName(), Component.text(number)).color(NamedTextColor.GREEN) : Component.translatable("command.competition.register_number_occupied").args(Component.text(number)).color(NamedTextColor.RED));
                     } else {
                         sender.sendMessage(Component.text("/competition join <player>"));
                     }
@@ -122,7 +122,7 @@ public class CompetitionCommand implements IPluginCommand {
                     Competitions.getCompetitors().stream().sorted(Comparator.comparingInt(CompetitorData::getNumber)).forEach(d -> pl.add(d.getName()));
                     sender.sendMessage(Component.translatable("competition.competitors.list").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(pl.toArray())).color(NamedTextColor.YELLOW)));
                     List<String> cl = new ArrayList<>();
-                    Competitions.EVENTS.stream().filter(IEvent::isEnable).forEach(c -> cl.add(c.getID().toUpperCase()));
+                    Competitions.EVENTS.values().stream().filter(IEvent::isEnable).forEach(c -> cl.add(c.getID().toUpperCase()));
                     sender.sendMessage(Component.translatable("competition.enabled").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(cl.toArray())).color(NamedTextColor.YELLOW)));
                 }
                 default -> sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));
@@ -149,7 +149,7 @@ public class CompetitionCommand implements IPluginCommand {
             l.add("info");
         } else if (args.length == 2) {
             switch (args[0]) {
-                case "start" -> Competitions.EVENTS.stream().filter(IEvent::isEnable).forEach(c -> l.add(c.getID()));
+                case "start" -> Competitions.EVENTS.values().stream().filter(IEvent::isEnable).forEach(c -> l.add(c.getID()));
                 case "join" -> Bukkit.getOnlinePlayers().stream().filter(p -> !Competitions.isCompetitor(p)).forEach(p -> l.add(p.getName()));
                 case "leave", "score" -> Competitions.getCompetitors().forEach(d -> l.add(d.getName()));
             }

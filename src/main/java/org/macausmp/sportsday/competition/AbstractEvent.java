@@ -8,6 +8,7 @@ import net.kyori.adventure.title.TitlePart;
 import org.bukkit.*;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +34,8 @@ public abstract class AbstractEvent implements IEvent {
     private final World world;
     private Status status = Status.IDLE;
     private final Collection<CompetitorData> competitors = new HashSet<>();
+    private final Map<UUID, CustomizeMusickit> competitorToMusickit = new HashMap<>();
+    public static final NamespacedKey IN_GAME = new NamespacedKey(PLUGIN, "in_game");
 
     public AbstractEvent(String id) {
         this.id = id;
@@ -74,7 +77,10 @@ public abstract class AbstractEvent implements IEvent {
 
     @Override
     public void setup() {
-        Bukkit.getOnlinePlayers().forEach(AbstractEvent::leavePractice);
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            leavePractice(p);
+            p.getPersistentDataContainer().set(IN_GAME, PersistentDataType.BOOLEAN, true);
+        });
         PRACTICE.clear();
         EVENT_TASKS.forEach(BukkitTask::cancel);
         EVENT_TASKS.clear();
@@ -93,6 +99,7 @@ public abstract class AbstractEvent implements IEvent {
             p.setGameMode(GameMode.ADVENTURE);
             PlayerCustomize.suitUp(p);
             p.getInventory().setItem(4, ItemUtil.SPRAY);
+            competitorToMusickit.put(data.getUUID(), PlayerCustomize.getMusickit(p));
         });
         addRunnable(new BukkitRunnable() {
             int i = PLUGIN.getConfig().getInt("ready_time");
@@ -127,39 +134,48 @@ public abstract class AbstractEvent implements IEvent {
         setStatus(Status.ENDED);
         onEnd(force);
         EVENT_TASKS.forEach(BukkitTask::cancel);
-        addRunnable(new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (status == Status.ENDED) {
-                    Competitions.setCurrentEvent(null);
-                    setStatus(Status.IDLE);
-                    Bukkit.getOnlinePlayers().forEach(p -> {
-                        p.teleport(location);
-                        p.setGameMode(GameMode.ADVENTURE);
-                    });
-                    Competitions.getOnlineCompetitors().forEach(d -> {
-                        Player p = d.getPlayer();
-                        p.getInventory().clear();
-                        PlayerCustomize.suitUp(p);
-                        p.getInventory().setItem(0, ItemUtil.MENU);
-                        p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
-                    });
-                    getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
-                        if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI)) e.remove();
-                    });
+        if (!force) {
+            if (!getLeaderboard().isEmpty()) {
+                OfflinePlayer mvp = getLeaderboard().get(0).getOfflinePlayer();
+                CustomizeMusickit musickit = competitorToMusickit.get(mvp.getUniqueId());
+                if (musickit != null) {
+                    Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
+                    Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem").args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
                 }
             }
-        }.runTaskLater(PLUGIN, 100L));
-        if (!force && !getLeaderboard().isEmpty()) {
-            OfflinePlayer mvp = getLeaderboard().get(0).getOfflinePlayer();
-            CustomizeMusickit musickit = PlayerCustomize.getMusickit(mvp);
-            if (musickit != null) {
-                Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
-                Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem").args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
-            }
+            addRunnable(new BukkitRunnable() {
+                @Override
+                public void run() {
+                    end();
+                }
+            }.runTaskLater(PLUGIN, 100L));
+        } else {
+            end();
         }
         Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.end.broadcast"));
         PLUGIN.getComponentLogger().info(Component.translatable(force ? "console.competition.force_end" : "console.competition.end").args(name));
+    }
+
+    private void end() {
+        if (status == Status.ENDED) {
+            Competitions.setCurrentEvent(null);
+            setStatus(Status.IDLE);
+            Bukkit.getOnlinePlayers().forEach(p -> {
+                p.getPersistentDataContainer().remove(IN_GAME);
+                p.teleport(location);
+                p.setGameMode(GameMode.ADVENTURE);
+            });
+            Competitions.getOnlineCompetitors().forEach(d -> {
+                Player p = d.getPlayer();
+                p.getInventory().clear();
+                PlayerCustomize.suitUp(p);
+                p.getInventory().setItem(0, ItemUtil.MENU);
+                p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+            });
+            getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
+                if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI)) e.remove();
+            });
+        }
     }
 
     /**

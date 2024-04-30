@@ -12,6 +12,7 @@ import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
 import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
 import org.macausmp.sportsday.util.CompetitorData;
+import org.macausmp.sportsday.util.PlayerHolder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 public final class Competitions {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
     private static final FileConfiguration COMPETITOR_CONFIG = PLUGIN.getConfigManager().getCompetitorConfig();
-    public static final Set<IEvent> EVENTS = new LinkedHashSet<>();
+    public static final Map<String, IEvent> EVENTS = new LinkedHashMap<>();
     public static final IEvent ELYTRA_RACING = register(new ElytraRacing());
     public static final IEvent ICE_BOAT_RACING = register(new IceBoatRacing());
     public static final IEvent JAVELIN_THROW = register(new JavelinThrow());
@@ -36,11 +37,14 @@ public final class Competitions {
      * @param competition Competition event to register
      * @return Competition event after registered
      */
-    private static <T extends IEvent> T register(T competition) {
-        EVENTS.add(competition);
+    private static <T extends IEvent> @NotNull T register(T competition) {
+        EVENTS.put(competition.getID(), competition);
         return competition;
     }
 
+    /**
+     * Load competitors' data
+     */
     public static void load() {
         COMPETITORS.clear();
         Set<String> keys = COMPETITOR_CONFIG.getKeys(false);
@@ -52,6 +56,9 @@ public final class Competitions {
         }
     }
 
+    /**
+     * Save competitors' data
+     */
     public static void save() {
         for (CompetitorData data : COMPETITORS) {
             COMPETITOR_CONFIG.set(data.getUUID() + ".name", data.getName());
@@ -65,31 +72,30 @@ public final class Competitions {
      * Start a competition
      * @param sender Who host the competition
      * @param id Competition id
-     * @return True if competition successfully started
+     * @return {@code True} if competition successfully started
      */
     public static boolean start(CommandSender sender, String id) {
         if (getCurrentEvent() != null && getCurrentEvent().getStatus() != Status.ENDED) {
             sender.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
             return false;
         }
-        for (IEvent event : EVENTS) {
-            if (event.getID().equals(id)) {
-                if (!event.isEnable()) {
-                    sender.sendMessage(Component.translatable("command.competition.disabled").color(NamedTextColor.RED));
-                    return false;
-                }
-                if (getOnlineCompetitors().size() < event.getLeastPlayersRequired()) {
-                    sender.sendMessage(Component.translatable("command.competition.not_enough_player_required").args(Component.text(event.getLeastPlayersRequired())).color(NamedTextColor.RED));
-                    return false;
-                }
-                sender.sendMessage(Component.translatable("command.competition.start.success").color(NamedTextColor.GREEN));
-                setCurrentEvent(event);
-                event.setup();
-                return true;
-            }
+        IEvent event = EVENTS.get(id);
+        if (event == null) {
+            sender.sendMessage(Component.translatable("event.name.unknown").color(NamedTextColor.RED));
+            return false;
         }
-        sender.sendMessage(Component.translatable("event.name.unknown").color(NamedTextColor.RED));
-        return false;
+        if (!event.isEnable()) {
+            sender.sendMessage(Component.translatable("command.competition.disabled").color(NamedTextColor.RED));
+            return false;
+        }
+        if (getOnlineCompetitors().size() < event.getLeastPlayersRequired()) {
+            sender.sendMessage(Component.translatable("command.competition.not_enough_player_required").args(Component.text(event.getLeastPlayersRequired())).color(NamedTextColor.RED));
+            return false;
+        }
+        sender.sendMessage(Component.translatable("command.competition.start.success").color(NamedTextColor.GREEN));
+        setCurrentEvent(event);
+        event.setup();
+        return true;
     }
 
     /**
@@ -125,7 +131,7 @@ public final class Competitions {
      * Add competitor to competitor list
      * @param competitor Competitor to add to the competitor list
      * @param number Competitor number
-     * @return True if competitor successfully added to the competitor list
+     * @return {@code True} if competitor successfully added to the competitor list
      */
     public static boolean join(@NotNull Player competitor, int number) {
         for (CompetitorData data : COMPETITORS) {
@@ -142,12 +148,13 @@ public final class Competitions {
     /**
      * Remove competitor from competitor list
      * @param competitor Competitor to remove from the competitor list
-     * @return True if competitor successfully removed from the competitor list
+     * @return {@code True} if competitor successfully removed from the competitor list
      */
     public static boolean leave(OfflinePlayer competitor) {
         if (isCompetitor(competitor)) {
             for (CompetitorData data : COMPETITORS) {
                 if (data.getUUID().equals(competitor.getUniqueId())) {
+                    data.remove();
                     if (competitor.isOnline() && getCurrentEvent() != null) getCurrentEvent().onDisqualification(data);
                     COMPETITOR_CONFIG.set(data.getUUID().toString(), null);
                     REGISTERED_NUMBER_LIST.remove(data.getNumber());
@@ -180,8 +187,8 @@ public final class Competitions {
      * Gets a view of all registered competitors
      * @return a view of registered competitors
      */
-    public static Collection<CompetitorData> getCompetitors() {
-        return COMPETITORS;
+    public static @NotNull Collection<CompetitorData> getCompetitors() {
+        return new HashSet<>(COMPETITORS);
     }
 
     /**
@@ -189,28 +196,25 @@ public final class Competitions {
      * @return a view of currently online registered competitors
      */
     public static @NotNull Collection<CompetitorData> getOnlineCompetitors() {
-        return COMPETITORS.stream().filter(data -> data.getOfflinePlayer().isOnline()).collect(Collectors.toSet());
+        return COMPETITORS.stream().filter(PlayerHolder::isOnline).collect(Collectors.toSet());
     }
 
     /**
      * Checks if this player is in competitor list
      * @param player Specified player
-     * @return True if the player is in competitor list
+     * @return {@code True} if the player is in competitor list
      */
     public static boolean isCompetitor(OfflinePlayer player) {
-        for (CompetitorData data : COMPETITORS) {
-            if (data.getUUID().equals(player.getUniqueId())) return true;
-        }
-        return false;
+        return COMPETITORS.stream().anyMatch(data -> data.getUUID().equals(player.getUniqueId()));
     }
 
     /**
      * Get competitor data by uuid
      *
-     * <p>Plugins should check that {@link #isCompetitor(OfflinePlayer)} returns <code>true</code> before calling this method.</p>
+     * <p>Plugins should check that {@link #isCompetitor(OfflinePlayer)} returns {@code True} before calling this method.</p>
      *
      * @param uuid Player uuid
-     * @return Competitor data
+     * @return Competitor data of uuid
      */
     public static @NotNull CompetitorData getCompetitor(UUID uuid) {
         for (CompetitorData data : COMPETITORS) {

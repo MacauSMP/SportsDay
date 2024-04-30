@@ -5,11 +5,13 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
+import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -27,7 +29,7 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
         }
         getInventory().setItem(0, GUIButton.COMPETITION_INFO);
         getInventory().setItem(1, GUIButton.COMPETITOR_LIST);
-        getInventory().setItem(2, ItemUtil.addEffect(GUIButton.COMPETITION_SETTINGS));
+        getInventory().setItem(2, ItemUtil.addWrapper(GUIButton.COMPETITION_SETTINGS));
         getInventory().setItem(3, GUIButton.VERSION);
         getInventory().setItem(18, GUIButton.ELYTRA_RACING);
         getInventory().setItem(19, GUIButton.ICE_BOAT_RACING);
@@ -53,20 +55,14 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
         HANDLER.forEach(PluginGUI::update);
     }
 
-    @Override
-    public void onClick(@NotNull Player p, @NotNull ItemStack item) {
-        String id = item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING);
-        if (ItemUtil.equals(item, "status_toggle")) {
-            for (IEvent event : Competitions.EVENTS) {
-                if (event.getID().equals(id)) {
-                    PLUGIN.getConfig().set(event.getID() + ".enable", !event.isEnable());
-                    PLUGIN.saveConfig();
-                    updateGUI();
-                    p.playSound(Sound.sound(Key.key(event.isEnable() ? "minecraft:entity.arrow.hit_player" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
-                    return;
-                }
-            }
-        }
+    @ButtonHandler("status_toggle")
+    public void toggle(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        IEvent event = Competitions.EVENTS.get(item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
+        if (event == null) return;
+        PLUGIN.getConfig().set(event.getID() + ".enable", !event.isEnable());
+        PLUGIN.saveConfig();
+        updateGUI();
+        p.playSound(Sound.sound(Key.key(event.isEnable() ? "minecraft:entity.arrow.hit_player" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
     }
 
     private @NotNull ItemStack status(@NotNull IEvent event) {

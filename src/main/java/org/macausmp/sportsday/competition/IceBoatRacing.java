@@ -38,7 +38,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
 
     @Override
     protected void onEnd(boolean force) {
-        boatMap.forEach((p, b) -> b.remove());
+        boatMap.values().forEach(Boat::remove);
     }
 
     @Override

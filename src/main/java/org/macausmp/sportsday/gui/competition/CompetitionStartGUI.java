@@ -4,11 +4,13 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
+import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.util.ItemUtil;
 
@@ -41,12 +43,10 @@ public class CompetitionStartGUI extends AbstractCompetitionGUI {
         getInventory().setItem(32, start(Competitions.SUMO));
     }
 
-    @Override
-    public void onClick(@NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.equals(item, "start_competition")) {
-            boolean b = Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
-            if (!b) p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
-        }
+    @ButtonHandler("start_competition")
+    public void start(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        boolean b = Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
+        if (!b) p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
     }
 
     private @NotNull ItemStack start(@NotNull IEvent event) {

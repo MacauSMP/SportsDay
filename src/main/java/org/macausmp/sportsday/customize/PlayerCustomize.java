@@ -1,9 +1,9 @@
 package org.macausmp.sportsday.customize;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -14,19 +14,22 @@ import org.bukkit.inventory.meta.ColorableArmorMeta;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
+import org.bukkit.persistence.PersistentDataAdapterContext;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public final class PlayerCustomize {
-    private static final FileConfiguration CONFIG = SportsDay.getInstance().getConfigManager().getPlayerdataConfig();
-    private static final HashMap<Material, TrimMaterial> TRIM_MATERIAL = new HashMap<>();
-    private static final HashMap<String, TrimPattern> TRIM_PATTERN = new HashMap<>();
-
+    private static final SportsDay PLUGIN = SportsDay.getInstance();
+    private static final Map<Material, TrimMaterial> TRIM_MATERIAL = new HashMap<>();
+    private static final Map<String, TrimPattern> TRIM_PATTERN = new HashMap<>();
     static {
         TRIM_MATERIAL.put(Material.QUARTZ, TrimMaterial.QUARTZ);
         TRIM_MATERIAL.put(Material.IRON_INGOT, TrimMaterial.IRON);
@@ -64,117 +67,223 @@ public final class PlayerCustomize {
     }
 
     private static @Nullable ItemStack cloth(@NotNull Player player, @NotNull EquipmentSlot slot) {
-        String source = CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".item");
-        if (source == null) return null;
-        ItemStack cloth = ItemUtil.setBind(new ItemStack(Objects.requireNonNull(Material.getMaterial(source))));
-        if (cloth.getItemMeta() instanceof ColorableArmorMeta) cloth.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(PlayerCustomize.getClothColor(player, slot)));
-        cloth.editMeta(ArmorMeta.class, meta -> {
+        Cloth cloth = getCloth(player, slot);
+        if (cloth == null) return null;
+        ItemStack item = getClothItemStack(cloth);
+        item.editMeta(meta -> {
             meta.setUnbreakable(true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-            if (hasClothTrim(player, slot)) meta.setTrim(new ArmorTrim(getClothTrimMaterial(player, slot), getClothTrimPattern(player, slot)));
         });
-        return cloth;
+        return ItemUtil.setBind(item);
     }
 
-    public static @Nullable ItemStack getClothItem(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
-        String item = CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".item");
-        if (item != null) return new ItemStack(Objects.requireNonNull(Material.getMaterial(item)));
-        return null;
+    public static @Nullable Cloth getCloth(@NotNull Player player, @NotNull EquipmentSlot slot) {
+        if (!player.getPersistentDataContainer().has(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER)) return null;
+        PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER));
+        return container.get(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), ClothDataType.INSTANCE);
     }
 
-    public static void setClothItem(@NotNull OfflinePlayer player, @NotNull Material type) {
-        CONFIG.set(player.getUniqueId() + ".clothing." + type.getEquipmentSlot().name().toLowerCase() + ".item", type.name());
+    public static @NotNull ItemStack getClothItemStack(@NotNull Cloth cloth) {
+        ItemStack item = new ItemStack(cloth.material);
+        if (cloth.colorable()) item.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(cloth.color));
+        if (cloth.trimMaterial.equals(Cloth.NONE)) return item;
+        TrimMaterial tm = TRIM_MATERIAL.get(Material.valueOf(cloth.trimMaterial));
+        TrimPattern tp = TRIM_PATTERN.get(cloth.trimPattern);
+        if (tm != null && tp != null) {
+            item.editMeta(ArmorMeta.class, meta -> meta.setTrim(new ArmorTrim(tm, tp)));
+        }
+        return item;
     }
 
-    public static void resetCloth(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
-        CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase(), null);
+    public static void setClothMaterial(@NotNull Player player, @NotNull Material type) {
+        if (!player.getPersistentDataContainer().has(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER)) {
+            PersistentDataContainer container = player.getPersistentDataContainer().getAdapterContext().newPersistentDataContainer();
+            player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER, container);
+        }
+        PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER));
+        Cloth original = getCloth(player, type.getEquipmentSlot());
+        if (original != null) {
+            original.material = type;
+        } else {
+            original = new Cloth(type);
+        }
+        container.set(new NamespacedKey(PLUGIN, type.getEquipmentSlot().name().toLowerCase()), ClothDataType.INSTANCE, original);
+        player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER, container);
     }
 
-    public static Color getClothColor(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
-        return CONFIG.getColor(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".color");
+    public static void resetCloth(@NotNull Player player, @NotNull EquipmentSlot slot) {
+        PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER));
+        container.remove(new NamespacedKey(PLUGIN, slot.name().toLowerCase()));
+        player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER, container);
     }
 
-    public static void setClothColor(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot, Color color) {
-        CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".color", color);
+    public static void setClothColor(@NotNull Player player, @NotNull EquipmentSlot slot, @Nullable Color color) {
+        PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER));
+        Cloth cloth = Objects.requireNonNull(getCloth(player, slot));
+        cloth.color = color != null ? color : Bukkit.getItemFactory().getDefaultLeatherColor();
+        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), ClothDataType.INSTANCE, cloth);
+        player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER, container);
     }
 
-    public static boolean hasClothTrim(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
-        String source = player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim";
-        return CONFIG.getString(source) != null && CONFIG.getString(source + ".material") != null && CONFIG.getString(source + ".pattern") != null;
+    public static void setClothTrimMaterial(@NotNull Player player, @NotNull EquipmentSlot slot, @NotNull Material type) {
+        PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER));
+        Cloth cloth = Objects.requireNonNull(getCloth(player, slot));
+        cloth.trimMaterial = type.name();
+        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), ClothDataType.INSTANCE, cloth);
+        player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER, container);
     }
 
-    public static TrimMaterial getClothTrimMaterial(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
-        return TRIM_MATERIAL.get(Material.getMaterial(Objects.requireNonNull(CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.material"))));
+    public static void setClothTrimPattern(@NotNull Player player, @NotNull EquipmentSlot slot, @NotNull Material type) {
+        PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER));
+        Cloth cloth = Objects.requireNonNull(getCloth(player, slot));
+        cloth.trimPattern = type.name().substring(0, type.name().length() - 29);
+        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), ClothDataType.INSTANCE, cloth);
+        player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER, container);
     }
 
-    public static void setClothTrimMaterial(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot, @NotNull Material type) {
-        CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.material", type.name());
+    public static void resetClothTrim(@NotNull Player player, @NotNull EquipmentSlot slot) {
+        PersistentDataContainer container = Objects.requireNonNull(player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER));
+        Cloth cloth = Objects.requireNonNull(getCloth(player, slot));
+        cloth.trimMaterial = PlayerCustomize.Cloth.NONE;
+        cloth.trimPattern = PlayerCustomize.Cloth.NONE;
+        container.set(new NamespacedKey(PLUGIN, slot.name().toLowerCase()), ClothDataType.INSTANCE, cloth);
+        player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "clothing"), PersistentDataType.TAG_CONTAINER, container);
     }
 
-    public static TrimPattern getClothTrimPattern(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
-        return TRIM_PATTERN.get(Objects.requireNonNull(CONFIG.getString(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.pattern")));
+    public static Boat.@Nullable Type getBoatType(@NotNull Player player) {
+        String type = player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "boat_type"), PersistentDataType.STRING);
+        return type != null ? Boat.Type.valueOf(type) : null;
     }
 
-    public static void setClothTrimPattern(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot, @NotNull Material type) {
-        CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim.pattern", type.name().substring(0, type.name().length() - 29));
+    public static void setBoatType(@NotNull Player player, @NotNull Material type) {
+        player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "boat_type"), PersistentDataType.STRING, type.name().substring(0, type.name().length() - 5));
     }
 
-    public static void resetClothTrim(@NotNull OfflinePlayer player, @NotNull EquipmentSlot slot) {
-        CONFIG.set(player.getUniqueId() + ".clothing." + slot.name().toLowerCase() + ".trim", null);
+    public static @Nullable Material getWeaponSkin(@NotNull Player player) {
+        String type = player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "weapon_skin"), PersistentDataType.STRING);
+        return type != null ? Material.getMaterial(type) : null;
     }
 
-    public static Boat.@Nullable Type getBoatType(@NotNull OfflinePlayer player) {
-        String source = CONFIG.getString(player.getUniqueId() + ".boat_type");
-        return source != null ? Boat.Type.valueOf(source) : null;
+    public static void setWeaponSkin(@NotNull Player player, @NotNull Material type) {
+        player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "weapon_skin"), PersistentDataType.STRING, type.name());
     }
 
-    public static void setBoatType(@NotNull OfflinePlayer player, @NotNull Material type) {
-        CONFIG.set(player.getUniqueId() + ".boat_type", type.name().substring(0, type.name().length() - 5));
+    public static @Nullable CustomizeParticleEffect getProjectileTrail(@NotNull Player player) {
+        String effect = player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "projectile_trail"), PersistentDataType.STRING);
+        return effect != null ? CustomizeParticleEffect.valueOf(effect) : null;
     }
 
-    public static @Nullable Material getWeaponSkin(@NotNull OfflinePlayer player) {
-        String source = CONFIG.getString(player.getUniqueId() + ".weapon_skin");
-        return source != null ? Material.getMaterial(Objects.requireNonNull(CONFIG.getString(player.getUniqueId() + ".weapon_skin"))) : null;
+    public static void setProjectileTrail(@NotNull Player player, CustomizeParticleEffect effect) {
+        if (effect != null) {
+            player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "projectile_trail"), PersistentDataType.STRING, effect.name());
+        } else {
+            player.getPersistentDataContainer().remove(new NamespacedKey(PLUGIN, "projectile_trail"));
+        }
     }
 
-    public static void setWeaponSkin(@NotNull OfflinePlayer player, @NotNull Material type) {
-        CONFIG.set(player.getUniqueId() + ".weapon_skin", type.name());
-    }
-    public static @Nullable CustomizeParticleEffect getProjectileTrail(@NotNull OfflinePlayer player) {
-        String source = CONFIG.getString(player.getUniqueId() + ".projectile_trail");
-        return source != null ? CustomizeParticleEffect.valueOf(source) : null;
+    public static @Nullable CustomizeParticleEffect getWalkingEffect(@NotNull Player player) {
+        String effect = player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "walking_effect"), PersistentDataType.STRING);
+        return effect != null ? CustomizeParticleEffect.valueOf(effect) : null;
     }
 
-    public static void setProjectileTrail(@NotNull OfflinePlayer player, CustomizeParticleEffect effect) {
-        CONFIG.set(player.getUniqueId() + ".projectile_trail", effect != null ? effect.name() : null);
+    public static void setWalkingEffect(@NotNull Player player, CustomizeParticleEffect effect) {
+        if (effect != null) {
+            player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "walking_effect"), PersistentDataType.STRING, effect.name());
+        } else {
+            player.getPersistentDataContainer().remove(new NamespacedKey(PLUGIN, "walking_effect"));
+        }
     }
 
-    public static @Nullable CustomizeParticleEffect getWalkingEffect(@NotNull OfflinePlayer player) {
-        String source = CONFIG.getString(player.getUniqueId() + ".walking_effect");
-        return source != null ? CustomizeParticleEffect.valueOf(source) : null;
+    public static @Nullable CustomizeGraffitiSpray getGraffitiSpray(@NotNull Player player) {
+        String graffiti = player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "graffiti_spray"), PersistentDataType.STRING);
+        return graffiti != null ? CustomizeGraffitiSpray.valueOf(graffiti) : null;
     }
 
-    public static void setWalkingEffect(@NotNull OfflinePlayer player, CustomizeParticleEffect effect) {
-        CONFIG.set(player.getUniqueId() + ".walking_effect", effect != null ? effect.name() : null);
+    public static void setGraffitiSpray(@NotNull Player player, CustomizeGraffitiSpray graffiti) {
+        if (graffiti != null) {
+            player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "graffiti_spray"), PersistentDataType.STRING, graffiti.name());
+        } else {
+            player.getPersistentDataContainer().remove(new NamespacedKey(PLUGIN, "graffiti_spray"));
+        }
     }
 
-    public static @Nullable CustomizeGraffitiSpray getGraffitiSpray(@NotNull OfflinePlayer player) {
-        String source = CONFIG.getString(player.getUniqueId() + ".graffiti_spray");
-        return source != null ? CustomizeGraffitiSpray.valueOf(source) : null;
+    public static @Nullable CustomizeMusickit getMusickit(@NotNull Player player) {
+        String musickit = player.getPersistentDataContainer().get(new NamespacedKey(PLUGIN, "musickit"), PersistentDataType.STRING);
+        return musickit != null ? CustomizeMusickit.valueOf(musickit) : null;
     }
 
-    public static void setGraffitiSpray(@NotNull OfflinePlayer player, CustomizeGraffitiSpray graffiti) {
-        CONFIG.set(player.getUniqueId() + ".graffiti_spray", graffiti != null ? graffiti.name() : null);
+    public static void setMusickit(@NotNull Player player, CustomizeMusickit musickit) {
+        if (musickit != null) {
+            player.getPersistentDataContainer().set(new NamespacedKey(PLUGIN, "musickit"), PersistentDataType.STRING, musickit.name());
+        } else {
+            player.getPersistentDataContainer().remove(new NamespacedKey(PLUGIN, "musickit"));
+        }
     }
 
-    public static @Nullable CustomizeMusickit getMusickit(@NotNull OfflinePlayer player) {
-        String source = CONFIG.getString(player.getUniqueId() + ".musickit");
-        return source != null ? CustomizeMusickit.valueOf(source) : null;
+    public static class Cloth {
+        public static final String NONE = "none";
+        private Material material;
+        private String trimMaterial = NONE;
+        private String trimPattern = NONE;
+        private Color color = Bukkit.getItemFactory().getDefaultLeatherColor();
+
+        private Cloth(Material material) {
+            this.material = material;
+        }
+
+        public Material getMaterial() {
+            return material;
+        }
+
+        public String getTrimMaterial() {
+            return trimMaterial;
+        }
+
+        public String getTrimPattern() {
+            return trimPattern;
+        }
+
+        public Color getColor() {
+            return color;
+        }
+
+        public boolean colorable() {
+            return material != null && Bukkit.getItemFactory().getItemMeta(material) instanceof ColorableArmorMeta;
+        }
     }
 
-    public static void setMusickit(@NotNull OfflinePlayer player, CustomizeMusickit musickit) {
-        CONFIG.set(player.getUniqueId() + ".musickit", musickit != null ? musickit.name() : null);
-    }
+    private static class ClothDataType implements PersistentDataType<PersistentDataContainer, Cloth> {
+        public static final ClothDataType INSTANCE = new ClothDataType();
 
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<Cloth> getComplexType() {
+            return Cloth.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull Cloth complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer container = context.newPersistentDataContainer();
+            container.set(new NamespacedKey(PLUGIN, "material"), PersistentDataType.STRING, complex.material.name());
+            container.set(new NamespacedKey(PLUGIN, "trim-material"), PersistentDataType.STRING, complex.trimMaterial);
+            container.set(new NamespacedKey(PLUGIN, "trim-pattern"), PersistentDataType.STRING, complex.trimPattern);
+            if (complex.colorable()) container.set(new NamespacedKey(PLUGIN, "color"), PersistentDataType.INTEGER, complex.color.asARGB());
+            return container;
+        }
+
+        @Override
+        public @NotNull Cloth fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            Cloth cloth = new Cloth(Material.valueOf(primitive.get(new NamespacedKey(PLUGIN, "material"), PersistentDataType.STRING)));
+            cloth.trimMaterial = primitive.get(new NamespacedKey(PLUGIN, "trim-material"), PersistentDataType.STRING);
+            cloth.trimPattern = primitive.get(new NamespacedKey(PLUGIN, "trim-pattern"), PersistentDataType.STRING);
+            Integer color = primitive.get(new NamespacedKey(PLUGIN, "color"), PersistentDataType.INTEGER);
+            if (color != null) cloth.color = Color.fromARGB(color);
+            return cloth;
+        }
+    }
 }

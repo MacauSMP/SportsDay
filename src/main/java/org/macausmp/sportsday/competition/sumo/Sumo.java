@@ -30,6 +30,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     private SumoStage[] stages;
     private int stageIndex = 0;
     private final boolean weapon = PLUGIN.getConfig().getBoolean(getID() + ".enable_weapon");
+    private final int time = PLUGIN.getConfig().getInt(getID() + ".weapon_time");
 
     public Sumo() {
         super("sumo");
@@ -59,8 +60,8 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
             match.setPlayer(getFromQueue());
             stages[0].getMatchList().add(match);
         }
-        stages[stages.length - 2].getMatchList().add(new SumoMatch());
-        stages[stages.length - 1].getMatchList().add(new SumoMatch());
+        stages[stages.length - 2].getMatchList().add(new SumoMatch()); // Third place
+        stages[stages.length - 1].getMatchList().add(new SumoMatch()); // Final
         stageSetup();
     }
 
@@ -68,8 +69,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
         Component c = Component.translatable("event.sumo.current_stage").args(getSumoStage().getName());
         for (int i = 0; i < getSumoStage().getMatchList().size();) {
             SumoMatch m = getSumoStage().getMatchList().get(i++);
-            c = c.append(Component.translatable("event.sumo.queue").args(Component.text(i), m.getCompetitors()[0].displayName(), m.getCompetitors()[1].displayName()));
-            if (i < getSumoStage().getMatchList().size() - 1) c = c.appendNewline();
+            c = c.appendNewline().append(Component.translatable("event.sumo.queue").args(Component.text(i), m.getCompetitors()[0].displayName(), m.getCompetitors()[1].displayName()));
         }
         Bukkit.broadcast(c);
     }
@@ -142,12 +142,12 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onMatchStart() {
-        SumoMatch match = getSumoStage().getCurrentMatch();
-        if (match != null) match.forEachPlayer(p -> p.teleport(getLocation()));
+        SumoMatch prev = getSumoStage().getCurrentMatch();
+        if (prev != null) prev.forEachPlayer(p -> p.teleport(getLocation()));
         getSumoStage().nextMatch();
-        assert match != null;
+        SumoMatch match = getSumoStage().getCurrentMatch();
         match.setStatus(SumoMatch.MatchStatus.COMING);
-        Player[] pl = getSumoStage().getCurrentMatch().getCompetitors();
+        Player[] pl = match.getCompetitors();
         Player p1 = pl[0];
         Player p2 = pl[1];
         if (Competitions.isCompetitor(p1) && Competitions.isCompetitor(p2)) {
@@ -161,7 +161,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                     public void run() {
                         if (i != 0) Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start_countdown").args(Component.text(i)).color(NamedTextColor.YELLOW));
                         if (i-- == 0) {
-                            getSumoStage().getCurrentMatch().setStatus(SumoMatch.MatchStatus.STARTED);
+                            match.setStatus(SumoMatch.MatchStatus.STARTED);
                             Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start"));
                             giveWeapon();
                             cancel();
@@ -181,16 +181,17 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     private void giveWeapon() {
         if (weapon) {
             addRunnable(new BukkitRunnable() {
-                int i = 45;
+                int i = time;
                 @Override
                 public void run() {
-                    if (getSumoStage().getCurrentMatch() == null || getSumoStage().getCurrentMatch().getStatus() == SumoMatch.MatchStatus.END) {
+                    SumoMatch match = getSumoStage().getCurrentMatch();
+                    if (match == null || match.getStatus() == SumoMatch.MatchStatus.END) {
                         cancel();
                         return;
                     }
                     if (i <= 15 && i % 5 == 0 && i > 0) Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.knockback_stick.countdown").args(Component.text(i)).color(NamedTextColor.YELLOW));
                     if (i-- == 0) {
-                        getSumoStage().getCurrentMatch().forEachPlayer(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon(p)));
+                        match.forEachPlayer(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon(p)));
                         Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.knockback_stick.given"));
                         cancel();
                     }
@@ -265,9 +266,9 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     private void nextSumoStage() {
         // If this is not the first stage of the event, it means there are some players in the arena
-        if (getSumoStage().getCurrentMatch() != null) getSumoStage().getCurrentMatch().forEachPlayer(p -> p.teleport(getLocation()));
-        stageIndex++;
-        if (stageIndex < stages.length - 2) {
+        SumoMatch prev = getSumoStage().getCurrentMatch();
+        if (prev != null) prev.forEachPlayer(p -> p.teleport(getLocation()));
+        if (++stageIndex < stages.length - 2) {
             queue.clear();
             queue.addAll(alive);
             int size = switch (stages[stageIndex + 1].getStage()) {

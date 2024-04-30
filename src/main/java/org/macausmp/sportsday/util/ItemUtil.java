@@ -22,10 +22,10 @@ import java.util.UUID;
 @SuppressWarnings("SpellCheckingInspection")
 public final class ItemUtil {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
-    public static final NamespacedKey ITEM_ID = Objects.requireNonNull(NamespacedKey.fromString("item_id", PLUGIN));
-    public static final NamespacedKey EVENT_ID = Objects.requireNonNull(NamespacedKey.fromString("event_id", PLUGIN));
-    public static final NamespacedKey BIND = Objects.requireNonNull(NamespacedKey.fromString("bind", PLUGIN));
-    public static final ItemStack OP_BOOK = addEffect(item(Material.KNOWLEDGE_BOOK, "competition_book", "item.op_book", "item.op_book_lore"));
+    public static final NamespacedKey ITEM_ID = new NamespacedKey(PLUGIN, "item_id");
+    public static final NamespacedKey EVENT_ID = new NamespacedKey(PLUGIN, "event_id");
+    public static final NamespacedKey BIND = new NamespacedKey(PLUGIN, "bind");
+    public static final ItemStack OP_BOOK = addWrapper(item(Material.KNOWLEDGE_BOOK, "competition_book", "item.op_book", "item.op_book_lore"));
     public static final ItemStack MENU = setBind(item(Material.COMPASS, "menu", "item.menu", "item.menu_lore"));
     public static final ItemStack LEAVE_PRACTICE = setBind(item(Material.BARRIER, "leave_practice", "item.leave_practice", "item.leave_practice_lore"));
     public static final ItemStack CUSTOMIZE = setBind(item(Material.CHEST, "customize", "item.customize", "item.customize_lore1", "item.customize_lore2"));
@@ -77,11 +77,16 @@ public final class ItemUtil {
         return stack;
     }
 
-    public static @NotNull ItemStack addEffect(@NotNull ItemStack stack) {
+    public static @NotNull ItemStack addWrapper(@NotNull ItemStack stack) {
         ItemStack s = stack.clone();
         s.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
         s.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         return s;
+    }
+
+    public static boolean isBind(@NotNull ItemStack stack) {
+        if (!stack.hasItemMeta()) return false;
+        return Boolean.TRUE.equals(stack.getItemMeta().getPersistentDataContainer().get(BIND, PersistentDataType.BOOLEAN));
     }
 
     public static @NotNull ItemStack setBind(@NotNull ItemStack stack) {
@@ -91,24 +96,23 @@ public final class ItemUtil {
     }
 
     public static boolean hasID(@NotNull ItemStack stack) {
-        return stack.hasItemMeta() && stack.getItemMeta().getPersistentDataContainer().has(ItemUtil.ITEM_ID, PersistentDataType.STRING);
+        return stack.getItemMeta().getPersistentDataContainer().has(ITEM_ID, PersistentDataType.STRING);
+    }
+
+    public static String getID(@NotNull ItemStack stack) {
+        return stack.getItemMeta().getPersistentDataContainer().get(ITEM_ID, PersistentDataType.STRING);
     }
 
     public static boolean equals(@NotNull ItemStack stack, @NotNull ItemStack other) {
         if (!stack.hasItemMeta() || !other.hasItemMeta()) return false;
-        String id1 = stack.getItemMeta().getPersistentDataContainer().get(ItemUtil.ITEM_ID, PersistentDataType.STRING);
-        String id2 = other.getItemMeta().getPersistentDataContainer().get(ItemUtil.ITEM_ID, PersistentDataType.STRING);
+        String id1 = stack.getItemMeta().getPersistentDataContainer().get(ITEM_ID, PersistentDataType.STRING);
+        String id2 = other.getItemMeta().getPersistentDataContainer().get(ITEM_ID, PersistentDataType.STRING);
         return Objects.equals(id1, id2);
     }
 
     public static boolean equals(@NotNull ItemStack stack, @NotNull String key) {
         if (!stack.hasItemMeta()) return false;
-        String id = stack.getItemMeta().getPersistentDataContainer().get(ItemUtil.ITEM_ID, PersistentDataType.STRING);
+        String id = stack.getItemMeta().getPersistentDataContainer().get(ITEM_ID, PersistentDataType.STRING);
         return Objects.equals(id, key);
-    }
-
-    public static boolean isBind(@NotNull ItemStack stack) {
-        if (!stack.hasItemMeta()) return false;
-        return Boolean.TRUE.equals(stack.getItemMeta().getPersistentDataContainer().get(BIND, PersistentDataType.BOOLEAN));
     }
 }

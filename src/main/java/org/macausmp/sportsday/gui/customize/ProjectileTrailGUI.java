@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -56,18 +57,22 @@ public class ProjectileTrailGUI extends PluginGUI {
         }
     }
 
-    @Override
-    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.equals(item, GUIButton.BACK)) {
-            p.openInventory(new CustomizeMenuGUI(p).getInventory());
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-            return;
-        }
-        if (ItemUtil.equals(item, "projectile_trail")) {
-            PlayerCustomize.setProjectileTrail(p, CustomizeParticleEffect.values()[e.getSlot() - START_INDEX]);
-        } else if (ItemUtil.equals(item, reset())) {
-            PlayerCustomize.setProjectileTrail(p, null);
-        }
+    @ButtonHandler("back")
+    public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        p.openInventory(new CustomizeMenuGUI(p).getInventory());
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+    }
+
+    @ButtonHandler("projectile_trail")
+    public void projectileTrail(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        PlayerCustomize.setProjectileTrail(p, CustomizeParticleEffect.values()[e.getSlot() - START_INDEX]);
+        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+        update();
+    }
+
+    @ButtonHandler("reset")
+    public void reset(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        PlayerCustomize.setProjectileTrail(p, null);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
     }

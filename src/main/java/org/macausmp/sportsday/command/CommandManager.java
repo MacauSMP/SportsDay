@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public final class CommandManager {
-    private final SportsDay plugin = SportsDay.getInstance();
+    private static final SportsDay PLUGIN = SportsDay.getInstance();
     private static final Set<IPluginCommand> COMMANDS = new HashSet<>();
     private static final IPluginCommand COMPETITION = new CompetitionCommand();
     private static final IPluginCommand COMPETITIONGUI = new CompetitionGUICommand();
@@ -26,8 +26,8 @@ public final class CommandManager {
         COMMANDS.add(CUSTOMIZE);
         COMMANDS.add(PING);
         for (IPluginCommand command : COMMANDS) {
-            Objects.requireNonNull(plugin.getCommand(command.name())).setExecutor(command);
-            Objects.requireNonNull(plugin.getCommand(command.name())).setTabCompleter(command);
+            Objects.requireNonNull(PLUGIN.getCommand(command.name())).setExecutor(command);
+            Objects.requireNonNull(PLUGIN.getCommand(command.name())).setTabCompleter(command);
         }
     }
 }

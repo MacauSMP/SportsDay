@@ -29,7 +29,7 @@ public interface IEvent extends Listener {
 
     /**
      * Get the event's minimum required number of players from the config file
-     * @return minimum required number of players of event
+     * @return Minimum required number of players of event
      */
     int getLeastPlayersRequired();
 
@@ -47,7 +47,7 @@ public interface IEvent extends Listener {
 
     /**
      * Return true if event is enabled
-     * @return True if event is enabled
+     * @return {@code True} if event is enabled
      */
     boolean isEnable();
 
@@ -63,7 +63,7 @@ public interface IEvent extends Listener {
 
     /**
      * End the event
-     * @param force True if end the event via command or gui instead of natural end
+     * @param force {@code True} if end the event via command or gui instead of natural end
      */
     void end(boolean force);
 

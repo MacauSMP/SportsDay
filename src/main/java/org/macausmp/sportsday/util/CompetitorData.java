@@ -11,11 +11,11 @@ import java.util.UUID;
 public final class CompetitorData implements PlayerHolder {
     private final UUID uuid;
     private final int number;
-    private int score = 0;
+    private int score;
+    private boolean removed;
 
     public CompetitorData(UUID uuid, int number) {
-        this.uuid = uuid;
-        this.number = number;
+        this(uuid, number, 0);
     }
 
     public CompetitorData(UUID uuid, int number, int score) {
@@ -63,6 +63,7 @@ public final class CompetitorData implements PlayerHolder {
      */
     public void setScore(int score) {
         this.score = score;
+        if (this.score < 0) this.score = 0;
     }
 
     /**
@@ -71,5 +72,22 @@ public final class CompetitorData implements PlayerHolder {
      */
     public void addScore(int score) {
         this.score += score;
+        if (this.score < 0) this.score = 0;
+    }
+
+    /**
+     * Checks if this {@link CompetitorData} is removed from plugin
+     * @return {@code True} if this {@link CompetitorData} is removed from plugin
+     */
+    public boolean isRemoved() {
+        return removed;
+    }
+
+    /**
+     * Declares that this {@link CompetitorData} has been removed from plugin
+     */
+    public void remove() {
+        if (removed) return;
+        removed = true;
     }
 }

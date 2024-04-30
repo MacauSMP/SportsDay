@@ -14,6 +14,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.CustomizeMusickit;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -21,10 +22,9 @@ import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class MusickitGUI extends PluginGUI {
-    private static final NamespacedKey MUSICKIT = Objects.requireNonNull(NamespacedKey.fromString("musickit", PLUGIN));
+    private static final NamespacedKey MUSICKIT = new NamespacedKey(PLUGIN, "musickit");
     private static final int START_INDEX = 10;
     private final Player player;
 
@@ -62,25 +62,28 @@ public class MusickitGUI extends PluginGUI {
         }
     }
 
-    @Override
-    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.equals(item, GUIButton.BACK)) {
-            p.openInventory(new CustomizeMenuGUI(p).getInventory());
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-            return;
+    @ButtonHandler("back")
+    public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        p.openInventory(new CustomizeMenuGUI(p).getInventory());
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+    }
+
+    @ButtonHandler("musickit")
+    public void musickit(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        CustomizeMusickit musickit = CustomizeMusickit.values()[e.getSlot() - START_INDEX];
+        if (e.isRightClick()) {
+            p.stopAllSounds();
+            p.playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
+        } else {
+            PlayerCustomize.setMusickit(p, musickit);
+            p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+            update();
         }
-        if (ItemUtil.equals(item, "musickit")) {
-            CustomizeMusickit musickit = CustomizeMusickit.values()[e.getSlot() - START_INDEX];
-            if (e.isRightClick()) {
-                p.stopAllSounds();
-                p.playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
-                return;
-            } else {
-                PlayerCustomize.setMusickit(p, musickit);
-            }
-        } else if (ItemUtil.equals(item, reset())) {
-            PlayerCustomize.setMusickit(p, null);
-        }
+    }
+
+    @ButtonHandler("reset")
+    public void reset(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        PlayerCustomize.setMusickit(p, null);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
     }

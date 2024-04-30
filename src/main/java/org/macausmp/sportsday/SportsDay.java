@@ -11,21 +11,29 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.command.CommandManager;
+import org.macausmp.sportsday.competition.AbstractEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
+import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
+import org.macausmp.sportsday.gui.competition.CompetitorProfileGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.ScoreboardHandler;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public final class SportsDay extends JavaPlugin implements Listener {
@@ -35,8 +43,8 @@ public final class SportsDay extends JavaPlugin implements Listener {
     public static Team COMPETITOR;
     public static Team REFEREE;
     public static Team AUDIENCE;
-    static BossBar BOSSBAR;
-    ScoreboardHandler scoreboardHandler;
+    private static BossBar BOSSBAR;
+    private ScoreboardHandler scoreboardHandler;
 
     public static SportsDay getInstance() {
         return instance;
@@ -113,17 +121,17 @@ public final class SportsDay extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        if (Competitions.getCurrentEvent() != null) Competitions.forceEnd(getServer().getConsoleSender());
-        Bukkit.getOnlinePlayers().forEach(p -> {
-            p.teleport(p.getWorld().getSpawnLocation());
-            p.setGameMode(GameMode.ADVENTURE);
-        });
-        Competitions.getOnlineCompetitors().forEach(d -> {
-            d.getPlayer().getInventory().clear();
-            PlayerCustomize.suitUp(d.getPlayer());
-            d.getPlayer().getInventory().setItem(0, ItemUtil.MENU);
-            d.getPlayer().getInventory().setItem(4, ItemUtil.CUSTOMIZE);
-        });
+        if (Competitions.getCurrentEvent() != null) {
+            Competitions.forceEnd(getServer().getConsoleSender());
+            Bukkit.getOnlinePlayers().forEach(p -> {
+                p.getInventory().clear();
+                PlayerCustomize.suitUp(p);
+                p.getInventory().setItem(0, ItemUtil.MENU);
+                p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+                p.teleport(p.getWorld().getSpawnLocation());
+                p.setGameMode(GameMode.ADVENTURE);
+            });
+        }
         Competitions.save();
     }
 
@@ -168,4 +176,42 @@ public final class SportsDay extends JavaPlugin implements Listener {
             }
         }.runTaskLater(this, d);
     }
+
+    @EventHandler
+    public void onJoin(@NotNull PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        scoreboardHandler.setScoreboard(p);
+        BOSSBAR.addViewer(p);
+        if (!p.hasPlayedBefore()) SportsDay.AUDIENCE.addPlayer(p);
+        if (Competitions.getCurrentEvent() == null && p.getPersistentDataContainer().has(AbstractEvent.IN_GAME)) {
+            p.getPersistentDataContainer().remove(AbstractEvent.IN_GAME);
+            if (p.isInsideVehicle()) Objects.requireNonNull(p.getVehicle()).remove();
+            p.getInventory().clear();
+            PlayerCustomize.suitUp(p);
+            p.getInventory().setItem(0, ItemUtil.MENU);
+            p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+            p.setGameMode(GameMode.ADVENTURE);
+            p.teleport(p.getWorld().getSpawnLocation());
+        }
+        if (!Competitions.isCompetitor(p)) return;
+        CompetitionInfoGUI.updateGUI();
+        CompetitorListGUI.updateGUI();
+        CompetitorProfileGUI.updateProfile(p.getUniqueId());
+    }
+
+    @EventHandler
+    public void onQuit(@NotNull PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+        AbstractEvent.leavePractice(p);
+        if (!Competitions.isCompetitor(p)) return;
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                CompetitionInfoGUI.updateGUI();
+                CompetitorListGUI.updateGUI();
+                CompetitorProfileGUI.updateProfile(p.getUniqueId());
+            }
+        }.runTaskLater(this, 1L);
+    }
+
 }

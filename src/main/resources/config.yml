@@ -12,7 +12,7 @@ ready_time: 15
 # 前三名玩家完成比賽後比賽結束倒計時
 event_end_countdown: 60
 # 中途斷線的玩家充許重新連線時間
-reconnect_time: 30
+reconnect_time: 50
 # 飛行賽
 elytra_racing:
   enable: true
@@ -91,6 +91,7 @@ sumo:
   enable: true
   least_players_required: 8
   enable_weapon: true
+  weapon_time: 45
   location:
     ==: org.bukkit.Location
     world: world

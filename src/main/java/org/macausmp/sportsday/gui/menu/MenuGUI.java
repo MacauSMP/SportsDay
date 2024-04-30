@@ -14,6 +14,7 @@ import org.macausmp.sportsday.CompetitionListener;
 import org.macausmp.sportsday.competition.AbstractTrackEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
+import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
@@ -32,24 +33,31 @@ public class MenuGUI extends PluginGUI {
         getInventory().setItem(2, PRACTICE);
     }
 
-    @Override
-    public void update() {
+    @ButtonHandler("guidebook")
+    public void openGuideBook(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        p.openBook(GUIDE_BOOK);
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
     }
 
-    @Override
-    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-        if (ItemUtil.equals(item, GUIDEBOOK)) {
-            p.openBook(GUIDE_BOOK);
-        } else if (ItemUtil.equals(item, HOME)) {
-            if (Competitions.getCurrentEvent() == null) {
-                p.teleport(p.getWorld().getSpawnLocation());
-                p.playSound(Sound.sound(Key.key("minecraft:entity.bat.takeoff"), Sound.Source.MASTER, 1f, 1f));
-            }
-        } else if (ItemUtil.equals(item, PRACTICE)) {
-            if (Competitions.getCurrentEvent() == null) {
-                p.openInventory(new PracticeGUI().getInventory());
-            }
+    @ButtonHandler("home")
+    public void home(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        if (Competitions.getCurrentEvent() == null) {
+            p.teleport(p.getWorld().getSpawnLocation());
+            p.playSound(Sound.sound(Key.key("minecraft:entity.bat.takeoff"), Sound.Source.MASTER, 1f, 1f));
+        } else {
+            p.sendMessage(Component.translatable("competition.function_disable"));
+            p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+        }
+    }
+
+    @ButtonHandler("practice")
+    public void practice(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        if (Competitions.getCurrentEvent() == null) {
+            p.openInventory(new PracticeGUI().getInventory());
+            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+        } else {
+            p.sendMessage(Component.translatable("competition.function_disable"));
+            p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
         }
     }
 
@@ -60,7 +68,7 @@ public class MenuGUI extends PluginGUI {
         Component b2 = Component.translatable(Objects.requireNonNull(CompetitionListener.DEATH).translationKey()).color(NamedTextColor.RED);
         Component b3 = Component.translatable(Objects.requireNonNull(AbstractTrackEvent.FINISH_LINE).translationKey()).color(NamedTextColor.GOLD);
         builder.addPage(Component.translatable("book.guidebook.page_block").args(b1, b2, b3));
-        for (IEvent event : Competitions.EVENTS) {
+        for (IEvent event : Competitions.EVENTS.values()) {
             Component rule = Component.translatable("event.rule." + event.getID());
             builder.addPage(Component.translatable("book.guidebook.page_event").args(event.getName().color(NamedTextColor.BLACK), rule));
         }

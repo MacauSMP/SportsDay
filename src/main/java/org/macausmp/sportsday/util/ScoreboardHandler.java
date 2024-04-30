@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class ScoreboardHandler {
-    private final SportsDay plugin = SportsDay.getInstance();
+    private static final SportsDay PLUGIN = SportsDay.getInstance();
 
     public void setScoreboard(Player p) {
         // Tick time correction (attempt to bring the timer closer to reality)
@@ -23,7 +23,7 @@ public class ScoreboardHandler {
         new BukkitRunnable() {
             @Override
             public void run() {
-                Scoreboard scoreboard = plugin.getServer().getScoreboardManager().getNewScoreboard();
+                Scoreboard scoreboard = PLUGIN.getServer().getScoreboardManager().getNewScoreboard();
                 Objective o = scoreboard.registerNewObjective("sportsday", Criteria.DUMMY, Component.translatable("scoreboard.title").color(NamedTextColor.GOLD));
                 o.setDisplaySlot(DisplaySlot.SIDEBAR);
                 Entry event = new Entry(o, "competition", "scoreboard.competition");
@@ -35,7 +35,7 @@ public class ScoreboardHandler {
                 Entry time = new Entry(o, "time", "scoreboard.time").setScore(4);
                 Entry ping = new Entry(o, "ping", "scoreboard.ping").setScore(3);
                 newline(o).setScore(2);
-                o.getScore(Objects.requireNonNull(plugin.getConfig().getString("server_ip"))).setScore(1);
+                o.getScore(Objects.requireNonNull(PLUGIN.getConfig().getString("server_ip"))).setScore(1);
                 new BukkitRunnable() {
                     final Score line = newline(o);
                     @Override
@@ -49,7 +49,7 @@ public class ScoreboardHandler {
                             status.resetScore();
                             line.resetScore();
                         }
-                        count.suffix(Component.translatable("%s/%s").args(Component.text(Competitions.getOnlineCompetitors().size()), Component.text(plugin.getServer().getOnlinePlayers().size())));
+                        count.suffix(Component.translatable("%s/%s").args(Component.text(Competitions.getOnlineCompetitors().size()), Component.text(PLUGIN.getServer().getOnlinePlayers().size())));
                         if (Competitions.isCompetitor(p)) {
                             number.suffix(Component.text(Competitions.getCompetitor(p.getUniqueId()).getNumber())).setScore(7);
                             score.suffix(Component.text(Competitions.getCompetitor(p.getUniqueId()).getScore())).setScore(6);
@@ -61,9 +61,9 @@ public class ScoreboardHandler {
                         ping.suffix(Component.text(p.getPing()));
                         p.setScoreboard(scoreboard);
                     }
-                }.runTaskTimer(plugin, 0L, 20L);
+                }.runTaskTimer(PLUGIN, 0L, 20L);
             }
-        }.runTaskLater(plugin, d);
+        }.runTaskLater(PLUGIN, d);
     }
 
     private @NotNull Score newline(@NotNull Objective o) {
@@ -74,12 +74,12 @@ public class ScoreboardHandler {
         return o.getScore(b.toString());
     }
 
-    protected static class Entry {
+    private final static class Entry {
         private final Objective objective;
-        protected final Team team;
-        protected final String entry;
+        private final Team team;
+        private final String entry;
 
-        protected Entry(@NotNull Objective objective, String entry, String code) {
+        public Entry(@NotNull Objective objective, String entry, String code) {
             this.objective = objective;
             this.team = Objects.requireNonNull(objective.getScoreboard()).registerNewTeam(entry);
             this.entry = LegacyComponentSerializer.legacySection().serialize(Component.translatable(code));

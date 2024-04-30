@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -45,8 +46,10 @@ public class ClothingColorGUI extends PluginGUI {
         }
         for (int i = START_INDEX; i < START_INDEX + DyeColor.values().length; i++) {
             ItemStack dye = getInventory().getItem(i);
-            Color color = PlayerCustomize.getClothColor(player, slot);
-            if (color == null || DyeColor.getByColor(color) == null) return;
+            PlayerCustomize.Cloth cloth = PlayerCustomize.getCloth(player, slot);
+            if (cloth == null) return;
+            Color color = cloth.getColor();
+            if (DyeColor.getByColor(color) == null) return;
             if (dye == null) break;
             if (dye.getType().name().equals(Objects.requireNonNull(DyeColor.getByColor(color)).name() + "_DYE")) {
                 dye.editMeta(meta -> meta.displayName(TextUtil.text(Component.translatable("gui.selected"))));
@@ -57,19 +60,24 @@ public class ClothingColorGUI extends PluginGUI {
         }
     }
 
-    @Override
-    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (ItemUtil.equals(item, GUIButton.BACK)) {
-            p.openInventory(new ClothingCustomizeGUI(p).getInventory());
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-            return;
-        }
+    @ButtonHandler("back")
+    public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        p.openInventory(new ClothingCustomizeGUI(p).getInventory());
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+    }
+
+    @ButtonHandler("dye")
+    public void dye(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         String s = item.getType().name();
-        if (s.endsWith("_DYE")) {
-            PlayerCustomize.setClothColor(p, slot, DyeColor.valueOf(s.substring(0, s.length() - 4)).getColor());
-        } else if (ItemUtil.equals(item, reset())) {
-            PlayerCustomize.setClothColor(p, slot, null);
-        }
+        PlayerCustomize.setClothColor(p, slot, DyeColor.valueOf(s.substring(0, s.length() - 4)).getColor());
+        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+        update();
+        PlayerCustomize.suitUp(p);
+    }
+
+    @ButtonHandler("reset")
+    public void reset(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        PlayerCustomize.setClothColor(p, slot, null);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
         PlayerCustomize.suitUp(p);

@@ -34,10 +34,7 @@ import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.PluginGUI;
-import org.macausmp.sportsday.gui.competition.CompetitionInfoGUI;
 import org.macausmp.sportsday.gui.competition.CompetitionMenuGUI;
-import org.macausmp.sportsday.gui.competition.CompetitorListGUI;
-import org.macausmp.sportsday.gui.competition.CompetitorProfileGUI;
 import org.macausmp.sportsday.gui.customize.CustomizeMenuGUI;
 import org.macausmp.sportsday.gui.customize.GraffitiSprayGUI;
 import org.macausmp.sportsday.gui.menu.MenuGUI;
@@ -53,38 +50,8 @@ public final class CompetitionListener implements Listener {
     private static final Set<UUID> SPAWNPOINT_SET = new HashSet<>();
     public static final Material CHECKPOINT = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("checkpoint_block")));
     public static final Material DEATH = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("death_block")));
-    public static final NamespacedKey GRAFFITI = Objects.requireNonNull(NamespacedKey.fromString("graffiti_frame", PLUGIN));
-    private static final Set<UUID> EASTER_TRIGGER = new HashSet<>();
-
-    @EventHandler
-    public void onJoin(@NotNull PlayerJoinEvent e) {
-        Player p = e.getPlayer();
-        PLUGIN.scoreboardHandler.setScoreboard(p);
-        SportsDay.BOSSBAR.addViewer(p);
-        if (!p.hasPlayedBefore()) SportsDay.AUDIENCE.addPlayer(p);
-        PlayerCustomize.suitUp(p);
-        p.getInventory().setItem(0, ItemUtil.MENU);
-        p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
-        if (!Competitions.isCompetitor(p)) return;
-        CompetitionInfoGUI.updateGUI();
-        CompetitorListGUI.updateGUI();
-        CompetitorProfileGUI.updateProfile(p.getUniqueId());
-    }
-
-    @EventHandler
-    public void onQuit(@NotNull PlayerQuitEvent e) {
-        Player p = e.getPlayer();
-        AbstractEvent.leavePractice(p);
-        if (!Competitions.isCompetitor(p)) return;
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                CompetitionInfoGUI.updateGUI();
-                CompetitorListGUI.updateGUI();
-                CompetitorProfileGUI.updateProfile(p.getUniqueId());
-            }
-        }.runTaskLater(PLUGIN, 1L);
-    }
+    public static final NamespacedKey GRAFFITI = new NamespacedKey(PLUGIN, "graffiti_frame");
+    private static final Set<UUID> EASTER_EGG = new HashSet<>();
 
     @EventHandler
     public void onMove(@NotNull PlayerMoveEvent e) {
@@ -135,29 +102,28 @@ public final class CompetitionListener implements Listener {
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
             IEvent current = Competitions.getCurrentEvent();
-            if (current == null || !Competitions.isCompetitor(player) || current.getStatus() == Status.STARTED) return;
-            e.setCancelled(true);
+            if (current == null || Competitions.isCompetitor(player) && current.getStatus() != Status.STARTED) e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onPlace(@NotNull BlockPlaceEvent e) {
         Player p = e.getPlayer();
-        if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
+        if (p.isOp() || p.getGameMode() == GameMode.CREATIVE) return;
         e.setCancelled(true);
     }
 
     @EventHandler
     public void onBreak(@NotNull BlockBreakEvent e) {
         Player p = e.getPlayer();
-        if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
+        if (p.isOp() || p.getGameMode() == GameMode.CREATIVE) return;
         e.setCancelled(true);
     }
 
     @EventHandler
     public void onDropItem(@NotNull PlayerDropItemEvent e) {
         Player p = e.getPlayer();
-        if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
+        if (p.isOp() || p.getGameMode() == GameMode.CREATIVE) return;
         if (ItemUtil.isBind(e.getItemDrop().getItemStack())) e.setCancelled(true);
     }
 
@@ -168,9 +134,9 @@ public final class CompetitionListener implements Listener {
             e.setCancelled(true);
             ItemStack item = e.getCurrentItem();
             if (item == null || !ItemUtil.hasID(item)) return;
-            gui.onClick(e, p, item);
+            gui.click(e, p, item);
         } else {
-            if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
+            if (p.isOp() || p.getGameMode() == GameMode.CREATIVE) return;
             ItemStack current = e.getCurrentItem();
             ItemStack button = e.getHotbarButton() == -1 ? null : p.getInventory().getItem(e.getHotbarButton());
             if (current != null && ItemUtil.isBind(current)) e.setCancelled(true);
@@ -186,7 +152,7 @@ public final class CompetitionListener implements Listener {
     @EventHandler
     public void onSwapItem(@NotNull PlayerSwapHandItemsEvent e) {
         Player p = e.getPlayer();
-        if (p.isOp() || (p.getGameMode() == GameMode.CREATIVE && !SportsDay.AUDIENCE.hasPlayer(p))) return;
+        if (p.isOp() || p.getGameMode() == GameMode.CREATIVE) return;
         ItemStack item = e.getOffHandItem();
         if (item == null) return;
         if (ItemUtil.isBind(item)) e.setCancelled(true);
@@ -294,8 +260,8 @@ public final class CompetitionListener implements Listener {
                 return;
             }
             // Easter egg, happen if player use the book without op permission
-            if (EASTER_TRIGGER.contains(p.getUniqueId())) return;
-            EASTER_TRIGGER.add(p.getUniqueId());
+            if (EASTER_EGG.contains(p.getUniqueId())) return;
+            EASTER_EGG.add(p.getUniqueId());
             new BukkitRunnable() {
                 int i = 0;
                 @Override
@@ -318,7 +284,7 @@ public final class CompetitionListener implements Listener {
                         p.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
                         p.setHealth(0);
                         p.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
-                        EASTER_TRIGGER.remove(p.getUniqueId());
+                        EASTER_EGG.remove(p.getUniqueId());
                         cancel();
                     }
                     i++;
