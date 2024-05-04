@@ -2,6 +2,7 @@ package org.macausmp.sportsday.competition.sumo;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -13,33 +14,34 @@ public class SumoMatch {
     private UUID winner;
     private UUID loser;
 
-    public void setPlayer(Player player) {
+    public void setPlayer(UUID uuid) {
         if (isSet()) return;
-        competitors[competitors[0] == null ? 0 : 1] = player.getUniqueId();
+        competitors[competitors[0] == null ? 0 : 1] = uuid;
     }
 
     public boolean isSet() {
         return competitors[0] != null && competitors[1] != null;
     }
 
-    public void setResult(Player loser) {
-        if (this.status == MatchStatus.END) return;
-        int i = indexOf(loser.getUniqueId());
+    public void setResult(UUID defeated) {
+        if (status == MatchStatus.END) return;
+        int i = indexOf(defeated);
         if (i == -1) return;
-        this.winner = competitors[i ^ 1];
-        this.loser = competitors[i];
-        this.status = MatchStatus.END;
+        winner = competitors[i ^ 1];
+        loser = competitors[i];
+        status = MatchStatus.END;
     }
 
-    public Player[] getCompetitors() {
+    public Player[] getPlayers() {
         return new Player[]{Bukkit.getPlayer(competitors[0]), Bukkit.getPlayer(competitors[1])};
     }
 
-    public boolean contain(@NotNull Player player) {
+    public boolean contain(@NotNull UUID uuid) {
         if (!isSet()) return false;
-        return competitors[0].equals(player.getUniqueId()) || competitors[1].equals(player.getUniqueId());
+        return competitors[0].equals(uuid) || competitors[1].equals(uuid);
     }
 
+    @MagicConstant(intValues = {-1, 0, 1})
     public int indexOf(UUID uuid) {
         if (!isSet()) return -1;
         if (competitors[0].equals(uuid)) return 0;
@@ -61,12 +63,12 @@ public class SumoMatch {
         this.status = status;
     }
 
-    public Player getWinner() {
-        return winner != null ? Bukkit.getPlayer(winner) : null;
+    public UUID getWinner() {
+        return winner;
     }
 
-    public Player getLoser() {
-        return loser != null ? Bukkit.getPlayer(loser) : null;
+    public UUID getLoser() {
+        return loser;
     }
 
     public enum MatchStatus {

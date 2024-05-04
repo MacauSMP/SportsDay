@@ -121,9 +121,9 @@ public class CompetitionCommand implements IPluginCommand {
                     List<String> pl = new ArrayList<>();
                     Competitions.getCompetitors().stream().sorted(Comparator.comparingInt(CompetitorData::getNumber)).forEach(d -> pl.add(d.getName()));
                     sender.sendMessage(Component.translatable("competition.competitors.list").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(pl.toArray())).color(NamedTextColor.YELLOW)));
-                    List<String> cl = new ArrayList<>();
-                    Competitions.EVENTS.values().stream().filter(IEvent::isEnable).forEach(c -> cl.add(c.getID().toUpperCase()));
-                    sender.sendMessage(Component.translatable("competition.enabled").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(cl.toArray())).color(NamedTextColor.YELLOW)));
+                    List<String> el = new ArrayList<>();
+                    Competitions.EVENTS.values().stream().filter(IEvent::isEnable).forEach(e -> el.add(e.getID().toUpperCase()));
+                    sender.sendMessage(Component.translatable("competition.enabled").color(NamedTextColor.GREEN).args(Component.text(Arrays.toString(el.toArray())).color(NamedTextColor.YELLOW)));
                 }
                 default -> sender.sendMessage(Component.translatable("command.unknown.argument").color(NamedTextColor.RED));
             }

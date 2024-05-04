@@ -27,10 +27,6 @@ public class SumoStage {
         return matchIndex < matchList.size();
     }
 
-    public int getMatchIndex() {
-        return matchIndex;
-    }
-
     public Stage getStage() {
         return stage;
     }

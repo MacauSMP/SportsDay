@@ -3,6 +3,7 @@ package org.macausmp.sportsday.gui;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +48,7 @@ public final class GUIButton {
                 lore.add(TextUtil.text(Component.translatable("event.type.field").color(NamedTextColor.GRAY)));
             }
             meta.lore(lore);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "event");
             meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID());
         });

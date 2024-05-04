@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'org.macausmp'
-version = '2.8.2-BETA'
+version = '2.8.3-BETA'
 
 repositories {
     mavenCentral()
@@ -21,7 +21,7 @@ dependencies {
     compileOnly "io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT"
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -33,7 +33,6 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        //noinspection GroovyAssignabilityCheck, GroovyAccessibility
         options.release = targetJavaVersion
     }
 }

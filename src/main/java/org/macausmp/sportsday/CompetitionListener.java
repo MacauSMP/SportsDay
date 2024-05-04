@@ -86,7 +86,7 @@ public final class CompetitionListener implements Listener {
             IEvent current = Competitions.getCurrentEvent();
             if (current == Competitions.SUMO) {
                 SumoMatch match = ((Sumo) current).getSumoStage().getCurrentMatch();
-                boolean b = match != null && match.getStatus() == SumoMatch.MatchStatus.STARTED && match.contain(player) && match.contain(damager);
+                boolean b = match != null && match.getStatus() == SumoMatch.MatchStatus.STARTED && match.contain(player.getUniqueId()) && match.contain(damager.getUniqueId());
                 if (b || AbstractEvent.inPractice(player, Competitions.SUMO)) {
                     e.setDamage(0);
                 } else {
