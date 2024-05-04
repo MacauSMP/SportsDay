@@ -27,7 +27,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     private final HashMap<CompetitorData, Integer> lapMap = new HashMap<>();
     private final HashMap<CompetitorData, Float> record = new HashMap<>();
     private final int laps;
-    private float time = 0f;
+    private int time = 0;
     private boolean endCountdown = false;
     private BukkitTask task;
 
@@ -51,7 +51,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     public void start() {
         super.start();
         PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".start_command")));
-        time = 0f;
+        time = 0;
         addRunnable(new BukkitRunnable() {
             @Override
             public void run() {
@@ -61,7 +61,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                 }
                 time++;
             }
-        }.runTaskTimer(PLUGIN, 1L, 1L));
+        }.runTaskTimer(PLUGIN, 0L, 1L));
     }
 
     @Override
@@ -113,7 +113,6 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                         Bukkit.broadcast(Component.translatable("event.track.end.countdown.notice").args(Component.text(PLUGIN.getConfig().getInt("event_end_countdown"))));
                         task = addRunnable(new BukkitRunnable() {
                             int i = PLUGIN.getConfig().getInt("event_end_countdown");
-
                             @Override
                             public void run() {
                                 if (i > 0)

@@ -17,10 +17,11 @@ import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.UUID;
 
 public class IceBoatRacing extends AbstractTrackEvent {
     private static final Material SPRING_BLOCK = Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString("ice_boat_racing.spring_block")));
-    private final HashMap<Player, Boat> boatMap = new HashMap<>();
+    private final HashMap<UUID, Boat> boatMap = new HashMap<>();
 
     public IceBoatRacing() {
         super("ice_boat_racing");
@@ -29,7 +30,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @Override
     protected void onSetup() {
         getLocation().getWorld().getEntitiesByClass(Boat.class).forEach(Boat::remove);
-        getCompetitors().forEach(data -> boatMap.put(data.getPlayer(), boat(data.getPlayer())));
+        getCompetitors().forEach(data -> boatMap.put(data.getUUID(), boat(data.getPlayer())));
     }
 
     @Override
@@ -43,31 +44,31 @@ public class IceBoatRacing extends AbstractTrackEvent {
 
     @Override
     protected void onPractice(@NotNull Player p) {
-        boatMap.put(p, boat(p));
+        boatMap.put(p.getUniqueId(), boat(p));
     }
 
     @EventHandler
     public void onMove(@NotNull PlayerMoveEvent e) {
         Player p = e.getPlayer();
-        if ((checkStatus(p) && getStatus() == Status.STARTED || inPractice(p, this)) && boatMap.get(p) != null) bounce(p);
+        if ((checkStatus(p) && getStatus() == Status.STARTED || inPractice(p, this)) && boatMap.containsKey(p.getUniqueId())) bounce(p);
     }
 
     private void bounce(@NotNull Player p) {
         Location loc = p.getLocation().clone();
         loc.setY(loc.getY() - 0.5f);
-        if (loc.getBlock().getType() == SPRING_BLOCK && !SPRING_BLOCK.isAir()) boatMap.get(p).setVelocity(new Vector(0f, 1.0f, 0f));
+        if (loc.getBlock().getType() == SPRING_BLOCK && !SPRING_BLOCK.isAir()) boatMap.get(p.getUniqueId()).setVelocity(new Vector(0f, 1.0f, 0f));
     }
 
     @Override
     protected void onCompletedLap(@NotNull Player p) {
-        boatMap.get(p).remove();
-        boatMap.put(p, boat(p));
+        boatMap.get(p.getUniqueId()).remove();
+        boatMap.put(p.getUniqueId(), boat(p));
     }
 
     @Override
     protected void onRaceFinish(@NotNull Player p) {
-        boatMap.get(p).remove();
-        boatMap.remove(p);
+        boatMap.get(p.getUniqueId()).remove();
+        boatMap.remove(p.getUniqueId());
     }
 
     @EventHandler
@@ -76,7 +77,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
             if (checkStatus(p) || inPractice(p, this)) {
                 e.setCancelled(true);
             } else {
-                boatMap.remove(p);
+                boatMap.remove(p.getUniqueId());
             }
         }
     }
@@ -86,7 +87,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
         if (e.getEntity() instanceof Player p && e.getMount() instanceof Boat b) {
             if (checkStatus(p) || inPractice(p, this)) {
                 if (b.getPassengers().isEmpty()) {
-                    boatMap.put(p, b);
+                    boatMap.put(p.getUniqueId(), b);
                 } else {
                     e.setCancelled(true);
                 }
@@ -97,16 +98,16 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onDeath(@NotNull PlayerDeathEvent e) {
         Player p = e.getPlayer();
-        if ((checkStatus(p) || inPractice(p, this)) && boatMap.get(p) != null) {
-            boatMap.get(p).remove();
-            boatMap.put(p, boat(p));
+        if ((checkStatus(p) || inPractice(p, this)) && boatMap.containsKey(p.getUniqueId())) {
+            boatMap.get(p.getUniqueId()).remove();
+            boatMap.put(p.getUniqueId(), boat(p));
         }
     }
 
     @EventHandler
     public void onFall(@NotNull EntityDamageEvent e) {
         if (!(e.getEntity() instanceof Player p)) return;
-        if ((checkStatus(p) || inPractice(p, this)) && boatMap.get(p) != null && e.getCause().equals(EntityDamageEvent.DamageCause.FALL)) e.setCancelled(true);
+        if ((checkStatus(p) || inPractice(p, this)) && boatMap.containsKey(p.getUniqueId()) && e.getCause().equals(EntityDamageEvent.DamageCause.FALL)) e.setCancelled(true);
     }
 
     @EventHandler

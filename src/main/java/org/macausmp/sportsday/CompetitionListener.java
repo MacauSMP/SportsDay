@@ -102,6 +102,7 @@ public final class CompetitionListener implements Listener {
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
             IEvent current = Competitions.getCurrentEvent();
+            if (AbstractEvent.inPractice(player)) return;
             if (current == null || Competitions.isCompetitor(player) && current.getStatus() != Status.STARTED) e.setCancelled(true);
         }
     }
@@ -125,28 +126,6 @@ public final class CompetitionListener implements Listener {
         Player p = e.getPlayer();
         if (p.isOp() || p.getGameMode() == GameMode.CREATIVE) return;
         if (ItemUtil.isBind(e.getItemDrop().getItemStack())) e.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onClick(@NotNull InventoryClickEvent e) {
-        if (!(e.getWhoClicked() instanceof Player p) || e.getClickedInventory() == null) return;
-        if (e.getInventory().getHolder() instanceof PluginGUI gui) {
-            e.setCancelled(true);
-            ItemStack item = e.getCurrentItem();
-            if (item == null || !ItemUtil.hasID(item)) return;
-            gui.click(e, p, item);
-        } else {
-            if (p.isOp() || p.getGameMode() == GameMode.CREATIVE) return;
-            ItemStack current = e.getCurrentItem();
-            ItemStack button = e.getHotbarButton() == -1 ? null : p.getInventory().getItem(e.getHotbarButton());
-            if (current != null && ItemUtil.isBind(current)) e.setCancelled(true);
-            if (button != null && ItemUtil.isBind(button)) e.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onClose(@NotNull InventoryCloseEvent e) {
-        if (e.getInventory().getHolder() instanceof PluginGUI gui) gui.onClose();
     }
 
     @EventHandler
@@ -236,6 +215,27 @@ public final class CompetitionListener implements Listener {
                 }
             }.runTaskLater(PLUGIN, 30L);
         }
+    }
+
+    @EventHandler
+    public void onClick(@NotNull InventoryClickEvent e) {
+        if (!(e.getWhoClicked() instanceof Player p) || e.getClickedInventory() == null) return;
+        if (e.getInventory().getHolder() instanceof PluginGUI gui) {
+            e.setCancelled(true);
+            ItemStack item = e.getCurrentItem();
+            if (item == null || !ItemUtil.hasID(item)) return;
+            gui.click(e, p, item);
+        } else {
+            if (p.isOp() || p.getGameMode() == GameMode.CREATIVE) return;
+            ItemStack current = e.getCurrentItem();
+            ItemStack button = e.getHotbarButton() == -1 ? null : p.getInventory().getItem(e.getHotbarButton());
+            if (current != null && ItemUtil.isBind(current) || button != null && ItemUtil.isBind(button)) e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onClose(@NotNull InventoryCloseEvent e) {
+        if (e.getInventory().getHolder() instanceof PluginGUI gui) gui.onClose();
     }
 
     @EventHandler

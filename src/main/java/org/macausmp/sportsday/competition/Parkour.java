@@ -15,25 +15,22 @@ public class Parkour extends AbstractTrackEvent {
 
     @Override
     protected void onSetup() {
-        getCompetitors().forEach(data -> data.getPlayer().setCollidable(false));
     }
 
     @Override
     protected void onStart() {
         Competitions.getOnlineCompetitors().forEach(d -> {
-            d.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
-            d.getPlayer().getInventory().setHelmet(null);
-            d.getPlayer().getInventory().setChestplate(null);
-            d.getPlayer().getInventory().setLeggings(null);
+            Player p = d.getPlayer();
+            p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
+            p.getInventory().setHelmet(null);
+            p.getInventory().setChestplate(null);
+            p.getInventory().setLeggings(null);
         });
     }
 
     @Override
     protected void onEnd(boolean force) {
-        Competitions.getOnlineCompetitors().forEach(d -> {
-            d.getPlayer().setCollidable(true);
-            d.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
-        });
+        Competitions.getOnlineCompetitors().forEach(d -> d.getPlayer().clearActivePotionEffects());
     }
 
     @Override
@@ -46,21 +43,21 @@ public class Parkour extends AbstractTrackEvent {
 
     @Override
     protected void onRaceFinish(@NotNull Player p) {
-        p.removePotionEffect(PotionEffectType.INVISIBILITY);
+        p.clearActivePotionEffects();
     }
 
     @EventHandler
-    public void onRespawn(PlayerRespawnEvent e) {
+    public void onRespawn(@NotNull PlayerRespawnEvent e) {
         IEvent event = Competitions.getCurrentEvent();
-        if (event != this || getStatus() != Status.STARTED) return;
         Player p = e.getPlayer();
-        if (getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId()))) return;
-        addRunnable(new BukkitRunnable() {
-            @Override
-            public void run() {
-                p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
-                cancel();
-            }
-        }.runTaskLater(PLUGIN, 5L));
+        if (event == this && getStatus() == Status.STARTED && Competitions.isCompetitor(p) && !getLeaderboard().contains(Competitions.getCompetitor(p.getUniqueId())) || inPractice(p, this)) {
+            addRunnable(new BukkitRunnable() {
+                @Override
+                public void run() {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
+                    cancel();
+                }
+            }.runTaskLater(PLUGIN, 5L));
+        }
     }
 }

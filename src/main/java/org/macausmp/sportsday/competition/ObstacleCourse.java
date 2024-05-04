@@ -1,8 +1,9 @@
 package org.macausmp.sportsday.competition;
 
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.SportsDay;
 
 public class ObstacleCourse extends AbstractTrackEvent {
     public ObstacleCourse() {
@@ -11,7 +12,7 @@ public class ObstacleCourse extends AbstractTrackEvent {
 
     @Override
     protected void onSetup() {
-        getCompetitors().forEach(data -> data.getPlayer().setCollidable(false));
+        SportsDay.COMPETITOR.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.ALWAYS);
     }
 
     @Override
@@ -20,10 +21,7 @@ public class ObstacleCourse extends AbstractTrackEvent {
 
     @Override
     protected void onEnd(boolean force) {
-        Competitions.getOnlineCompetitors().forEach(d -> {
-            d.getPlayer().setCollidable(true);
-            d.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
-        });
+        SportsDay.COMPETITOR.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
     }
 
     @Override

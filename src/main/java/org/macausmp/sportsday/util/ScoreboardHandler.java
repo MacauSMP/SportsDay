@@ -14,9 +14,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+@Deprecated
 public class ScoreboardHandler {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
 
+    @Deprecated
     public void setScoreboard(Player p) {
         // Tick time correction (attempt to bring the timer closer to reality)
         long d = Math.round(20f - LocalDateTime.now().getNano() / 50000000f);
@@ -59,9 +61,9 @@ public class ScoreboardHandler {
                         }
                         time.suffix(Component.text(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))));
                         ping.suffix(Component.text(p.getPing()));
-                        p.setScoreboard(scoreboard);
                     }
                 }.runTaskTimer(PLUGIN, 0L, 20L);
+                p.setScoreboard(scoreboard);
             }
         }.runTaskLater(PLUGIN, d);
     }

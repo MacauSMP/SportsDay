@@ -47,6 +47,7 @@ public class MenuGUI extends PluginGUI {
         } else {
             p.sendMessage(Component.translatable("competition.function_disable"));
             p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+            p.closeInventory();
         }
     }
 
@@ -58,6 +59,7 @@ public class MenuGUI extends PluginGUI {
         } else {
             p.sendMessage(Component.translatable("competition.function_disable"));
             p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+            p.closeInventory();
         }
     }
 

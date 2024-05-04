@@ -33,6 +33,7 @@ ice_boat_racing:
   enable: true
   least_players_required: 8
   laps: 2
+  spring_block: SLIME_BLOCK
   location:
     ==: org.bukkit.Location
     world: world
@@ -43,7 +44,6 @@ ice_boat_racing:
     yaw: 0
   ready_command: "fill 0 0 0 0 0 0 barrier"
   start_command: "fill 0 0 0 0 0 0 air"
-  spring_block: SLIME_BLOCK
 # 擲標槍
 javelin_throw:
   enable: true

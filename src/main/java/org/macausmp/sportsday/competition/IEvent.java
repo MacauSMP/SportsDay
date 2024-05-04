@@ -46,10 +46,16 @@ public interface IEvent extends Listener {
     World getWorld();
 
     /**
-     * Return true if event is enabled
+     * Return {@code True} if event is enabled
      * @return {@code True} if event is enabled
      */
     boolean isEnable();
+
+    /**
+     * Get the last event time
+     * @return The time of the last event
+     */
+    long getLastTime();
 
     /**
      * Set up the event and make it get ready to start

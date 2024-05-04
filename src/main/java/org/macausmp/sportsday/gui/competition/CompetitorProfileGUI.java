@@ -45,6 +45,8 @@ public class CompetitorProfileGUI extends AbstractCompetitionGUI {
     @Override
     public void update() {
         getInventory().setItem(18, icon());
+        getInventory().setItem(19, increase());
+        getInventory().setItem(20, decrease());
     }
 
     public static void updateProfile(UUID uuid) {
@@ -100,11 +102,13 @@ public class CompetitorProfileGUI extends AbstractCompetitionGUI {
     }
 
     private @NotNull ItemStack increase() {
-        return ItemUtil.item(Material.YELLOW_CONCRETE, "increase", "gui.competitor.increase", "gui.competitor.increase_lore1", "gui.competitor.increase_lore2");
+        Component score = Component.translatable("competitor.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
+        return ItemUtil.item(Material.YELLOW_STAINED_GLASS_PANE, "increase", "gui.competitor.increase", score, "gui.competitor.increase_lore1", "gui.competitor.increase_lore2");
     }
 
     private @NotNull ItemStack decrease() {
-        return ItemUtil.item(Material.RED_CONCRETE, "decrease", "gui.competitor.decrease", "gui.competitor.decrease_lore1", "gui.competitor.decrease_lore2");
+        Component score = Component.translatable("competitor.score").args(Component.text(data.getScore())).color(NamedTextColor.YELLOW);
+        return ItemUtil.item(Material.RED_STAINED_GLASS_PANE, "decrease", "gui.competitor.decrease", score, "gui.competitor.decrease_lore1", "gui.competitor.decrease_lore2");
     }
 
     @Override

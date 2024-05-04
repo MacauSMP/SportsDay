@@ -36,6 +36,7 @@ public abstract class AbstractEvent implements IEvent {
     private final Collection<CompetitorData> competitors = new HashSet<>();
     private final Map<UUID, CustomizeMusickit> competitorToMusickit = new HashMap<>();
     public static final NamespacedKey IN_GAME = new NamespacedKey(PLUGIN, "in_game");
+    private long time;
 
     public AbstractEvent(String id) {
         this.id = id;
@@ -76,10 +77,16 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     @Override
+    public final long getLastTime() {
+        return time;
+    }
+
+    @Override
     public void setup() {
+        time = System.currentTimeMillis();
         Bukkit.getOnlinePlayers().forEach(p -> {
             leavePractice(p);
-            p.getPersistentDataContainer().set(IN_GAME, PersistentDataType.BOOLEAN, true);
+            p.getPersistentDataContainer().set(IN_GAME, PersistentDataType.LONG, time);
         });
         PRACTICE.clear();
         EVENT_TASKS.forEach(BukkitTask::cancel);
@@ -90,15 +97,14 @@ public abstract class AbstractEvent implements IEvent {
         competitors.addAll(Competitions.getOnlineCompetitors());
         competitors.forEach(data -> {
             Player p = data.getPlayer();
-            p.setBedSpawnLocation(location, true);
             if (!SportsDay.REFEREE.hasPlayer(p)) p.getInventory().clear();
             p.clearActivePotionEffects();
             p.setFireTicks(0);
-            p.setHealth(20);
-            p.teleport(location);
             p.setGameMode(GameMode.ADVENTURE);
             PlayerCustomize.suitUp(p);
             p.getInventory().setItem(4, ItemUtil.SPRAY);
+            p.setBedSpawnLocation(location, true);
+            p.teleport(location);
             competitorToMusickit.put(data.getUUID(), PlayerCustomize.getMusickit(p));
         });
         addRunnable(new BukkitRunnable() {
@@ -110,8 +116,8 @@ public abstract class AbstractEvent implements IEvent {
                     Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 0.5f));
                 }
                 if (i-- == 0) {
-                    this.cancel();
                     start();
+                    cancel();
                 }
             }
         }.runTaskTimer(PLUGIN, 0L, 20L));
@@ -205,7 +211,7 @@ public abstract class AbstractEvent implements IEvent {
      * Set the current event status
      * @param status new status
      */
-    protected void setStatus(Status status) {
+    protected final void setStatus(Status status) {
         this.status = status;
         CompetitionInfoGUI.updateGUI();
     }
@@ -219,21 +225,26 @@ public abstract class AbstractEvent implements IEvent {
         competitors.remove(competitor);
         getLeaderboard().remove(competitor);
         Player p = competitor.getPlayer();
+        if (p.isInsideVehicle()) Objects.requireNonNull(p.getVehicle()).remove();
+        p.clearActivePotionEffects();
+        p.setFireTicks(0);
         p.getInventory().clear();
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(0, ItemUtil.MENU);
         p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+        p.setBedSpawnLocation(p.getWorld().getSpawnLocation(), true);
     }
 
     @Override
     public void joinPractice(@NotNull Player p) {
         PRACTICE.put(p, this);
-        p.teleport(location);
-        p.setBedSpawnLocation(location, true);
-        p.setCollidable(false);
+        p.clearActivePotionEffects();
+        p.setFireTicks(0);
         p.getInventory().clear();
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(8, ItemUtil.LEAVE_PRACTICE);
+        p.setBedSpawnLocation(location, true);
+        p.teleport(location);
         p.sendMessage(Component.translatable("competitor.practice.teleport.venue").args(name));
         onPractice(p);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
@@ -253,13 +264,23 @@ public abstract class AbstractEvent implements IEvent {
         if (!PRACTICE.containsKey(p)) return;
         PRACTICE.remove(p);
         if (p.isInsideVehicle()) Objects.requireNonNull(p.getVehicle()).remove();
-        p.teleport(p.getWorld().getSpawnLocation());
-        p.setBedSpawnLocation(p.getWorld().getSpawnLocation(), true);
-        p.setCollidable(true);
+        p.clearActivePotionEffects();
+        p.setFireTicks(0);
         p.getInventory().clear();
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(0, ItemUtil.MENU);
         p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+        p.setBedSpawnLocation(p.getWorld().getSpawnLocation(), true);
+        p.teleport(p.getWorld().getSpawnLocation());
+    }
+
+    /**
+     * Check if player is practicing
+     * @param p Who going to be checked
+     * @return True if player is practicing
+     */
+    public static boolean inPractice(Player p) {
+        return PRACTICE.containsKey(p);
     }
 
     /**
@@ -288,7 +309,7 @@ public abstract class AbstractEvent implements IEvent {
      * Add a {@link BukkitTask} to this event
      * @param task {@link BukkitTask} to add
      */
-    protected BukkitTask addRunnable(BukkitTask task) {
+    protected final BukkitTask addRunnable(BukkitTask task) {
         EVENT_TASKS.add(task);
         return task;
     }

@@ -76,15 +76,15 @@ public final class CompetitorData implements PlayerHolder {
     }
 
     /**
-     * Checks if this {@link CompetitorData} is removed from plugin
-     * @return {@code True} if this {@link CompetitorData} is removed from plugin
+     * Returns {@code True} if this {@link CompetitorData} has been marked for removal
+     * @return {@code True} if this {@link CompetitorData} is removed
      */
     public boolean isRemoved() {
         return removed;
     }
 
     /**
-     * Declares that this {@link CompetitorData} has been removed from plugin
+     * Mark the {@link CompetitorData} removal
      */
     public void remove() {
         if (removed) return;

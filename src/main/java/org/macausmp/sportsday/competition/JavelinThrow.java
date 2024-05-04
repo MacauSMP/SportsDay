@@ -168,7 +168,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent {
                         if (i > 0) Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.player_disconnected").args(Component.text(i)).color(NamedTextColor.YELLOW));
                         if (i-- == 0) {
                             onMatchEnd();
-                            this.cancel();
+                            cancel();
                         }
                     }
                 }.runTaskTimer(PLUGIN, 0L, 20L));
