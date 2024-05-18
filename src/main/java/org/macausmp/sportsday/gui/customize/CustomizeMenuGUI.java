@@ -5,13 +5,16 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
 import org.macausmp.sportsday.customize.CustomizeMusickit;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
@@ -22,6 +25,7 @@ import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -61,30 +65,32 @@ public class CustomizeMenuGUI extends PluginGUI {
 
     private @NotNull ItemStack clothing() {
         ItemStack stack = customize(Material.LEATHER_CHESTPLATE, "clothing");
-        Material head = getType(PlayerCustomize.getCloth(player, EquipmentSlot.HEAD));
-        Material chest = getType(PlayerCustomize.getCloth(player, EquipmentSlot.CHEST));
-        Material legs = getType(PlayerCustomize.getCloth(player, EquipmentSlot.LEGS));
-        Material feet = getType(PlayerCustomize.getCloth(player, EquipmentSlot.FEET));
-        if (head != null || chest != null || legs != null || feet != null) {
+        Material[] slots = Arrays.stream(EquipmentSlot.values())
+                .filter(EquipmentSlot::isArmor)
+                .map(this::getType)
+                .filter(Objects::nonNull)
+                .toArray(Material[]::new);
+        ArrayUtils.reverse(slots);
+        if (slots.length > 0) {
             List<Component> lore = new ArrayList<>();
             lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())));
-            if (head != null) lore.add(getTypeName(head));
-            if (chest != null) lore.add(getTypeName(chest));
-            if (legs != null) lore.add(getTypeName(legs));
-            if (feet != null) lore.add(getTypeName(feet));
+            Arrays.stream(slots).forEach(s -> lore.add(getTypeName(s)));
             stack.lore(lore);
         }
+        stack.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         return stack;
     }
 
-    private Material getType(PlayerCustomize.Cloth cloth) {
+    private @Nullable Material getType(EquipmentSlot slot) {
+        PlayerCustomize.Cloth cloth = PlayerCustomize.getCloth(player, slot);
         return cloth != null ? cloth.getMaterial() : null;
     }
 
     private @NotNull ItemStack boatType() {
         ItemStack stack = customize(Material.OAK_BOAT, "boat_type");
         Boat.Type type = PlayerCustomize.getBoatType(player);
-        if (type == null) type = Boat.Type.OAK;
+        if (type == null)
+            type = Boat.Type.OAK;
         List<Component> lore = new ArrayList<>();
         Component c = getTypeName(Objects.requireNonNull(Material.getMaterial(type.name() + "_BOAT")));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())).append(c));
@@ -95,7 +101,8 @@ public class CustomizeMenuGUI extends PluginGUI {
     private @NotNull ItemStack weaponSkin() {
         ItemStack stack = customize(Material.BONE, "weapon_skin");
         Material type = PlayerCustomize.getWeaponSkin(player);
-        if (type == null) type = Material.BLAZE_ROD;
+        if (type == null)
+            type = Material.BLAZE_ROD;
         List<Component> lore = new ArrayList<>();
         Component c = getTypeName(type);
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())).append(c));
@@ -104,7 +111,9 @@ public class CustomizeMenuGUI extends PluginGUI {
     }
 
     private @NotNull Component getTypeName(@NotNull Material type) {
-        return Component.translatable(type.translationKey()).color(NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false);
+        return Component.translatable(type.translationKey())
+                .color(NamedTextColor.GREEN)
+                .decoration(TextDecoration.ITALIC, false);
     }
 
     private @NotNull ItemStack projectileTrail() {
@@ -139,7 +148,7 @@ public class CustomizeMenuGUI extends PluginGUI {
 
     private @NotNull ItemStack musickit() {
         ItemStack stack = customize(Material.JUKEBOX, "musickit");
-        CustomizeMusickit musickit = PlayerCustomize.getMusickit(player);
+        CustomizeMusickit musickit = PlayerCustomize.getMusickit(player.getPersistentDataContainer());
         List<Component> lore = new ArrayList<>();
         Component c = musickit != null ? musickit.getName() : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(c)));

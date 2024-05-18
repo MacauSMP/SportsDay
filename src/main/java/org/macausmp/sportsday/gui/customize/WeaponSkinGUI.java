@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -26,10 +25,9 @@ public class WeaponSkinGUI extends PluginGUI {
     public WeaponSkinGUI(Player player) {
         super(18, Component.translatable("gui.customize.weapon_skin.title"));
         this.player = player;
-        for (int i = 0; i < 9; i++) {
-            getInventory().setItem(i, GUIButton.BOARD);
-        }
-        getInventory().setItem(8, GUIButton.BACK);
+        for (int i = 0; i < 9; i++)
+            getInventory().setItem(i, BOARD);
+        getInventory().setItem(8, BACK);
         update();
     }
 
@@ -45,7 +43,8 @@ public class WeaponSkinGUI extends PluginGUI {
         Material weapon = PlayerCustomize.getWeaponSkin(player);
         for (int i = 9; i < getInventory().getSize(); i++) {
             ItemStack stack = getInventory().getItem(i);
-            if (stack == null) break;
+            if (stack == null)
+                break;
             if (weapon == null || weapon.equals(stack.getType())) {
                 List<Component> lore = new ArrayList<>();
                 lore.add(TextUtil.text(Component.translatable("gui.selected")));

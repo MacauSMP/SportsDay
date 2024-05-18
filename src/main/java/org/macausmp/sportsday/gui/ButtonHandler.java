@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An annotation to mark methods as being gui button handler methods
+ * An annotation to mark methods as being gui button handler methods.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

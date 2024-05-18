@@ -13,10 +13,10 @@ Macau SMP SportsDay papermc plugin
 > Open competition GUI
 > * `book`
 * `/register`
-> Register as a competitor
+> Register as a contestant
 > * `<number>`
 * `/unregister`
-> Unregister as a competitor
+> Unregister as a contestant
 * `/menu`
 > Open main menu
 * `/customize`

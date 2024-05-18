@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -28,24 +27,24 @@ public class ProjectileTrailGUI extends PluginGUI {
     public ProjectileTrailGUI(Player player) {
         super(54, Component.translatable("gui.customize.projectile_trail.title"));
         this.player = player;
-        for (int i = 0; i < 9; i++) {
-            getInventory().setItem(i, GUIButton.BOARD);
-        }
-        getInventory().setItem(8, GUIButton.BACK);
+        for (int i = 0; i < 9; i++)
+            getInventory().setItem(i, BOARD);
+        getInventory().setItem(8, BACK);
         getInventory().setItem(9, reset());
         update();
     }
 
     @Override
     public void update() {
-        for (int i = 0; i < CustomizeParticleEffect.values().length; i++) {
+        for (int i = 0; i < CustomizeParticleEffect.values().length; i++)
             getInventory().setItem(i + START_INDEX, effect(CustomizeParticleEffect.values()[i]));
-        }
         CustomizeParticleEffect effect = PlayerCustomize.getProjectileTrail(player);
-        if (effect == null) return;
+        if (effect == null)
+            return;
         for (int i = START_INDEX; i < getInventory().getSize(); i++) {
             ItemStack stack = getInventory().getItem(i);
-            if (stack == null) break;
+            if (stack == null)
+                break;
             if (effect.getMaterial().equals(stack.getType())) {
                 List<Component> lore = new ArrayList<>();
                 lore.add(TextUtil.text(Component.translatable("gui.selected")));

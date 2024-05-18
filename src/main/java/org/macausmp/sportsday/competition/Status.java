@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.macausmp.sportsday.util.TextUtil;
 
 /**
- * Represents the competition status
+ * Represents the competition status.
  */
 public enum Status {
     IDLE("competition.status.idle"),

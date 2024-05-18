@@ -22,12 +22,12 @@ public class ElytraRacing extends AbstractTrackEvent {
 
     @Override
     protected void onSetup() {
-        Competitions.getOnlineCompetitors().forEach(d -> d.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, ELYTRA));
+        Competitions.getOnlineContestants().forEach(d -> d.getPlayer().getInventory().setItem(EquipmentSlot.CHEST, ELYTRA));
     }
 
     @Override
     protected void onStart() {
-        Competitions.getOnlineCompetitors().forEach(d -> d.getPlayer().getInventory().setItem(0, FIREWORK));
+        Competitions.getOnlineContestants().forEach(d -> d.getPlayer().getInventory().setItem(0, FIREWORK));
     }
 
     @Override
@@ -35,9 +35,9 @@ public class ElytraRacing extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onPractice(@NotNull Player p) {
-        p.getInventory().setItem(EquipmentSlot.CHEST, ELYTRA);
-        p.getInventory().setItem(0, FIREWORK);
+    protected void onPractice(@NotNull Player player) {
+        player.getInventory().setItem(EquipmentSlot.CHEST, ELYTRA);
+        player.getInventory().setItem(0, FIREWORK);
     }
 
     @EventHandler
@@ -48,9 +48,9 @@ public class ElytraRacing extends AbstractTrackEvent {
     @EventHandler
     public void onUseFirework(@NotNull PlayerInteractEvent e) {
         Player p = e.getPlayer();
-        if (Competitions.getCurrentEvent() == this && getStatus() == Status.STARTED && Competitions.isCompetitor(p) || inPractice(p, this)) {
-            if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET) e.setCancelled(true);
-        }
+        if (Competitions.getCurrentEvent() == this && getStatus() == Status.STARTED && Competitions.isContestant(p) || inPractice(p, this))
+            if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET)
+                e.setCancelled(true);
     }
 
     private static @NotNull ItemStack elytra() {

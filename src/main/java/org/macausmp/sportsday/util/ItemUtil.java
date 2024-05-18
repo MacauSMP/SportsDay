@@ -36,28 +36,27 @@ public final class ItemUtil {
         ItemStack clone = stack.clone();
         clone.editMeta(meta -> {
             if (display != null) {
-                if (display instanceof Component c) {
+                if (display instanceof Component c)
                     meta.displayName(TextUtil.text(c));
-                } else if (display instanceof String s) {
+                else if (display instanceof String s)
                     meta.displayName(TextUtil.text(Component.translatable(s)));
-                } else {
+                else
                     throw new IllegalArgumentException("Object type must be Component or String");
-                }
             }
             if (lore != null) {
                 List<Component> components = new ArrayList<>();
                 for (Object o : lore) {
-                    if (o instanceof Component c) {
+                    if (o instanceof Component c)
                         components.add(TextUtil.text(c));
-                    } else if (o instanceof String s) {
+                    else if (o instanceof String s)
                         components.add(TextUtil.text(Component.translatable(s)));
-                    } else {
+                    else
                         throw new IllegalArgumentException("Object type must be Component or String");
-                    }
                 }
                 meta.lore(components);
             }
-            if (id != null) meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, id);
+            if (id != null)
+                meta.getPersistentDataContainer().set(ITEM_ID, PersistentDataType.STRING, id);
         });
         return clone;
     }
@@ -68,7 +67,8 @@ public final class ItemUtil {
 
     public static @NotNull ItemStack head(String value, String id, Object display, Object... lore) {
         ItemStack stack = item(Material.PLAYER_HEAD, id, display, lore);
-        if (value == null || value.isEmpty()) return stack;
+        if (value == null || value.isEmpty())
+            return stack;
         stack.editMeta(SkullMeta.class, meta -> {
             PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID());
             profile.getProperties().add(new ProfileProperty("textures", value));
@@ -85,7 +85,8 @@ public final class ItemUtil {
     }
 
     public static boolean isBind(@NotNull ItemStack stack) {
-        if (!stack.hasItemMeta()) return false;
+        if (!stack.hasItemMeta())
+            return false;
         return Boolean.TRUE.equals(stack.getItemMeta().getPersistentDataContainer().get(BIND, PersistentDataType.BOOLEAN));
     }
 
@@ -104,14 +105,18 @@ public final class ItemUtil {
     }
 
     public static boolean equals(@NotNull ItemStack stack, @NotNull ItemStack other) {
-        if (!stack.hasItemMeta() || !other.hasItemMeta()) return false;
+        if (!stack.hasItemMeta() || !other.hasItemMeta())
+            return false;
         String id1 = stack.getItemMeta().getPersistentDataContainer().get(ITEM_ID, PersistentDataType.STRING);
         String id2 = other.getItemMeta().getPersistentDataContainer().get(ITEM_ID, PersistentDataType.STRING);
+        if (id1 == null || id2 == null)
+            return false;
         return Objects.equals(id1, id2);
     }
 
     public static boolean equals(@NotNull ItemStack stack, @NotNull String key) {
-        if (!stack.hasItemMeta()) return false;
+        if (!stack.hasItemMeta())
+            return false;
         String id = stack.getItemMeta().getPersistentDataContainer().get(ITEM_ID, PersistentDataType.STRING);
         return Objects.equals(id, key);
     }

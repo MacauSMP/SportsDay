@@ -15,10 +15,10 @@ commands:
     permission: op
   register:
     usage: "/register <number>"
-    description: "Register as a competitor"
+    description: "Register as a contestant"
   unregister:
     usage: "/register"
-    description: "Unregister as a competitor"
+    description: "Unregister as a contestant"
   menu:
     usage: "/menu"
     description: "Open menu gui"

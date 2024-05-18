@@ -8,20 +8,25 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
- * Represents a plugin command
+ * Represents a plugin command.
  */
 public interface IPluginCommand extends CommandExecutor, TabCompleter {
     /**
-     * Execute command
+     * Execute command.
      * @param sender command sender
      * @param args arguments
      */
     void onCommand(CommandSender sender, String[] args);
 
     /**
-     * Command name
+     * Command name.
      * @return name of command
      */
     String name();
@@ -32,15 +37,16 @@ public interface IPluginCommand extends CommandExecutor, TabCompleter {
         return true;
     }
 
-    default void requirePlayer(@NotNull CommandSender sender, @NotNull Function<Player> function) {
-        if (sender instanceof Player p) {
-            function.apply(p);
-        } else {
-            sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));
-        }
+    @Override
+    @Nullable
+    default List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        return new ArrayList<>();
     }
 
-    interface Function<T> {
-        void apply(T p);
+    default void requirePlayer(@NotNull CommandSender sender, @NotNull Consumer<Player> consumer) {
+        if (sender instanceof Player p)
+            consumer.accept(p);
+        else
+            sender.sendMessage(Component.translatable("permissions.requires.player").color(NamedTextColor.RED));
     }
 }

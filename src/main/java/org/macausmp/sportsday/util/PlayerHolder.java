@@ -9,23 +9,23 @@ import java.util.UUID;
 
 public interface PlayerHolder {
     /**
-     * Get the uuid of the player
-     * @return The player's uuid
+     * Gets the uuid of the player.
+     * @return the player's uuid
      */
     @NotNull
     UUID getUUID();
 
     /**
-     * Get the player
-     * @return The player
+     * Gets the player.
+     * @return the player
      */
     default Player getPlayer() {
         return getOfflinePlayer().getPlayer();
     }
 
     /**
-     * Get the offline player
-     * @return The offline player
+     * Gets the offline player.
+     * @return the offline player
      */
     @NotNull
     default OfflinePlayer getOfflinePlayer() {
@@ -33,8 +33,8 @@ public interface PlayerHolder {
     }
 
     /**
-     * Checks if this player is currently online
-     * @return true if they are online
+     * Checks if this player is currently online.
+     * @return {@code True} if they are online
      * @see OfflinePlayer#isOnline()
      */
     default boolean isOnline() {

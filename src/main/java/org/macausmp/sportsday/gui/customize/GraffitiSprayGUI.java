@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -31,24 +30,24 @@ public class GraffitiSprayGUI extends PluginGUI {
     public GraffitiSprayGUI(Player player) {
         super(54, Component.translatable("gui.customize.graffiti_spray.title"));
         this.player = player;
-        for (int i = 0; i < 9; i++) {
-            getInventory().setItem(i, GUIButton.BOARD);
-        }
-        getInventory().setItem(8, GUIButton.BACK);
+        for (int i = 0; i < 9; i++)
+            getInventory().setItem(i, BOARD);
+        getInventory().setItem(8, BACK);
         getInventory().setItem(9, reset());
         update();
     }
 
     @Override
     public void update() {
-        for (int i = 0; i < CustomizeGraffitiSpray.values().length; i++) {
+        for (int i = 0; i < CustomizeGraffitiSpray.values().length; i++)
             getInventory().setItem(i + START_INDEX, graffiti(CustomizeGraffitiSpray.values()[i]));
-        }
         CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(player);
-        if (graffiti == null) return;
+        if (graffiti == null)
+            return;
         for (int i = START_INDEX; i < getInventory().getSize(); i++) {
             ItemStack stack = getInventory().getItem(i);
-            if (stack == null) break;
+            if (stack == null)
+                break;
             String key = stack.getItemMeta().getPersistentDataContainer().get(GRAFFITI_SPRAY, PersistentDataType.STRING);
             if (key != null && key.equals(graffiti.name())) {
                 List<Component> lore = new ArrayList<>();

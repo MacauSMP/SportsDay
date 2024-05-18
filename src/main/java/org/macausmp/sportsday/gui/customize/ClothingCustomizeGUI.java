@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -34,10 +33,9 @@ public class ClothingCustomizeGUI extends PluginGUI {
     public ClothingCustomizeGUI(Player player) {
         super(45, Component.translatable("gui.customize.clothing.title"));
         this.player = player;
-        for (int i = 0; i < 9; i++) {
-            getInventory().setItem(i, GUIButton.BOARD);
-        }
-        getInventory().setItem(8, GUIButton.BACK);
+        for (int i = 0; i < 9; i++)
+            getInventory().setItem(i, BOARD);
+        getInventory().setItem(8, BACK);
         getInventory().setItem(17, reset("gui.customize.clothing.head"));
         getInventory().setItem(26, reset("gui.customize.clothing.chest"));
         getInventory().setItem(35, reset("gui.customize.clothing.legs"));
@@ -108,7 +106,8 @@ public class ClothingCustomizeGUI extends PluginGUI {
 
     private @Nullable ItemStack present(@NotNull EquipmentSlot slot) {
         PlayerCustomize.Cloth cloth = PlayerCustomize.getCloth(player, slot);
-        if (cloth == null) return null;
+        if (cloth == null)
+            return null;
         ItemStack item = PlayerCustomize.getClothItemStack(cloth);
         item.editMeta(ArmorMeta.class, meta -> {
             List<Component> lore = new ArrayList<>();
@@ -124,17 +123,20 @@ public class ClothingCustomizeGUI extends PluginGUI {
         cloth.editMeta(ArmorMeta.class, meta -> {
             List<Component> lore = new ArrayList<>();
             lore.add(TextUtil.text(Component.translatable("gui.select")));
-            if (cloth.getItemMeta() instanceof ColorableArmorMeta) lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.color.lore")));
+            if (cloth.getItemMeta() instanceof ColorableArmorMeta)
+                lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.color.lore")));
             meta.lore(lore);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "select_cloth");
         });
         PlayerCustomize.Cloth cloth1 = PlayerCustomize.getCloth(player, material.getEquipmentSlot());
-        if (cloth.getItemMeta() instanceof ColorableArmorMeta && cloth1 != null) cloth.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(cloth1.getColor()));
+        if (cloth.getItemMeta() instanceof ColorableArmorMeta && cloth1 != null)
+            cloth.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(cloth1.getColor()));
         return cloth;
     }
 
     private @NotNull ItemStack reset(String slot) {
-        return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset").args(Component.translatable(slot)));
+        return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset")
+                .args(Component.translatable(slot)));
     }
 }

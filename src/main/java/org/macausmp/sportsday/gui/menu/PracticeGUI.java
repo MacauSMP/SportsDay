@@ -13,24 +13,23 @@ import org.macausmp.sportsday.competition.AbstractEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.GUIButton;
 import org.macausmp.sportsday.gui.PluginGUI;
+import org.macausmp.sportsday.gui.competition.AbstractCompetitionGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
 public class PracticeGUI extends PluginGUI {
     public PracticeGUI() {
         super(27, Component.translatable("gui.menu.practice.title"));
-        for (int i = 0; i < 9; i++) {
-            getInventory().setItem(i, GUIButton.BOARD);
-        }
-        getInventory().setItem(8, GUIButton.BACK);
-        getInventory().setItem(9, GUIButton.ELYTRA_RACING);
-        getInventory().setItem(10, GUIButton.ICE_BOAT_RACING);
-        getInventory().setItem(11, GUIButton.JAVELIN_THROW);
-        getInventory().setItem(12, GUIButton.OBSTACLE_COURSE);
-        getInventory().setItem(13, GUIButton.PARKOUR);
-        getInventory().setItem(14, GUIButton.SUMO);
+        for (int i = 0; i < 9; i++)
+            getInventory().setItem(i, BOARD);
+        getInventory().setItem(8, BACK);
+        getInventory().setItem(9, AbstractCompetitionGUI.ELYTRA_RACING);
+        getInventory().setItem(10, AbstractCompetitionGUI.ICE_BOAT_RACING);
+        getInventory().setItem(11, AbstractCompetitionGUI.JAVELIN_THROW);
+        getInventory().setItem(12, AbstractCompetitionGUI.OBSTACLE_COURSE);
+        getInventory().setItem(13, AbstractCompetitionGUI.PARKOUR);
+        getInventory().setItem(14, AbstractCompetitionGUI.SUMO);
         update();
     }
 
@@ -54,7 +53,8 @@ public class PracticeGUI extends PluginGUI {
     public void practice(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (Competitions.getCurrentEvent() == null) {
             IEvent event = Competitions.EVENTS.get(item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
-            if (event == null) return;
+            if (event == null)
+                return;
             AbstractEvent.leavePractice(p);
             event.joinPractice(p);
         }
