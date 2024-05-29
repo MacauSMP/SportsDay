@@ -16,7 +16,6 @@ import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.competition.AbstractCompetitionGUI;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.TextUtil;
 
 public class PracticeGUI extends PluginGUI {
     public PracticeGUI() {
@@ -30,11 +29,6 @@ public class PracticeGUI extends PluginGUI {
         getInventory().setItem(12, AbstractCompetitionGUI.OBSTACLE_COURSE);
         getInventory().setItem(13, AbstractCompetitionGUI.PARKOUR);
         getInventory().setItem(14, AbstractCompetitionGUI.SUMO);
-        update();
-    }
-
-    @Override
-    public void update() {
         getInventory().setItem(18, practice(Competitions.ELYTRA_RACING));
         getInventory().setItem(19, practice(Competitions.ICE_BOAT_RACING));
         getInventory().setItem(20, practice(Competitions.JAVELIN_THROW));
@@ -61,12 +55,8 @@ public class PracticeGUI extends PluginGUI {
     }
 
     private @NotNull ItemStack practice(@NotNull IEvent event) {
-        ItemStack stack = new ItemStack(Material.OAK_DOOR);
-        stack.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("gui.menu.practice").args(event.getName())));
-            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "practice");
-            meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID());
-        });
+        ItemStack stack = ItemUtil.item(Material.OAK_DOOR, "practice", Component.translatable("gui.menu.practice").arguments(event.getName()));
+        stack.editMeta(meta -> meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID()));
         return stack;
     }
 }

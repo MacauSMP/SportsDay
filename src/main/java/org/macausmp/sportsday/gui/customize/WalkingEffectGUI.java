@@ -13,20 +13,20 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.CustomizeParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
+import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.TextUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WalkingEffectGUI extends PluginGUI {
-    private static final int START_INDEX = 10;
-    private final Player player;
+    private final PageBox<CustomizeParticleEffect> pageBox = new PageBox<>(this, 10, 54,
+            () -> List.of(CustomizeParticleEffect.values()));
+    private CustomizeParticleEffect selected;
 
-    public WalkingEffectGUI(Player player) {
+    public WalkingEffectGUI(@NotNull Player player) {
         super(54, Component.translatable("gui.customize.walking_effect.title"));
-        this.player = player;
+        selected = PlayerCustomize.getWalkingEffect(player);
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i, BOARD);
         getInventory().setItem(8, BACK);
@@ -36,24 +36,7 @@ public class WalkingEffectGUI extends PluginGUI {
 
     @Override
     public void update() {
-        for (int i = 0; i < CustomizeParticleEffect.values().length; i++)
-            getInventory().setItem(i + START_INDEX, effect(CustomizeParticleEffect.values()[i]));
-        CustomizeParticleEffect effect = PlayerCustomize.getWalkingEffect(player);
-        if (effect == null)
-            return;
-        for (int i = START_INDEX; i < getInventory().getSize(); i++) {
-            ItemStack stack = getInventory().getItem(i);
-            if (stack == null)
-                break;
-            if (effect.getMaterial().equals(stack.getType())) {
-                List<Component> lore = new ArrayList<>();
-                lore.add(TextUtil.text(Component.translatable("gui.selected")));
-                stack.lore(lore);
-                stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-                break;
-            }
-        }
+        pageBox.updatePage(this::effect);
     }
 
     @ButtonHandler("back")
@@ -64,20 +47,26 @@ public class WalkingEffectGUI extends PluginGUI {
 
     @ButtonHandler("walking_effect")
     public void walkingEffect(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PlayerCustomize.setWalkingEffect(p, CustomizeParticleEffect.values()[e.getSlot() - START_INDEX]);
+        PlayerCustomize.setWalkingEffect(p, selected = CustomizeParticleEffect.values()[e.getSlot() - 10]);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
     }
 
     @ButtonHandler("reset")
     public void reset(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PlayerCustomize.setWalkingEffect(p, null);
+        PlayerCustomize.setWalkingEffect(p, selected = null);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
     }
 
     private @NotNull ItemStack effect(@NotNull CustomizeParticleEffect effect) {
-        return ItemUtil.item(effect.getMaterial(), "walking_effect", effect.getName(), "gui.select");
+        ItemStack stack = ItemUtil.item(effect.getMaterial(), "walking_effect", effect.getName(),
+                effect == selected ? "gui.selected" : "gui.select");
+        if (effect == selected) {
+            stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
+        }
+        return stack;
     }
 
     private @NotNull ItemStack reset() {

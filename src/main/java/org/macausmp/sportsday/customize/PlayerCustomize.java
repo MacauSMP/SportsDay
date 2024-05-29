@@ -16,18 +16,17 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 public final class PlayerCustomize {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
-    private static final Map<Material, TrimMaterial> TRIM_MATERIAL = new HashMap<>();
-    private static final Map<String, TrimPattern> TRIM_PATTERN = new HashMap<>();
+    private static final Map<Material, TrimMaterial> TRIM_MATERIAL = new LinkedHashMap<>();
+    private static final Map<String, TrimPattern> TRIM_PATTERN = new LinkedHashMap<>();
     private static final NamespacedKey CLOTHING = new NamespacedKey(PLUGIN, "clothing");
     private static final NamespacedKey BOAT_TYPE = new NamespacedKey(PLUGIN, "boat_type");
     private static final NamespacedKey WEAPON_SKIN = new NamespacedKey(PLUGIN, "weapon_skin");
@@ -47,6 +46,16 @@ public final class PlayerCustomize {
         TRIM_MATERIAL.put(Material.LAPIS_LAZULI, TrimMaterial.LAPIS);
         TRIM_MATERIAL.put(Material.AMETHYST_SHARD, TrimMaterial.AMETHYST);
         Registry.TRIM_PATTERN.forEach(k -> TRIM_PATTERN.put(k.key().value().toUpperCase(), k));
+    }
+
+    public static @Unmodifiable List<Material> getTrimMaterial() {
+        return List.copyOf(TRIM_MATERIAL.keySet());
+    }
+
+    public static @Unmodifiable List<Material> getTrimPattern() {
+        return TRIM_PATTERN.keySet().stream()
+                .map(k -> Objects.requireNonNull(Material.getMaterial(k + "_ARMOR_TRIM_SMITHING_TEMPLATE")))
+                .toList();
     }
 
     public static void suitUp(@NotNull Player player) {
@@ -78,7 +87,7 @@ public final class PlayerCustomize {
             item.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(cloth.color));
         if (cloth.trimMaterial.equals(Cloth.NONE))
             return item;
-        TrimMaterial tm = TRIM_MATERIAL.get(Material.valueOf(cloth.trimMaterial));
+        TrimMaterial tm = TRIM_MATERIAL.get(Material.getMaterial(cloth.trimMaterial));
         TrimPattern tp = TRIM_PATTERN.get(cloth.trimPattern);
         if (tm != null && tp != null)
             item.editMeta(ArmorMeta.class, meta -> meta.setTrim(new ArmorTrim(tm, tp)));
@@ -138,16 +147,16 @@ public final class PlayerCustomize {
         player.getPersistentDataContainer().set(CLOTHING, PersistentDataType.TAG_CONTAINER, container);
     }
 
-    public static Boat.@Nullable Type getBoatType(@NotNull Player player) {
-        return get(player.getPersistentDataContainer(), BOAT_TYPE, Boat.Type::valueOf);
+    public static Boat.@NotNull Type getBoatType(@NotNull Player player) {
+        return Optional.ofNullable(get(player.getPersistentDataContainer(), BOAT_TYPE, Boat.Type::valueOf)).orElse(Boat.Type.OAK);
     }
 
     public static void setBoatType(@NotNull Player player, @NotNull Material type) {
         set(player.getPersistentDataContainer(), BOAT_TYPE, type.name().substring(0, type.name().length() - 5));
     }
 
-    public static @Nullable Material getWeaponSkin(@NotNull Player player) {
-        return get(player.getPersistentDataContainer(), WEAPON_SKIN, Material::getMaterial);
+    public static @NotNull Material getWeaponSkin(@NotNull Player player) {
+        return Optional.ofNullable(get(player.getPersistentDataContainer(), WEAPON_SKIN, Material::getMaterial)).orElse(Material.BLAZE_ROD);
     }
 
     public static void setWeaponSkin(@NotNull Player player, @NotNull Material type) {
@@ -260,7 +269,7 @@ public final class PlayerCustomize {
         @Override
         public @NotNull Cloth fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
             Cloth cloth = new Cloth();
-            cloth.material = Material.valueOf(primitive.get(MATERIAL, PersistentDataType.STRING));
+            cloth.material = Material.getMaterial(Objects.requireNonNull(primitive.get(MATERIAL, PersistentDataType.STRING)));
             cloth.trimMaterial = primitive.get(TRIM_MATERIAL, PersistentDataType.STRING);
             cloth.trimPattern = primitive.get(TRIM_PATTERN, PersistentDataType.STRING);
             Integer color = primitive.get(COLOR, PersistentDataType.INTEGER);

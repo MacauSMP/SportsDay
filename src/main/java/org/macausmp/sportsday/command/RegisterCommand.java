@@ -21,18 +21,18 @@ public class RegisterCommand implements IPluginCommand {
                         }
                     } catch (Exception e) {
                         sender.sendMessage(Component.translatable("parsing.int.invalid")
-                                .args(Component.text(args[0])).color(NamedTextColor.RED));
+                                .arguments(Component.text(args[0])).color(NamedTextColor.RED));
                         return;
                     }
                 } else {
                     number = Competitions.genNumber();
                 }
                 if (!Competitions.join(p, number))
-                    sender.sendMessage(Component.translatable("command.competition.register_number_occupied")
-                            .args(Component.text(number)).color(NamedTextColor.RED));
+                    sender.sendMessage(Component.translatable("competition.register.failed.number_occupied")
+                            .arguments(Component.text(number)).color(NamedTextColor.RED));
             } else {
-                sender.sendMessage(Component.translatable("command.competition.register.failed.self")
-                        .args(p.displayName()).color(NamedTextColor.RED));
+                sender.sendMessage(Component.translatable("competition.register.failed")
+                        .arguments(p.displayName()).color(NamedTextColor.RED));
             }
         });
     }

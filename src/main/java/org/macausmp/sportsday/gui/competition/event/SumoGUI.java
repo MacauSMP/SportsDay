@@ -19,40 +19,28 @@ import org.macausmp.sportsday.competition.sumo.SumoMatch;
 import org.macausmp.sportsday.competition.sumo.SumoStage;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
-import org.macausmp.sportsday.gui.competition.AbstractCompetitionGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
-public class SumoGUI extends AbstractCompetitionGUI {
-    private static final Set<SumoGUI> HANDLER = new HashSet<>();
+public class SumoGUI extends AbstractEventGUI<Sumo> {
     private static final NamespacedKey STAGE_NUMBER = new NamespacedKey(PLUGIN, "stage_number");
     private static final ItemStack NEXT_PAGE1 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "next_page1", "gui.page.next");
     private static final ItemStack PREVIOUS_PAGE1 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "prev_page1", "gui.page.prev");
     private static final ItemStack NEXT_PAGE2 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "next_page2", "gui.page.next");
     private static final ItemStack PREVIOUS_PAGE2 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "prev_page2", "gui.page.prev");
-    private final Sumo event;
     private final PageBox<SumoStage> stagePageBox;
     private SumoStage selectedStage;
     private final PageBox<SumoMatch> matchPageBox;
 
     public SumoGUI(@NotNull Sumo event) {
-        super(54, Component.translatable("event.name.sumo"));
-        this.event = event;
+        super(54, Component.translatable("event.name.sumo"), event);
         this.stagePageBox = new PageBox<>(this, 28, 35, () -> List.of(event.getSumoStages()));
         this.selectedStage = event.getSumoStage();
         this.matchPageBox = new PageBox<>(this, 45, 54, () -> selectedStage.getMatchList());
-        for (int i = 0; i < 9; i++) {
-            getInventory().setItem(i + 9, BOARD);
+        for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 36, BOARD);
-        }
-        getInventory().setItem(0, ItemUtil.addWrapper(COMPETITION_CONSOLE));
-        getInventory().setItem(1, CONTESTANTS_LIST);
-        getInventory().setItem(2, COMPETITION_SETTINGS);
-        getInventory().setItem(3, VERSION);
         getInventory().setItem(27, PREVIOUS_PAGE1);
         getInventory().setItem(35, NEXT_PAGE1);
         getInventory().setItem(36, PREVIOUS_PAGE2);
@@ -71,15 +59,10 @@ public class SumoGUI extends AbstractCompetitionGUI {
         matchPageBox.updatePage(this::match);
     }
 
-    public static void updateGUI() {
-        HANDLER.forEach(SumoGUI::update);
-    }
-
     @ButtonHandler("sumo_stage")
     public void selectStage(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        Integer i = item.getItemMeta().getPersistentDataContainer().get(STAGE_NUMBER, PersistentDataType.INTEGER);
-        if (i != null)
-            selectedStage = event.getSumoStages()[i - 1];
+        int i = Objects.requireNonNull(item.getItemMeta().getPersistentDataContainer().get(STAGE_NUMBER, PersistentDataType.INTEGER));
+        selectedStage = event.getSumoStages()[i - 1];
         update();
     }
 
@@ -110,24 +93,23 @@ public class SumoGUI extends AbstractCompetitionGUI {
     private @NotNull ItemStack currentMatch(@NotNull SumoStage stage) {
         SumoMatch match = stage.getCurrentMatch();
         return ItemUtil.item(Material.COD, "sumo_match", "gui.competition.sumo.current_match",
-                Component.translatable("gui.competition.sumo.current_match.status").args(match.getStatus().getName()),
-                Component.translatable("gui.competition.sumo.match.stage").args(stage.getName()),
-                Component.translatable("gui.competition.sumo.match.number").args(Component.text(match.getNumber())),
+                Component.translatable("gui.competition.sumo.current_match.status").arguments(match.getStatus().getName()),
+                Component.translatable("gui.competition.sumo.match.stage").arguments(stage.getName()),
+                Component.translatable("gui.competition.sumo.match.number").arguments(Component.text(match.getNumber())),
                 Component.translatable("gui.competition.sumo.match.players")
-                        .args(match.getPlayers()[0].displayName(), match.getPlayers()[1].displayName()),
-                Component.translatable("gui.competition.sumo.match.result")
-                        .args(!match.isEnd()
-                                ? Component.translatable("gui.competition.tbd")
-                                : Component.translatable("gui.competition.sumo.match.winner")
-                                .args(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName())));
+                        .arguments(match.getFirstPlayerName(), match.getSecondPlayerName()),
+                Component.translatable("gui.competition.sumo.match.result").arguments(!match.isEnd()
+                        ? Component.translatable("gui.competition.tbd")
+                        : Component.translatable("gui.competition.sumo.match.winner")
+                        .arguments(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName())));
     }
 
     private @NotNull ItemStack stage(@NotNull SumoStage stage) {
         ItemStack stack = ItemUtil.item(stage.getIcon(), "sumo_stage",
-                Component.translatable("gui.competition.sumo.stage.title")
-                        .args(stage.getStage() == SumoStage.Stage.ELIMINATE
-                                ? Component.translatable("{0} #" + stage.getNumber()).args(stage.getName())
-                                : stage.getName()));
+                Component.translatable("gui.competition.sumo.stage.title").arguments(stage.getStage() == SumoStage.Stage.ELIMINATE
+                        ? Component.translatable("{0} #" + stage.getNumber()).arguments(stage.getName())
+                        : stage.getName()),
+                "gui.competition.sumo.stage.lore");
         stack.editMeta(meta -> meta.getPersistentDataContainer().set(STAGE_NUMBER, PersistentDataType.INTEGER, stage.getNumber()));
         if (stage == selectedStage) {
             stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -138,19 +120,15 @@ public class SumoGUI extends AbstractCompetitionGUI {
 
     private @NotNull ItemStack match(@NotNull SumoMatch match) {
         return ItemUtil.item(Material.COD, "sumo_match",
-                Component.translatable("gui.competition.sumo.match.number").args(Component.text(match.getNumber())),
+                Component.translatable("gui.competition.sumo.match.number").arguments(Component.text(match.getNumber())),
                 match.isSet()
-                        ? Component.translatable("gui.competition.sumo.match.players").args(match.getPlayers()[0].displayName(), match.getPlayers()[1].displayName())
-                        : Component.translatable("gui.competition.sumo.match.players").args(Component.translatable("gui.competition.tbd"), Component.translatable("gui.competition.tbd")),
-                Component.translatable("gui.competition.sumo.match.result")
-                        .args(!match.isEnd()
-                                ? Component.translatable("gui.competition.tbd")
-                                : Component.translatable("gui.competition.sumo.match.winner")
-                                .args(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName())));
-    }
-
-    @Override
-    public void onClose() {
-        HANDLER.remove(this);
+                        ? Component.translatable("gui.competition.sumo.match.players")
+                        .arguments(match.getFirstPlayerName(), match.getSecondPlayerName())
+                        : Component.translatable("gui.competition.sumo.match.players")
+                        .arguments(Component.translatable("gui.competition.tbd"), Component.translatable("gui.competition.tbd")),
+                Component.translatable("gui.competition.sumo.match.result").arguments(!match.isEnd()
+                        ? Component.translatable("gui.competition.tbd")
+                        : Component.translatable("gui.competition.sumo.match.winner")
+                        .arguments(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName())));
     }
 }

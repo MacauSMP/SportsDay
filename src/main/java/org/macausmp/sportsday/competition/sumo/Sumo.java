@@ -1,30 +1,32 @@
 package org.macausmp.sportsday.competition.sumo;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.AbstractEvent;
-import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.IFieldEvent;
-import org.macausmp.sportsday.competition.Status;
+import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.event.SumoGUI;
-import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.*;
 
-public class Sumo extends AbstractEvent implements IFieldEvent {
+public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
     private final Set<ContestantData> alive = new HashSet<>();
     private final List<ContestantData> queue = new ArrayList<>();
     private SumoStage[] stages;
@@ -65,35 +67,36 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     private void stageSetup() {
-        Component c = Component.translatable("event.sumo.current_stage").args(getSumoStage().getName());
+        TranslatableComponent.Builder builder = Component.translatable("event.sumo.current_stage")
+                .arguments(getSumoStage().getName()).toBuilder();
         for (int i = 0; i < getSumoStage().getMatchList().size();) {
             SumoMatch m = getSumoStage().getMatchList().get(i);
-            c = c.appendNewline().append(Component.translatable("event.sumo.queue")
-                    .args(Component.text(++i), m.getPlayers()[0].displayName(), m.getPlayers()[1].displayName()));
+            builder.appendNewline().append(Component.translatable("event.sumo.queue")
+                    .arguments(Component.text(++i), m.getFirstPlayerName(), m.getSecondPlayerName()));
         }
-        Bukkit.broadcast(c);
+        Bukkit.broadcast(builder.build());
         SumoGUI.updateGUI();
     }
 
     @Override
     public void onStart() {
-        onMatchStart();
+        nextMatch();
     }
 
     @Override
     public void onEnd(boolean force) {
         if (force)
             return;
-        Component c = Component.translatable("event.result");
+        TranslatableComponent.Builder builder = Component.translatable("event.result").toBuilder();
         for (int i = 0; i < getLeaderboard().size();) {
             ContestantData data = getLeaderboard().get(i);
-            c = c.appendNewline().append(Component.translatable("event.sumo.rank")
-                    .args(Component.text(++i), Component.text(data.getName())));
+            builder.appendNewline().append(Component.translatable("event.sumo.rank")
+                    .arguments(Component.text(++i), Component.text(data.getName())));
             if (i <= 3)
                 data.addScore(4 - i);
             data.addScore(1);
         }
-        Bukkit.broadcast(c);
+        Bukkit.broadcast(builder.build());
     }
 
     @EventHandler
@@ -112,6 +115,25 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                 match.setResult(p.getUniqueId());
                 onMatchEnd();
             }
+        }
+    }
+
+    @EventHandler
+    public void onHit(@NotNull EntityDamageByEntityEvent e) {
+        if (e.getEntity() instanceof Player player && e.getDamager() instanceof Player damager) {
+            if (Competitions.getCurrentEvent() == this) {
+                SumoMatch match = getSumoStage().getCurrentMatch();
+                if (match != null && match.getStatus() == SumoMatch.MatchStatus.STARTED
+                        && match.contain(player.getUniqueId()) && match.contain(damager.getUniqueId())) {
+                    e.setDamage(0);
+                    return;
+                }
+            }
+            if (AbstractEvent.inPractice(player, this) && AbstractEvent.inPractice(damager, this)) {
+                e.setDamage(0);
+                return;
+            }
+            e.setCancelled(true);
         }
     }
 
@@ -149,20 +171,15 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     @Override
     public void onMatchStart() {
-        SumoMatch prev = getSumoStage().getCurrentMatch();
-        if (prev != null)
-            prev.forEachPlayer(p -> p.teleport(getLocation()));
-        getSumoStage().nextMatch();
         SumoMatch match = getSumoStage().getCurrentMatch();
         match.setStatus(SumoMatch.MatchStatus.COMING);
         SumoGUI.updateGUI();
-        Player[] pa = match.getPlayers();
-        Player p1 = pa[0];
-        Player p2 = pa[1];
+        OfflinePlayer p1 = match.getFirstPlayer();
+        OfflinePlayer p2 = match.getSecondPlayer();
         if (Competitions.isContestant(p1) && Competitions.isContestant(p2)) {
             if (p1.isOnline() && p2.isOnline()) {
-                p1.teleport(Objects.requireNonNull(PLUGIN.getConfig().getLocation(getID() + ".p1-location")));
-                p2.teleport(Objects.requireNonNull(PLUGIN.getConfig().getLocation(getID() + ".p2-location")));
+                ((Player) p1).teleport(Objects.requireNonNull(PLUGIN.getConfig().getLocation(getID() + ".p1-location")));
+                ((Player) p2).teleport(Objects.requireNonNull(PLUGIN.getConfig().getLocation(getID() + ".p2-location")));
                 match.forEachPlayer(p -> p.getInventory().clear());
                 addRunnable(new BukkitRunnable() {
                     int i = 5;
@@ -170,7 +187,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                     public void run() {
                         if (i != 0)
                             Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start_countdown")
-                                    .args(Component.text(i)).color(NamedTextColor.YELLOW));
+                                    .arguments(Component.text(i)).color(NamedTextColor.YELLOW));
                         if (i-- == 0) {
                             match.setStatus(SumoMatch.MatchStatus.STARTED);
                             Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start"));
@@ -203,7 +220,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
                     }
                     if (i <= 15 && i % 5 == 0 && i > 0)
                         Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.knockback_stick.countdown")
-                                .args(Component.text(i)).color(NamedTextColor.YELLOW));
+                                .arguments(Component.text(i)).color(NamedTextColor.YELLOW));
                     if (i-- == 0) {
                         match.forEachPlayer(p -> p.getInventory().setItem(EquipmentSlot.HAND, weapon(p)));
                         Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.knockback_stick.given"));
@@ -215,10 +232,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
     }
 
     private @NotNull ItemStack weapon(@NotNull Player p) {
-        ItemStack weapon = ItemUtil.setBind(ItemUtil.item(Material.BLAZE_ROD, null, "item.sportsday.kb_stick"));
-        Material material = PlayerCustomize.getWeaponSkin(p);
-        if (material != null)
-            weapon.setType(material);
+        ItemStack weapon = ItemUtil.setBind(ItemUtil.item(PlayerCustomize.getWeaponSkin(p), null, "item.sportsday.kb_stick"));
         weapon.editMeta(meta -> {
             meta.addEnchant(Enchantment.KNOCKBACK, 1, false);
             meta.addEnchant(Enchantment.BINDING_CURSE, 1, false);
@@ -233,28 +247,29 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
             getWorld().strikeLightningEffect(Objects.requireNonNull(Bukkit.getPlayer(match.getLoser())).getLocation());
         Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_end"));
         Bukkit.broadcast(Component.translatable("event.sumo.match_winner")
-                .args(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName()).color(NamedTextColor.YELLOW));
+                .arguments(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName()).color(NamedTextColor.YELLOW));
         match.forEachPlayer(p -> p.getInventory().clear());
         // eliminate loser
         if (getSumoStage().getStage() != SumoStage.Stage.SEMI_FINAL) {
-            for (ContestantData data : alive)
+            for (ContestantData data : alive) {
                 if (data.getUUID().equals(match.getLoser())) {
                     getLeaderboard().addFirst(data);
                     alive.remove(data);
                     break;
                 }
+            }
         } else {
             stages[stages.length - 2].getMatchList().getFirst().setPlayer(match.getLoser());
             stages[stages.length - 1].getMatchList().getFirst().setPlayer(match.getWinner());
         }
-        // if stage == THIRD_PLACE or FINAL
+        // if stage is THIRD_PLACE or FINAL
         if (stageIndex >= stages.length - 2)
             getLeaderboard().addFirst(Competitions.getContestant(match.getWinner()));
         // If this stage is not over
         if (getSumoStage().hasNextMatch()) {
-            SumoMatch m = getSumoStage().getCurrentMatch();
+            SumoMatch m = getSumoStage().getNextMatch();
             Bukkit.broadcast(Component.translatable("event.sumo.next_queue")
-                    .args(m.getPlayers()[0].displayName(), m.getPlayers()[1].displayName()));
+                    .arguments(m.getFirstPlayerName(), m.getSecondPlayerName()));
             nextMatch();
         } else {
             if (getSumoStage().hasNextStage())
@@ -272,8 +287,12 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
             @Override
             public void run() {
                 Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.next_match_countdown")
-                        .args(Component.text(i)).color(NamedTextColor.GREEN));
+                        .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                 if (i-- == 0) {
+                    SumoMatch prev = getSumoStage().getCurrentMatch();
+                    if (prev != null)
+                        prev.forEachPlayer(p -> p.teleport(getLocation()));
+                    getSumoStage().nextMatch();
                     onMatchStart();
                     cancel();
                 }
@@ -309,7 +328,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
             public void run() {
                 if (i <= 5 && i > 0)
                     Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.next_stage_countdown")
-                            .args(Component.text(i)).color(NamedTextColor.GREEN));
+                            .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                 if (i-- == 0) {
                     nextMatch();
                     cancel();
@@ -328,4 +347,37 @@ public class Sumo extends AbstractEvent implements IFieldEvent {
 
     @Override
     protected void onPractice(@NotNull Player player) {}
+
+    @Override
+    public void load(@NotNull PersistentDataContainer data) {
+        init();
+        alive.clear();
+        queue.clear();
+        Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "alive"),
+                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING)))
+                .forEach(uuid -> alive.add(Competitions.getContestant(UUID.fromString(uuid))));
+        stageIndex = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER));
+        stages = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "stages"),
+                PersistentDataType.LIST.listTypeFrom(SumoStage.SUMO_STAGE))).toArray(SumoStage[]::new);
+        TranslatableComponent.Builder builder = Component.translatable("event.sumo.current_stage")
+                .arguments(getSumoStage().getName()).toBuilder();
+        for (int i = getSumoStage().getCurrentMatchIndex() + 1, j = 0; i < getSumoStage().getMatchList().size(); i++) {
+            SumoMatch m = getSumoStage().getMatchList().get(i);
+            builder.appendNewline().append(Component.translatable("event.sumo.queue")
+                    .arguments(Component.text(++j), m.getFirstPlayerName(), m.getSecondPlayerName()));
+        }
+        Bukkit.broadcast(builder.build());
+        SumoGUI.updateGUI();
+        start();
+    }
+
+    @Override
+    public void save(@NotNull PersistentDataContainer data) {
+        List<String> alive = this.alive.stream().map(d -> d.getUUID().toString()).toList();
+        data.set(new NamespacedKey(PLUGIN, "alive"),
+                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING), alive);
+        data.set(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER, stageIndex);
+        data.set(new NamespacedKey(PLUGIN, "stages"), PersistentDataType.LIST.listTypeFrom(SumoStage.SUMO_STAGE),
+                Arrays.stream(stages).toList());
+    }
 }

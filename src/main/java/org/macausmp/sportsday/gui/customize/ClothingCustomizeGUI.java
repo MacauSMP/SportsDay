@@ -30,7 +30,7 @@ public class ClothingCustomizeGUI extends PluginGUI {
     private static final String[] ARMOR = {"HELMET", "CHESTPLATE", "LEGGINGS", "BOOTS"};
     private final Player player;
 
-    public ClothingCustomizeGUI(Player player) {
+    public ClothingCustomizeGUI(@NotNull Player player) {
         super(45, Component.translatable("gui.customize.clothing.title"));
         this.player = player;
         for (int i = 0; i < 9; i++)
@@ -108,35 +108,35 @@ public class ClothingCustomizeGUI extends PluginGUI {
         PlayerCustomize.Cloth cloth = PlayerCustomize.getCloth(player, slot);
         if (cloth == null)
             return null;
-        ItemStack item = PlayerCustomize.getClothItemStack(cloth);
-        item.editMeta(ArmorMeta.class, meta -> {
+        ItemStack stack = PlayerCustomize.getClothItemStack(cloth);
+        stack.editMeta(ArmorMeta.class, meta -> {
             List<Component> lore = new ArrayList<>();
             lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.trim.lore")));
             meta.lore(lore);
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "cloth");
         });
-        return item;
+        return stack;
     }
 
     private @NotNull ItemStack select(Material material) {
-        ItemStack cloth = new ItemStack(material);
-        cloth.editMeta(ArmorMeta.class, meta -> {
+        ItemStack stack = new ItemStack(material);
+        stack.editMeta(ArmorMeta.class, meta -> {
             List<Component> lore = new ArrayList<>();
             lore.add(TextUtil.text(Component.translatable("gui.select")));
-            if (cloth.getItemMeta() instanceof ColorableArmorMeta)
+            if (stack.getItemMeta() instanceof ColorableArmorMeta)
                 lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.color.lore")));
             meta.lore(lore);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "select_cloth");
         });
-        PlayerCustomize.Cloth cloth1 = PlayerCustomize.getCloth(player, material.getEquipmentSlot());
-        if (cloth.getItemMeta() instanceof ColorableArmorMeta && cloth1 != null)
-            cloth.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(cloth1.getColor()));
-        return cloth;
+        PlayerCustomize.Cloth cloth = PlayerCustomize.getCloth(player, material.getEquipmentSlot());
+        if (stack.getItemMeta() instanceof ColorableArmorMeta && cloth != null)
+            stack.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(cloth.getColor()));
+        return stack;
     }
 
     private @NotNull ItemStack reset(String slot) {
         return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset")
-                .args(Component.translatable(slot)));
+                .arguments(Component.translatable(slot)));
     }
 }

@@ -1,14 +1,23 @@
-package org.macausmp.sportsday.util;
+package org.macausmp.sportsday.competition;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataAdapterContext;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.SportsDay;
+import org.macausmp.sportsday.util.PlayerHolder;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
  * Represents a contestant data.
  */
 public final class ContestantData implements PlayerHolder {
+    private static final SportsDay PLUGIN = SportsDay.getInstance();
+    static final ContestantDataType CONTESTANT_DATA = new ContestantDataType();
     private final UUID uuid;
     private final int number;
     private int score;
@@ -94,5 +103,35 @@ public final class ContestantData implements PlayerHolder {
     @Override
     public int hashCode() {
         return uuid.hashCode();
+    }
+
+    protected static class ContestantDataType implements PersistentDataType<PersistentDataContainer, ContestantData> {
+
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<ContestantData> getComplexType() {
+            return ContestantData.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull ContestantData complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer pdc = context.newPersistentDataContainer();
+            pdc.set(new NamespacedKey(PLUGIN, "uuid"), STRING, complex.uuid.toString());
+            pdc.set(new NamespacedKey(PLUGIN, "number"), INTEGER, complex.number);
+            pdc.set(new NamespacedKey(PLUGIN, "score"), INTEGER, complex.score);
+            return pdc;
+        }
+
+        @Override
+        public @NotNull ContestantData fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            UUID uuid = UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "uuid"), STRING)));
+            int number = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "number"), INTEGER));
+            int score = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "score"), INTEGER));
+            return new ContestantData(uuid, number, score);
+        }
     }
 }

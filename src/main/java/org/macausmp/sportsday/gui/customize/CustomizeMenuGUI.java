@@ -32,7 +32,7 @@ import java.util.Objects;
 public class CustomizeMenuGUI extends PluginGUI {
     private final Player player;
 
-    public CustomizeMenuGUI(Player player) {
+    public CustomizeMenuGUI(@NotNull Player player) {
         super(45, Component.translatable("gui.customize.title"));
         this.player = player;
         update();
@@ -73,7 +73,7 @@ public class CustomizeMenuGUI extends PluginGUI {
         ArrayUtils.reverse(slots);
         if (slots.length > 0) {
             List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())));
+            lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(Component.text())));
             Arrays.stream(slots).forEach(s -> lore.add(getTypeName(s)));
             stack.lore(lore);
         }
@@ -89,11 +89,9 @@ public class CustomizeMenuGUI extends PluginGUI {
     private @NotNull ItemStack boatType() {
         ItemStack stack = customize(Material.OAK_BOAT, "boat_type");
         Boat.Type type = PlayerCustomize.getBoatType(player);
-        if (type == null)
-            type = Boat.Type.OAK;
         List<Component> lore = new ArrayList<>();
         Component c = getTypeName(Objects.requireNonNull(Material.getMaterial(type.name() + "_BOAT")));
-        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())).append(c));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(Component.text())).append(c));
         stack.lore(lore);
         return stack;
     }
@@ -101,11 +99,9 @@ public class CustomizeMenuGUI extends PluginGUI {
     private @NotNull ItemStack weaponSkin() {
         ItemStack stack = customize(Material.BONE, "weapon_skin");
         Material type = PlayerCustomize.getWeaponSkin(player);
-        if (type == null)
-            type = Material.BLAZE_ROD;
         List<Component> lore = new ArrayList<>();
         Component c = getTypeName(type);
-        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(Component.text())).append(c));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(Component.text())).append(c));
         stack.lore(lore);
         return stack;
     }
@@ -121,7 +117,7 @@ public class CustomizeMenuGUI extends PluginGUI {
         CustomizeParticleEffect effect = PlayerCustomize.getProjectileTrail(player);
         List<Component> lore = new ArrayList<>();
         Component c = effect != null ? effect.getName() : TextUtil.text(Component.translatable("gui.text.none"));
-        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(c)));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
         stack.lore(lore);
         return stack;
     }
@@ -131,7 +127,7 @@ public class CustomizeMenuGUI extends PluginGUI {
         CustomizeParticleEffect effect = PlayerCustomize.getWalkingEffect(player);
         List<Component> lore = new ArrayList<>();
         Component c = effect != null ? effect.getName() : TextUtil.text(Component.translatable("gui.text.none"));
-        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(c)));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
         stack.lore(lore);
         return stack;
     }
@@ -141,7 +137,7 @@ public class CustomizeMenuGUI extends PluginGUI {
         CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(player);
         List<Component> lore = new ArrayList<>();
         Component c = graffiti != null ? graffiti.getName() : TextUtil.text(Component.translatable("gui.text.none"));
-        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(c)));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
         stack.lore(lore);
         return stack;
     }
@@ -151,12 +147,13 @@ public class CustomizeMenuGUI extends PluginGUI {
         CustomizeMusickit musickit = PlayerCustomize.getMusickit(player.getPersistentDataContainer());
         List<Component> lore = new ArrayList<>();
         Component c = musickit != null ? musickit.getName() : TextUtil.text(Component.translatable("gui.text.none"));
-        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").args(c)));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
         stack.lore(lore);
         return stack;
     }
 
     private @NotNull ItemStack customize(Material material, String customize) {
-        return ItemUtil.item(material, "customize_" + customize, Component.translatable("gui.customize." + customize + ".title").color(NamedTextColor.YELLOW));
+        return ItemUtil.item(material, "customize_" + customize, Component.translatable("gui.customize." + customize + ".title")
+                .color(NamedTextColor.YELLOW));
     }
 }

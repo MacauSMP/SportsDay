@@ -19,7 +19,7 @@ public class PingCommand implements IPluginCommand {
             Player p = Bukkit.getPlayerExact(args[0]);
             sender.sendMessage(p == null
                     ? Component.translatable("argument.player.unknown").color(NamedTextColor.RED)
-                    : Component.translatable("%s's ping: %sms").args(p.displayName(), Component.text(p.getPing())));
+                    : Component.translatable("%s's ping: %sms").arguments(p.displayName(), Component.text(p.getPing())));
         } else {
             requirePlayer(sender, p -> p.sendMessage("Your ping: %sms".formatted(p.getPing())));
         }

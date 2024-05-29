@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.macausmp.sportsday.util.ContestantData;
 
 import java.util.Collection;
 import java.util.List;

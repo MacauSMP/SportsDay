@@ -1,6 +1,7 @@
 package org.macausmp.sportsday.gui;
 
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Function;
@@ -22,7 +23,7 @@ public final class PageBox<T> {
      * @param start content item start slot
      * @param end content item end slot
      */
-    public PageBox(PluginGUI gui, int start, int end, Supplier<List<T>> entries) {
+    public PageBox(@NotNull PluginGUI gui, int start, int end, @NotNull Supplier<List<T>> entries) {
         this.gui = gui;
         this.start = start;
         this.end = end;
@@ -39,7 +40,6 @@ public final class PageBox<T> {
 
     /**
      * Gets current page number.
-     *
      * @return number of current page
      */
     public int getPage() {
@@ -59,7 +59,6 @@ public final class PageBox<T> {
 
     /**
      * Gets the slot where the content item starts.
-     *
      * @return slot where the content item starts
      */
     public int getStartSlot() {
@@ -68,7 +67,6 @@ public final class PageBox<T> {
 
     /**
      * Gets the slot where the content item ends.
-     *
      * @return slot where the content item ends
      */
     public int getEndSlot() {
@@ -101,7 +99,11 @@ public final class PageBox<T> {
         gui.update();
     }
 
-    public void updatePage(Function<T, ItemStack> function) {
+    /**
+     * Update gui content item
+     * @param function map each entry to {@link ItemStack}
+     */
+    public void updatePage(@NotNull Function<T, ItemStack> function) {
         for (int i = getStartSlot(); i < getEndSlot(); i++)
             gui.getInventory().setItem(i, null);
         for (int i = 0; i < getSize(); i++) {

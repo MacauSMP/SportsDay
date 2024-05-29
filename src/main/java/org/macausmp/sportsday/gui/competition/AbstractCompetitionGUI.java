@@ -18,6 +18,7 @@ import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.competition.event.JavelinGUI;
 import org.macausmp.sportsday.gui.competition.event.SumoGUI;
+import org.macausmp.sportsday.gui.competition.event.TrackEventGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -28,10 +29,11 @@ public abstract class AbstractCompetitionGUI extends PluginGUI {
     protected static final ItemStack COMPETITION_CONSOLE = ItemUtil.item(Material.COMMAND_BLOCK, "competition_console", "gui.console.title", "gui.console.lore");
     protected static final ItemStack CONTESTANTS_LIST = ItemUtil.item(Material.PAPER, "contestants_list", "gui.contestants_list.title", "gui.contestants_list.lore");
     protected static final ItemStack START_COMPETITION = ItemUtil.head(ItemUtil.START, "start_competitions", "gui.start.title", "gui.start.lore");
+    protected static final ItemStack LOAD_COMPETITION = ItemUtil.head(ItemUtil.START, "load_competitions", "gui.load.title", "gui.load.lore");
     protected static final ItemStack END_COMPETITION = ItemUtil.item(Material.RED_CONCRETE, "end_competition", "gui.end.title", "gui.end.lore");
     protected static final ItemStack COMPETITION_SETTINGS = ItemUtil.item(Material.REPEATER, "competition_settings", "gui.settings.title", "gui.settings.lore");
     @SuppressWarnings("deprecation")
-    protected static final ItemStack VERSION = ItemUtil.item(Material.OAK_SIGN, "version", Component.translatable("gui.plugin_version").args(Component.text(SportsDay.getInstance().getDescription().getVersion())));
+    protected static final ItemStack VERSION = ItemUtil.item(Material.OAK_SIGN, "version", Component.translatable("gui.plugin_version").arguments(Component.text(SportsDay.getInstance().getDescription().getVersion())));
     public static final ItemStack ELYTRA_RACING = event(Material.ELYTRA, Competitions.ELYTRA_RACING);
     public static final ItemStack ICE_BOAT_RACING = event(Material.OAK_BOAT, Competitions.ICE_BOAT_RACING);
     public static final ItemStack JAVELIN_THROW = event(Material.TRIDENT, Competitions.JAVELIN_THROW);
@@ -46,8 +48,9 @@ public abstract class AbstractCompetitionGUI extends PluginGUI {
             List<Component> lore = new ArrayList<>();
             if (event instanceof ITrackEvent e) {
                 lore.add(TextUtil.text(Component.translatable("event.type.track").color(NamedTextColor.GRAY)));
-                lore.add(TextUtil.text(Component.translatable("event.track.laps").args(Component.text((e.getMaxLaps()))).color(NamedTextColor.YELLOW)));
-            } else {
+                lore.add(TextUtil.text(Component.translatable("event.track.laps")
+                        .arguments(Component.text((e.getMaxLaps()))).color(NamedTextColor.YELLOW)));
+            } else if (event instanceof IFieldEvent) {
                 lore.add(TextUtil.text(Component.translatable("event.type.field").color(NamedTextColor.GRAY)));
             }
             meta.lore(lore);
@@ -71,6 +74,10 @@ public abstract class AbstractCompetitionGUI extends PluginGUI {
                 p.openInventory(new JavelinGUI((JavelinThrow) event).getInventory());
             else if (event == Competitions.SUMO)
                 p.openInventory(new SumoGUI((Sumo) event).getInventory());
+            else if (event instanceof ITrackEvent track)
+                p.openInventory(new TrackEventGUI(track).getInventory());
+            else
+                p.openInventory(new CompetitionConsoleGUI().getInventory());
         } else {
             p.openInventory(new CompetitionConsoleGUI().getInventory());
         }

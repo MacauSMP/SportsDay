@@ -12,19 +12,21 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
+import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.TextUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WeaponSkinGUI extends PluginGUI {
-    private final Player player;
+    private final PageBox<Material> pageBox = new PageBox<>(this, 9, 18,
+            () -> List.of(Material.BLAZE_ROD, Material.BONE, Material.SHEARS, Material.BAMBOO,
+                    Material.DEAD_BUSH, Material.SUGAR_CANE, Material.COD));
+    private Material selected;
 
-    public WeaponSkinGUI(Player player) {
+    public WeaponSkinGUI(@NotNull Player player) {
         super(18, Component.translatable("gui.customize.weapon_skin.title"));
-        this.player = player;
+        selected = PlayerCustomize.getWeaponSkin(player);
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i, BOARD);
         getInventory().setItem(8, BACK);
@@ -33,27 +35,7 @@ public class WeaponSkinGUI extends PluginGUI {
 
     @Override
     public void update() {
-        getInventory().setItem(9, weapon(Material.BLAZE_ROD));
-        getInventory().setItem(10, weapon(Material.BONE));
-        getInventory().setItem(11, weapon(Material.SHEARS));
-        getInventory().setItem(12, weapon(Material.BAMBOO));
-        getInventory().setItem(13, weapon(Material.DEAD_BUSH));
-        getInventory().setItem(14, weapon(Material.SUGAR_CANE));
-        getInventory().setItem(15, weapon(Material.COD));
-        Material weapon = PlayerCustomize.getWeaponSkin(player);
-        for (int i = 9; i < getInventory().getSize(); i++) {
-            ItemStack stack = getInventory().getItem(i);
-            if (stack == null)
-                break;
-            if (weapon == null || weapon.equals(stack.getType())) {
-                List<Component> lore = new ArrayList<>();
-                lore.add(TextUtil.text(Component.translatable("gui.selected")));
-                stack.lore(lore);
-                stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-                break;
-            }
-        }
+        pageBox.updatePage(this::weapon);
     }
 
     @ButtonHandler("back")
@@ -64,12 +46,17 @@ public class WeaponSkinGUI extends PluginGUI {
 
     @ButtonHandler("weapon")
     public void weapon(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PlayerCustomize.setWeaponSkin(p, item.getType());
+        PlayerCustomize.setWeaponSkin(p, selected = item.getType());
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
     }
 
     private @NotNull ItemStack weapon(Material material) {
-        return ItemUtil.item(material, "weapon", null, "gui.select");
+        ItemStack stack = ItemUtil.item(material, "weapon", null, material == selected ? "gui.selected" : "gui.select");
+        if (material == selected) {
+            stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
+        }
+        return stack;
     }
 }

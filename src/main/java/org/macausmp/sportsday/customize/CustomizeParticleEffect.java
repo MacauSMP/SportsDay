@@ -16,7 +16,7 @@ public enum CustomizeParticleEffect {
     HEART("customize.particle.heart", new ParticleBuilder(Particle.HEART), Material.GOLDEN_APPLE),
     NOTE("customize.particle.note", new ParticleBuilder(Particle.NOTE), Material.NOTE_BLOCK),
     GREEN_STAR("customize.particle.green_star", new ParticleBuilder(Particle.VILLAGER_HAPPY), Material.EMERALD),
-    BLOOD("customize.particle.blood", new ParticleBuilder(Particle.BLOCK_DUST).data(Material.REDSTONE_BLOCK.createBlockData()), Material.REDSTONE);
+    BLOOD("customize.particle.blood", new ParticleBuilder(Particle.BLOCK_CRACK).data(Material.REDSTONE_BLOCK.createBlockData()), Material.REDSTONE);
 
     private final Component name;
     private final Particle particle;
@@ -38,8 +38,8 @@ public enum CustomizeParticleEffect {
         return particle;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T getData() {
-        //noinspection unchecked
         return (T) data;
     }
 

@@ -11,21 +11,22 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ContestantData;
-import org.macausmp.sportsday.competition.JavelinThrow;
+import org.macausmp.sportsday.competition.ITrackEvent;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.util.ItemUtil;
 
-public class JavelinGUI extends AbstractEventGUI<JavelinThrow> {
+public class TrackEventGUI extends AbstractEventGUI<ITrackEvent> {
     private final PageBox<ContestantData> pageBox;
 
-    public JavelinGUI(@NotNull JavelinThrow event) {
-        super(54, Component.translatable("event.name.javelin_throw"), event);
-        this.pageBox = new PageBox<>(this, 36, 54, () -> event.getContestants().stream().toList());
-        for (int i = 0; i < 9; i++)
-            getInventory().setItem(i + 27, BOARD);
-        getInventory().setItem(27, PREVIOUS_PAGE);
-        getInventory().setItem(35, NEXT_PAGE);
+    public TrackEventGUI(@NotNull ITrackEvent event) {
+        super(54, Component.translatable("event.name." + event.getID()), event);
+        this.pageBox = new PageBox<>(this, 18, 54,
+                () -> event.getContestants().stream()
+                        .sorted((d1, d2) -> event.getRecord(d1) > 0 && event.getRecord(d2) > 0
+                                ? Float.compare(event.getRecord(d1), event.getRecord(d2)) : 0).toList());
+        getInventory().setItem(9, PREVIOUS_PAGE);
+        getInventory().setItem(17, NEXT_PAGE);
         update();
     }
 
@@ -34,8 +35,6 @@ public class JavelinGUI extends AbstractEventGUI<JavelinThrow> {
         if (Competitions.getCurrentEvent() != event)
             return;
         HANDLER.add(this);
-        if (event.getCurrentPlayer() != null)
-            getInventory().setItem(18, current());
         pageBox.updatePage(this::icon);
     }
 
@@ -51,22 +50,14 @@ public class JavelinGUI extends AbstractEventGUI<JavelinThrow> {
         pageBox.previousPage();
     }
 
-    private @NotNull ItemStack current() {
-        ContestantData data = event.getCurrentPlayer();
-        ItemStack stack = ItemUtil.item(Material.PLAYER_HEAD, "current",
-                Component.translatable("gui.competition.javelin.current_player")
-                        .arguments(Component.text(data.getName())));
-        stack.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
-        return stack;
-    }
-
     private @NotNull ItemStack icon(@NotNull ContestantData data) {
-        JavelinThrow.ScoreResult sr = event.getScoreResult(data.getUUID());
+        float f = event.getRecord(data);
         ItemStack stack = ItemUtil.item(Material.PLAYER_HEAD, "icon",
-                Component.translatable("gui.competition.javelin.player").arguments(Component.text(data.getName())),
-                Component.translatable("gui.competition.javelin.result").arguments(sr == null || !sr.isSet()
+                Component.translatable("gui.competition.track.player")
+                        .arguments(Component.text(data.getName())),
+                Component.translatable("gui.competition.track.result").arguments(f == -1
                         ? Component.translatable("gui.competition.tbd")
-                        : Component.translatable("gui.competition.javelin.meters").arguments(Component.text(sr.getDistance()))));
+                        : Component.translatable("gui.competition.track.second").arguments(Component.text(f))));
         stack.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
         return stack;
     }

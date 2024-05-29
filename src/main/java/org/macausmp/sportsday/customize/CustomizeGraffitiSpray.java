@@ -11,8 +11,7 @@ public enum CustomizeGraffitiSpray {
     APOCALYPTIC("customize.graffiti_spray.a"),
     SAVAGE("customize.graffiti_spray.s"),
     SICK_SKILLS("customize.graffiti_spray.ss"),
-    SMOKIN_SEXY_STYLE("customize.graffiti_spray.sss"),
-    ;
+    SMOKIN_SEXY_STYLE("customize.graffiti_spray.sss");
 
     private final Component name;
 

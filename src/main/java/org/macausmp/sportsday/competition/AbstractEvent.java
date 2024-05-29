@@ -13,12 +13,11 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.CompetitionListener;
 import org.macausmp.sportsday.SportsDay;
+import org.macausmp.sportsday.SportsDayListener;
 import org.macausmp.sportsday.customize.CustomizeMusickit;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
-import org.macausmp.sportsday.util.ContestantData;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -109,16 +108,37 @@ public abstract class AbstractEvent implements IEvent {
 
     @Override
     public void setup() {
+        init();
+        addRunnable(new BukkitRunnable() {
+            int i = PLUGIN.getConfig().getInt("ready_time");
+            @Override
+            public void run() {
+                if (i % 5 == 0 || (i <= 5 && i > 0)) {
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.start.countdown")
+                            .arguments(Component.text(i)).color(NamedTextColor.GREEN));
+                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
+                            Sound.Source.MASTER, 1f, 0.5f));
+                }
+                if (i-- == 0) {
+                    start();
+                    cancel();
+                }
+            }
+        }.runTaskTimer(PLUGIN, 0L, 20L));
+        Bukkit.broadcast(Component.translatable("event.ready.broadcast")
+                .arguments(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
+        Bukkit.broadcast(Component.translatable("event.rule." + id));
+        onSetup();
+        PLUGIN.getComponentLogger().info(Component.translatable("console.competition.coming").arguments(name));
+    }
+
+    protected void init() {
         time = System.currentTimeMillis();
         Bukkit.getOnlinePlayers().forEach(p -> {
             leavePractice(p);
             p.getPersistentDataContainer().set(IN_GAME, PersistentDataType.LONG, time);
         });
         PRACTICE.clear();
-        EVENT_TASKS.forEach(BukkitTask::cancel);
-        EVENT_TASKS.clear();
-        contestants.clear();
-        getLeaderboard().clear();
         setStatus(Status.COMING);
         contestants.addAll(Competitions.getOnlineContestants());
         contestants.forEach(data -> {
@@ -130,31 +150,10 @@ public abstract class AbstractEvent implements IEvent {
             p.setGameMode(GameMode.ADVENTURE);
             PlayerCustomize.suitUp(p);
             p.getInventory().setItem(4, ItemUtil.SPRAY);
-            p.setBedSpawnLocation(location, true);
+            p.setRespawnLocation(location, true);
             p.teleport(location);
             contestantToMusickit.put(data.getUUID(), p.getPersistentDataContainer());
         });
-        addRunnable(new BukkitRunnable() {
-            int i = PLUGIN.getConfig().getInt("ready_time");
-            @Override
-            public void run() {
-                if (i % 5 == 0 || (i <= 5 && i > 0)) {
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.start.countdown")
-                            .args(Component.text(i)).color(NamedTextColor.GREEN));
-                    Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
-                            Sound.Source.MASTER, 1f, 0.5f));
-                }
-                if (i-- == 0) {
-                    start();
-                    cancel();
-                }
-            }
-        }.runTaskTimer(PLUGIN, 0L, 20L));
-        Bukkit.broadcast(Component.translatable("event.ready.broadcast")
-                .args(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
-        Bukkit.broadcast(Component.translatable("event.rule." + id));
-        onSetup();
-        PLUGIN.getComponentLogger().info(Component.translatable("console.competition.coming").args(name));
     }
 
     @Override
@@ -162,7 +161,8 @@ public abstract class AbstractEvent implements IEvent {
         setStatus(Status.STARTED);
         onStart();
         Bukkit.getServer().sendActionBar(Component.translatable("event.start.broadcast"));
-        Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+        Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
+                Sound.Source.MASTER, 1f, 1f));
     }
 
     @Override
@@ -171,30 +171,45 @@ public abstract class AbstractEvent implements IEvent {
         onEnd(force);
         EVENT_TASKS.forEach(BukkitTask::cancel);
         if (!force) {
-            if (!getLeaderboard().isEmpty()) {
-                OfflinePlayer mvp = getLeaderboard().getFirst().getOfflinePlayer();
-                CustomizeMusickit musickit = PlayerCustomize.getMusickit(contestantToMusickit.get(mvp.getUniqueId()));
-                if (musickit != null) {
-                    Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
-                    Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem")
-                            .args(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW), musickit.getName()));
-                }
-            }
+            Competitions.clearEventData();
             addRunnable(new BukkitRunnable() {
                 @Override
                 public void run() {
                     end();
                 }
             }.runTaskLater(PLUGIN, 100L));
+            if (!getLeaderboard().isEmpty()) {
+                OfflinePlayer mvp = getLeaderboard().getFirst().getOfflinePlayer();
+                PersistentDataContainer pdc = contestantToMusickit.get(mvp.getUniqueId());
+                if (pdc == null) {
+                    if (mvp.isOnline())
+                        pdc = Objects.requireNonNull(mvp.getPlayer()).getPersistentDataContainer();
+                }
+                if (pdc != null) {
+                    CustomizeMusickit musickit = PlayerCustomize.getMusickit(pdc);
+                    if (musickit != null) {
+                        Bukkit.getServer().playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
+                        Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem")
+                                .arguments(Component.text(Objects.requireNonNull(mvp.getName()))
+                                        .color(NamedTextColor.YELLOW), musickit.getName()));
+                    }
+                }
+            }
         } else {
             end();
         }
         Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.end.broadcast"));
-        PLUGIN.getComponentLogger().info(Component.translatable(force ? "console.competition.force_end" : "console.competition.end").args(name));
+        PLUGIN.getComponentLogger().info(Component.translatable(force ? "console.competition.force_end" : "console.competition.end")
+                .arguments(name));
     }
 
     private void end() {
         if (status == Status.ENDED) {
+            EVENT_TASKS.forEach(BukkitTask::cancel);
+            EVENT_TASKS.clear();
+            contestants.clear();
+            leaderboard.clear();
+            contestantToMusickit.clear();
             Competitions.setCurrentEvent(null);
             setStatus(Status.IDLE);
             Bukkit.getOnlinePlayers().forEach(p -> {
@@ -210,7 +225,7 @@ public abstract class AbstractEvent implements IEvent {
                 p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
             });
             getWorld().getEntitiesByClass(ItemFrame.class).forEach(e -> {
-                if (e.getPersistentDataContainer().has(CompetitionListener.GRAFFITI))
+                if (e.getPersistentDataContainer().has(SportsDayListener.GRAFFITI))
                     e.remove();
             });
         }
@@ -247,7 +262,7 @@ public abstract class AbstractEvent implements IEvent {
         PlayerCustomize.suitUp(p);
         p.getInventory().setItem(0, ItemUtil.MENU);
         p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
-        p.setBedSpawnLocation(p.getWorld().getSpawnLocation(), true);
+        p.setRespawnLocation(p.getWorld().getSpawnLocation(), true);
     }
 
     @Override
@@ -258,9 +273,9 @@ public abstract class AbstractEvent implements IEvent {
         player.getInventory().clear();
         PlayerCustomize.suitUp(player);
         player.getInventory().setItem(8, ItemUtil.LEAVE_PRACTICE);
-        player.setBedSpawnLocation(location, true);
+        player.setRespawnLocation(location, true);
         player.teleport(location);
-        player.sendMessage(Component.translatable("contestant.practice.teleport.venue").args(name));
+        player.sendMessage(Component.translatable("contestant.practice.teleport.venue").arguments(name));
         onPractice(player);
         player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
     }
@@ -286,7 +301,7 @@ public abstract class AbstractEvent implements IEvent {
         PlayerCustomize.suitUp(player);
         player.getInventory().setItem(0, ItemUtil.MENU);
         player.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
-        player.setBedSpawnLocation(player.getWorld().getSpawnLocation(), true);
+        player.setRespawnLocation(player.getWorld().getSpawnLocation(), true);
         player.teleport(player.getWorld().getSpawnLocation());
     }
 
@@ -308,17 +323,6 @@ public abstract class AbstractEvent implements IEvent {
      */
     public static <T extends IEvent> boolean inPractice(Player player, T event) {
         return PRACTICE.containsKey(player) && PRACTICE.get(player) == event;
-    }
-
-    /**
-     * Get the event the player is practice on.
-     * @param player who is practicing
-     * @return event the player is practice on
-     * @param <T> the event type
-     */
-    public static <T extends IEvent> T getPracticeEvent(Player player) {
-        //noinspection unchecked
-        return (T) PRACTICE.get(player);
     }
 
     /**

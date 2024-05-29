@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.CompetitionListener;
 import org.macausmp.sportsday.competition.AbstractTrackEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
@@ -32,7 +31,7 @@ public class MenuGUI extends PluginGUI {
     }
 
     @ButtonHandler("guidebook")
-    public void openGuideBook(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+    public void guide(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.openBook(GUIDE_BOOK);
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
     }
@@ -64,13 +63,13 @@ public class MenuGUI extends PluginGUI {
     private static @NotNull Book guidebook() {
         Book.Builder builder = Book.builder();
         builder.addPage(Component.translatable("book.guidebook.page_main"));
-        Component b1 = Component.translatable(CompetitionListener.CHECKPOINT.translationKey()).color(NamedTextColor.GREEN);
-        Component b2 = Component.translatable(CompetitionListener.DEATH.translationKey()).color(NamedTextColor.RED);
+        Component b1 = Component.translatable(AbstractTrackEvent.CHECKPOINT.translationKey()).color(NamedTextColor.GREEN);
+        Component b2 = Component.translatable(AbstractTrackEvent.DEATH.translationKey()).color(NamedTextColor.RED);
         Component b3 = Component.translatable(AbstractTrackEvent.FINISH_LINE.translationKey()).color(NamedTextColor.GOLD);
-        builder.addPage(Component.translatable("book.guidebook.page_block").args(b1, b2, b3));
+        builder.addPage(Component.translatable("book.guidebook.page_block").arguments(b1, b2, b3));
         for (IEvent event : Competitions.EVENTS.values()) {
             Component rule = Component.translatable("event.rule." + event.getID());
-            builder.addPage(Component.translatable("book.guidebook.page_event").args(event.getName().color(NamedTextColor.BLACK), rule));
+            builder.addPage(Component.translatable("book.guidebook.page_event").arguments(event.getName().color(NamedTextColor.BLACK), rule));
         }
         return builder.build();
     }

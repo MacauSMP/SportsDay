@@ -3,7 +3,9 @@ package org.macausmp.sportsday.competition;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -14,12 +16,14 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.util.ContestantData;
+import org.macausmp.sportsday.gui.competition.event.TrackEventGUI;
 
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class AbstractTrackEvent extends AbstractEvent implements ITrackEvent {
+    private static final Set<UUID> SPAWNPOINT_SET = new HashSet<>();
+    public static final @NotNull Material CHECKPOINT = getMaterial("checkpoint_block");
+    public static final @NotNull Material DEATH = getMaterial("death_block");
     public static final @NotNull Material FINISH_LINE = getMaterial("finish_line_block");
     private final HashMap<ContestantData, Integer> lapMap = new HashMap<>();
     private final HashMap<ContestantData, Float> record = new HashMap<>();
@@ -42,7 +46,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                 Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".ready_command")));
         super.setup();
         getContestants().forEach(data -> lapMap.put(data, 0));
-        Bukkit.broadcast(Component.translatable("event.track.laps").args(Component.text(laps)).color(NamedTextColor.GREEN));
+        Bukkit.broadcast(Component.translatable("event.track.laps").arguments(Component.text(laps)).color(NamedTextColor.GREEN));
     }
 
     @Override
@@ -68,16 +72,16 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         super.end(force);
         if (force)
             return;
-        Component c = Component.translatable("event.result");
+        TranslatableComponent.Builder builder = Component.translatable("event.result").toBuilder();
         for (int i = 0; i < getLeaderboard().size();) {
             ContestantData data = getLeaderboard().get(i);
-            c = c.appendNewline().append(Component.translatable("event.track.rank")
-                    .args(Component.text(++i), Component.text(data.getName()), Component.text(record.get(data))));
+            builder.appendNewline().append(Component.translatable("event.track.rank")
+                    .arguments(Component.text(++i), Component.text(data.getName()), Component.text(record.get(data))));
             if (i <= 3)
                 data.addScore(4 - i);
             data.addScore(1);
         }
-        Bukkit.broadcast(c);
+        Bukkit.broadcast(builder.build());
     }
 
     @EventHandler
@@ -88,24 +92,29 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
             ContestantData data = Competitions.getContestant(p.getUniqueId());
             if (getLeaderboard().contains(data) || !lapMap.containsKey(data))
                 return;
-            Location loc = p.getLocation().clone();
+            Location loc = e.getTo().clone();
             loc.setY(loc.getY() - 0.5f);
+            spawnpoint(p, loc);
+            if (loc.getBlock().getType() == DEATH)
+                p.setHealth(0);
             if (loc.getBlock().getType() == FINISH_LINE) {
                 lapMap.put(data, lapMap.get(data) + 1);
                 p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
                 if (lapMap.get(data) < laps) {
                     p.teleport(getLocation());
-                    p.setBedSpawnLocation(getLocation(), true);
+                    p.setRespawnLocation(getLocation(), true);
                     onCompletedLap(p);
                     Bukkit.broadcast(Component.translatable("event.track.contestant.completed_lap")
-                            .args(p.displayName()).color(NamedTextColor.YELLOW));
+                            .arguments(p.displayName()).color(NamedTextColor.YELLOW));
+                    TrackEventGUI.updateGUI();
                 } else {
                     record.put(data, time / 20f);
                     p.setGameMode(GameMode.SPECTATOR);
                     getLeaderboard().add(Competitions.getContestant(p.getUniqueId()));
                     onRaceFinish(p);
                     Bukkit.broadcast(Component.translatable("event.track.contestant.completed_all")
-                            .args(p.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW));
+                            .arguments(p.displayName(), Component.text(record.get(data))).color(NamedTextColor.YELLOW));
+                    TrackEventGUI.updateGUI();
                     if (getLeaderboard().size() == getContestants().size()) {
                         if (task != null && !task.isCancelled())
                             task.cancel();
@@ -116,14 +125,14 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                     if (getLeaderboard().size() >= 3 && !endCountdown) {
                         endCountdown = true;
                         Bukkit.broadcast(Component.translatable("event.track.end.countdown.notice")
-                                .args(Component.text(PLUGIN.getConfig().getInt("event_end_countdown"))));
+                                .arguments(Component.text(PLUGIN.getConfig().getInt("event_end_countdown"))));
                         task = addRunnable(new BukkitRunnable() {
                             int i = PLUGIN.getConfig().getInt("event_end_countdown");
                             @Override
                             public void run() {
                                 if (i > 0)
                                     PLUGIN.getServer().sendActionBar(Component.translatable("event.track.end.countdown")
-                                            .args(Component.text(i)).color(NamedTextColor.GREEN));
+                                            .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                                 if (i-- == 0) {
                                     PLUGIN.getServer().sendActionBar(Component.translatable("event.track.end.countdown_end"));
                                     end(false);
@@ -137,14 +146,29 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         } else if (inPractice(p, this)) {
             Location loc = p.getLocation().clone();
             loc.setY(loc.getY() - 0.5f);
+            spawnpoint(p, loc);
+            if (loc.getBlock().getType() == DEATH)
+                p.setHealth(0);
             if (loc.getBlock().getType() == FINISH_LINE) {
                 p.teleport(getLocation());
-                p.setBedSpawnLocation(getLocation(), true);
-                p.sendMessage(Component.translatable("contestant.practice.finished").args(getName()));
+                p.setRespawnLocation(getLocation(), true);
+                p.sendMessage(Component.translatable("contestant.practice.finished").arguments(getName()));
                 onCompletedLap(p);
                 p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
             }
         }
+    }
+
+    private void spawnpoint(@NotNull Player player, @NotNull Location loc) {
+        UUID uuid = player.getUniqueId();
+        if (loc.getBlock().getType() == CHECKPOINT && !SPAWNPOINT_SET.contains(uuid)) {
+            SPAWNPOINT_SET.add(uuid);
+            player.setRespawnLocation(player.getLocation(), true);
+            player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+            player.sendActionBar(Component.text("Checkpoint").color(NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
+        }
+        if (loc.getBlock().getType() != CHECKPOINT)
+            SPAWNPOINT_SET.remove(uuid);
     }
 
     @Override
@@ -166,7 +190,12 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         return laps;
     }
 
+    @Override
+    public float getRecord(ContestantData data) {
+        return Optional.ofNullable(record.get(data)).orElse(-1f);
+    }
+
     public static @NotNull Material getMaterial(@NotNull String path) {
-        return Material.valueOf(PLUGIN.getConfig().getString(path));
+        return Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString(path))));
     }
 }

@@ -6,14 +6,14 @@ import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDismountEvent;
+import org.bukkit.event.entity.EntityMountEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
-import org.spigotmc.event.entity.EntityDismountEvent;
-import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -124,10 +124,8 @@ public class IceBoatRacing extends AbstractTrackEvent {
      * @return a new boat containing the player
      */
     private @NotNull Boat boat(@NotNull Player p) {
-        Boat boat = getWorld().spawn(Objects.requireNonNull(p.getBedSpawnLocation()), Boat.class);
-        Boat.Type type = PlayerCustomize.getBoatType(p);
-        if (type != null)
-            boat.setBoatType(type);
+        Boat boat = getWorld().spawn(Objects.requireNonNull(p.getRespawnLocation()), Boat.class);
+        boat.setBoatType(PlayerCustomize.getBoatType(p));
         boat.setInvulnerable(true);
         boat.addPassenger(p);
         return boat;

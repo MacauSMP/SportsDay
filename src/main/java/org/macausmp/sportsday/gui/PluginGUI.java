@@ -10,8 +10,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.CompetitionListener;
 import org.macausmp.sportsday.SportsDay;
+import org.macausmp.sportsday.SportsDayListener;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.lang.reflect.InvocationTargetException;
@@ -82,7 +82,7 @@ public abstract class PluginGUI implements InventoryHolder {
     }
 
     /**
-     * Listener call from {@link CompetitionListener#onClose(InventoryCloseEvent)}.
+     * Listener call from {@link SportsDayListener#onClose(InventoryCloseEvent)}.
      */
     public void onClose() {}
 }
