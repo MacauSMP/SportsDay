@@ -5,7 +5,7 @@ import net.kyori.adventure.key.KeyPattern;
 import net.kyori.adventure.text.Component;
 import org.macausmp.sportsday.util.TextUtil;
 
-public enum CustomizeMusickit {
+public enum Musickit {
     TAKE_ON_ME("customize.musickit.take_on_me", "take_on_me"),
     BAKA_MITAI("customize.musickit.baka_mitai", "baka_mitai"),
     KABUTACK("customize.musickit.kabutack", "kabutack"),
@@ -25,7 +25,7 @@ public enum CustomizeMusickit {
     private final Component name;
     private final Key key;
 
-    CustomizeMusickit(String code, @KeyPattern.Value String key) {
+    Musickit(String code, @KeyPattern.Value String key) {
         this.name = TextUtil.text(Component.translatable(code));
         this.key = Key.key("minecraft", "mvp." + key);
     }

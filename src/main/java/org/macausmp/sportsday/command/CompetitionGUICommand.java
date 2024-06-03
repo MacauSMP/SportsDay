@@ -9,7 +9,7 @@ import org.macausmp.sportsday.util.ItemUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompetitionGUICommand implements IPluginCommand {
+public class CompetitionGUICommand extends PluginCommand {
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         requirePlayer(sender, p -> {

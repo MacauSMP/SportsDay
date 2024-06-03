@@ -17,33 +17,33 @@ import java.util.function.Consumer;
 /**
  * Represents a plugin command.
  */
-public interface IPluginCommand extends CommandExecutor, TabCompleter {
+public abstract class PluginCommand implements CommandExecutor, TabCompleter {
     /**
      * Execute command.
      * @param sender command sender
      * @param args arguments
      */
-    void onCommand(CommandSender sender, String[] args);
+    public abstract void onCommand(CommandSender sender, String[] args);
 
     /**
      * Command name.
      * @return name of command
      */
-    String name();
+    public abstract String name();
 
     @Override
-    default boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         onCommand(sender, args);
         return true;
     }
 
     @Override
     @Nullable
-    default List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         return new ArrayList<>();
     }
 
-    default void requirePlayer(@NotNull CommandSender sender, @NotNull Consumer<Player> consumer) {
+    protected void requirePlayer(@NotNull CommandSender sender, @NotNull Consumer<Player> consumer) {
         if (sender instanceof Player p)
             consumer.accept(p);
         else

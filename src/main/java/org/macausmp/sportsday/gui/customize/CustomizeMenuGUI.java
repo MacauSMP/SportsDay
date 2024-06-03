@@ -15,10 +15,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
-import org.macausmp.sportsday.customize.CustomizeMusickit;
-import org.macausmp.sportsday.customize.CustomizeParticleEffect;
-import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.customize.*;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -43,9 +40,10 @@ public class CustomizeMenuGUI extends PluginGUI {
         getInventory().setItem(10, clothing());
         getInventory().setItem(12, boatType());
         getInventory().setItem(14, weaponSkin());
-        getInventory().setItem(16, projectileTrail());
-        getInventory().setItem(28, walkingEffect());
-        getInventory().setItem(31, graffitiSpray());
+        getInventory().setItem(16, victoryDance());
+        getInventory().setItem(28, projectileTrail());
+        getInventory().setItem(30, walkingEffect());
+        getInventory().setItem(32, graffitiSpray());
         getInventory().setItem(34, musickit());
     }
 
@@ -55,9 +53,10 @@ public class CustomizeMenuGUI extends PluginGUI {
             case 10 -> p.openInventory(new ClothingCustomizeGUI(p).getInventory());
             case 12 -> p.openInventory(new BoatTypeGUI(p).getInventory());
             case 14 -> p.openInventory(new WeaponSkinGUI(p).getInventory());
-            case 16 -> p.openInventory(new ProjectileTrailGUI(p).getInventory());
-            case 28 -> p.openInventory(new WalkingEffectGUI(p).getInventory());
-            case 31 -> p.openInventory(new GraffitiSprayGUI(p).getInventory());
+            case 16 -> p.openInventory(new VictoryDanceGUI(p).getInventory());
+            case 28 -> p.openInventory(new ProjectileTrailGUI(p).getInventory());
+            case 30 -> p.openInventory(new WalkingEffectGUI(p).getInventory());
+            case 32 -> p.openInventory(new GraffitiSprayGUI(p).getInventory());
             case 34 -> p.openInventory(new MusickitGUI(p).getInventory());
         }
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
@@ -112,9 +111,19 @@ public class CustomizeMenuGUI extends PluginGUI {
                 .decoration(TextDecoration.ITALIC, false);
     }
 
+    private @NotNull ItemStack victoryDance() {
+        ItemStack stack = customize(Material.PLAYER_HEAD, "victory_dance");
+        VictoryDance victoryDance = PlayerCustomize.getVictoryDance(player);
+        List<Component> lore = new ArrayList<>();
+        Component c = victoryDance != null ? victoryDance.getName() : TextUtil.text(Component.translatable("gui.text.none"));
+        lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
+        stack.lore(lore);
+        return stack;
+    }
+
     private @NotNull ItemStack projectileTrail() {
         ItemStack stack = customize(Material.ARROW, "projectile_trail");
-        CustomizeParticleEffect effect = PlayerCustomize.getProjectileTrail(player);
+        ParticleEffect effect = PlayerCustomize.getProjectileTrail(player);
         List<Component> lore = new ArrayList<>();
         Component c = effect != null ? effect.getName() : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
@@ -124,7 +133,7 @@ public class CustomizeMenuGUI extends PluginGUI {
 
     private @NotNull ItemStack walkingEffect() {
         ItemStack stack = customize(Material.NETHER_STAR, "walking_effect");
-        CustomizeParticleEffect effect = PlayerCustomize.getWalkingEffect(player);
+        ParticleEffect effect = PlayerCustomize.getWalkingEffect(player);
         List<Component> lore = new ArrayList<>();
         Component c = effect != null ? effect.getName() : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
@@ -134,7 +143,7 @@ public class CustomizeMenuGUI extends PluginGUI {
 
     private @NotNull ItemStack graffitiSpray() {
         ItemStack stack = customize(Material.PAINTING, "graffiti_spray");
-        CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(player);
+        GraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(player);
         List<Component> lore = new ArrayList<>();
         Component c = graffiti != null ? graffiti.getName() : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
@@ -144,7 +153,7 @@ public class CustomizeMenuGUI extends PluginGUI {
 
     private @NotNull ItemStack musickit() {
         ItemStack stack = customize(Material.JUKEBOX, "musickit");
-        CustomizeMusickit musickit = PlayerCustomize.getMusickit(player.getPersistentDataContainer());
+        Musickit musickit = PlayerCustomize.getMusickit(player);
         List<Component> lore = new ArrayList<>();
         Component c = musickit != null ? musickit.getName() : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));

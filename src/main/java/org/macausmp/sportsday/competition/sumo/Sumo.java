@@ -87,14 +87,43 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
     public void onEnd(boolean force) {
         if (force)
             return;
+        for (int i = 0, length = stages.length; i < length; i++) {
+            SumoStage stage = stages[i];
+            for (SumoMatch match : stage.getMatchList()) {
+                if (getSumoStage().getStage() == SumoStage.Stage.SEMI_FINAL)
+                    continue;
+                getLeaderboard().addFirst(Competitions.getContestant(match.getLoser()));
+                if (i >= stages.length - 2)
+                    getLeaderboard().addFirst(Competitions.getContestant(match.getWinner()));
+            }
+        }
         TranslatableComponent.Builder builder = Component.translatable("event.result").toBuilder();
-        for (int i = 0; i < getLeaderboard().size();) {
-            ContestantData data = getLeaderboard().get(i);
-            builder.appendNewline().append(Component.translatable("event.sumo.rank")
-                    .arguments(Component.text(++i), Component.text(data.getName())));
-            if (i <= 3)
-                data.addScore(4 - i);
-            data.addScore(1);
+        for (int i = 0, k = 1, size = 34 - Integer.numberOfLeadingZeros(getContestants().size() - 1); i < size; i++) {
+            if (i < 4) {
+                ContestantData data = getLeaderboard().get(i);
+                builder.appendNewline().append(Component.translatable("event.sumo.rank")
+                        .arguments(Component.text(i + 1), Component.text(data.getName())));
+                data.addScore(switch (i) {
+                    case 0 -> 10;
+                    case 1 -> 8;
+                    case 2 -> 6;
+                    case 3 -> 5;
+                    default -> 0;
+                });
+            } else {
+                StringJoiner joiner = new StringJoiner(", ");
+                for (int s = 2 << k, e = 2 << k + 1; s < e; s++) {
+                    if (s > getLeaderboard().size() - 1)
+                        break;
+                    ContestantData data = getLeaderboard().get(i);
+                    joiner.add(data.getName());
+                    if (i < 6)
+                        data.addScore(6 - i);
+                }
+                int s = (2 << k) + 1, e = Math.min(2 << (++k), getLeaderboard().size());
+                builder.appendNewline().append(Component.translatable("event.sumo.rank")
+                        .arguments(Component.text(s + (s != e ? "-" + e : "")), Component.text(joiner.toString())));
+            }
         }
         Bukkit.broadcast(builder.build());
     }
@@ -251,20 +280,11 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
         match.forEachPlayer(p -> p.getInventory().clear());
         // eliminate loser
         if (getSumoStage().getStage() != SumoStage.Stage.SEMI_FINAL) {
-            for (ContestantData data : alive) {
-                if (data.getUUID().equals(match.getLoser())) {
-                    getLeaderboard().addFirst(data);
-                    alive.remove(data);
-                    break;
-                }
-            }
+            alive.removeIf(data -> data.getUUID().equals(match.getLoser()));
         } else {
             stages[stages.length - 2].getMatchList().getFirst().setPlayer(match.getLoser());
             stages[stages.length - 1].getMatchList().getFirst().setPlayer(match.getWinner());
         }
-        // if stage is THIRD_PLACE or FINAL
-        if (stageIndex >= stages.length - 2)
-            getLeaderboard().addFirst(Competitions.getContestant(match.getWinner()));
         // If this stage is not over
         if (getSumoStage().hasNextMatch()) {
             SumoMatch m = getSumoStage().getNextMatch();
@@ -373,9 +393,9 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
 
     @Override
     public void save(@NotNull PersistentDataContainer data) {
-        List<String> alive = this.alive.stream().map(d -> d.getUUID().toString()).toList();
         data.set(new NamespacedKey(PLUGIN, "alive"),
-                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING), alive);
+                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING),
+                alive.stream().map(d -> d.getUUID().toString()).toList());
         data.set(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER, stageIndex);
         data.set(new NamespacedKey(PLUGIN, "stages"), PersistentDataType.LIST.listTypeFrom(SumoStage.SUMO_STAGE),
                 Arrays.stream(stages).toList());

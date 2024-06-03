@@ -10,7 +10,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.customize.ParticleEffect;
+import org.macausmp.sportsday.customize.VictoryDance;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
@@ -19,14 +19,14 @@ import org.macausmp.sportsday.util.ItemUtil;
 
 import java.util.List;
 
-public class ProjectileTrailGUI extends PluginGUI {
-    private final PageBox<ParticleEffect> pageBox = new PageBox<>(this, 10, 54,
-            () -> List.of(ParticleEffect.values()));
-    private ParticleEffect selected;
+public class VictoryDanceGUI extends PluginGUI {
+    private final PageBox<VictoryDance> pageBox = new PageBox<>(this, 10, 54,
+            () -> List.of(VictoryDance.values()));
+    private VictoryDance selected;
 
-    public ProjectileTrailGUI(@NotNull Player player) {
-        super(54, Component.translatable("gui.customize.projectile_trail.title"));
-        selected = PlayerCustomize.getProjectileTrail(player);
+    public VictoryDanceGUI(@NotNull Player player) {
+        super(54, Component.translatable("gui.customize.victory_dance.title"));
+        selected = PlayerCustomize.getVictoryDance(player);
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i, BOARD);
         getInventory().setItem(8, BACK);
@@ -36,7 +36,7 @@ public class ProjectileTrailGUI extends PluginGUI {
 
     @Override
     public void update() {
-        pageBox.updatePage(this::effect);
+        pageBox.updatePage(this::victoryDance);
     }
 
     @ButtonHandler("back")
@@ -45,24 +45,24 @@ public class ProjectileTrailGUI extends PluginGUI {
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
     }
 
-    @ButtonHandler("projectile_trail")
-    public void projectileTrail(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PlayerCustomize.setProjectileTrail(p, selected = ParticleEffect.values()[e.getSlot() - 10]);
+    @ButtonHandler("victory_dance")
+    public void victoryDance(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        PlayerCustomize.setVictoryDance(p, selected = VictoryDance.values()[e.getSlot() - 10]);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
     }
 
     @ButtonHandler("reset")
     public void reset(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PlayerCustomize.setProjectileTrail(p, selected = null);
+        PlayerCustomize.setVictoryDance(p, selected = null);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
     }
 
-    private @NotNull ItemStack effect(@NotNull ParticleEffect effect) {
-        ItemStack stack = ItemUtil.item(effect.getMaterial(), "projectile_trail", effect.getName(),
-                effect == selected ? "gui.selected" : "gui.select");
-        if (effect == selected) {
+    private @NotNull ItemStack victoryDance(@NotNull VictoryDance victoryDance) {
+        ItemStack stack = ItemUtil.item(victoryDance.getMaterial(), "victory_dance", victoryDance.getName(),
+                victoryDance == selected ? "gui.selected" : "gui.select");
+        if (victoryDance == selected) {
             stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
         }
@@ -70,6 +70,6 @@ public class ProjectileTrailGUI extends PluginGUI {
     }
 
     private @NotNull ItemStack reset() {
-        return ItemUtil.item(Material.BARRIER, "reset", "gui.customize.projectile_trail.reset");
+        return ItemUtil.item(Material.BARRIER, "reset", "gui.customize.victory_dance.reset");
     }
 }

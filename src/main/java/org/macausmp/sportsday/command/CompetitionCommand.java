@@ -15,7 +15,7 @@ import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.*;
 
-public class CompetitionCommand implements IPluginCommand {
+public class CompetitionCommand extends PluginCommand {
     @Override
     public void onCommand(CommandSender sender, String @NotNull [] args) {
         if (args.length > 0) {

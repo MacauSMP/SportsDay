@@ -10,7 +10,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.customize.CustomizeParticleEffect;
+import org.macausmp.sportsday.customize.ParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
@@ -20,9 +20,9 @@ import org.macausmp.sportsday.util.ItemUtil;
 import java.util.List;
 
 public class WalkingEffectGUI extends PluginGUI {
-    private final PageBox<CustomizeParticleEffect> pageBox = new PageBox<>(this, 10, 54,
-            () -> List.of(CustomizeParticleEffect.values()));
-    private CustomizeParticleEffect selected;
+    private final PageBox<ParticleEffect> pageBox = new PageBox<>(this, 10, 54,
+            () -> List.of(ParticleEffect.values()));
+    private ParticleEffect selected;
 
     public WalkingEffectGUI(@NotNull Player player) {
         super(54, Component.translatable("gui.customize.walking_effect.title"));
@@ -47,7 +47,7 @@ public class WalkingEffectGUI extends PluginGUI {
 
     @ButtonHandler("walking_effect")
     public void walkingEffect(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PlayerCustomize.setWalkingEffect(p, selected = CustomizeParticleEffect.values()[e.getSlot() - 10]);
+        PlayerCustomize.setWalkingEffect(p, selected = ParticleEffect.values()[e.getSlot() - 10]);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
     }
@@ -59,7 +59,7 @@ public class WalkingEffectGUI extends PluginGUI {
         update();
     }
 
-    private @NotNull ItemStack effect(@NotNull CustomizeParticleEffect effect) {
+    private @NotNull ItemStack effect(@NotNull ParticleEffect effect) {
         ItemStack stack = ItemUtil.item(effect.getMaterial(), "walking_effect", effect.getName(),
                 effect == selected ? "gui.selected" : "gui.select");
         if (effect == selected) {

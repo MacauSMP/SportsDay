@@ -5,7 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.macausmp.sportsday.competition.Competitions;
 
-public class RegisterCommand implements IPluginCommand {
+public class RegisterCommand extends PluginCommand {
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         requirePlayer(sender, p -> {

@@ -8,14 +8,14 @@ import java.util.Set;
 
 public final class CommandManager {
     private static final SportsDay PLUGIN = SportsDay.getInstance();
-    private static final Set<IPluginCommand> COMMANDS = new HashSet<>();
-    private static final IPluginCommand COMPETITION = new CompetitionCommand();
-    private static final IPluginCommand COMPETITIONGUI = new CompetitionGUICommand();
-    private static final IPluginCommand REGISTER = new RegisterCommand();
-    private static final IPluginCommand UNREGISTER = new UnregisterCommand();
-    private static final IPluginCommand MENU = new MenuCommand();
-    private static final IPluginCommand CUSTOMIZE = new CustomizeCommand();
-    private static final IPluginCommand PING = new PingCommand();
+    private static final Set<PluginCommand> COMMANDS = new HashSet<>();
+    private static final PluginCommand COMPETITION = new CompetitionCommand();
+    private static final PluginCommand COMPETITIONGUI = new CompetitionGUICommand();
+    private static final PluginCommand REGISTER = new RegisterCommand();
+    private static final PluginCommand UNREGISTER = new UnregisterCommand();
+    private static final PluginCommand MENU = new MenuCommand();
+    private static final PluginCommand CUSTOMIZE = new CustomizeCommand();
+    private static final PluginCommand PING = new PingCommand();
 
     public void register() {
         COMMANDS.add(COMPETITION);
@@ -25,7 +25,7 @@ public final class CommandManager {
         COMMANDS.add(MENU);
         COMMANDS.add(CUSTOMIZE);
         COMMANDS.add(PING);
-        for (IPluginCommand command : COMMANDS) {
+        for (PluginCommand command : COMMANDS) {
             Objects.requireNonNull(PLUGIN.getCommand(command.name())).setExecutor(command);
             Objects.requireNonNull(PLUGIN.getCommand(command.name())).setTabCompleter(command);
         }

@@ -21,7 +21,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.customize.CustomizeParticleEffect;
+import org.macausmp.sportsday.customize.ParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.event.JavelinGUI;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -104,18 +104,19 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
                 trident.setCustomNameVisible(true);
                 trident.customName(Component.translatable("event.javelin.javelin_name")
                         .arguments(p.displayName(), Component.text()));
-                addRunnable(new BukkitRunnable() {
-                    private final CustomizeParticleEffect effect = PlayerCustomize.getProjectileTrail(p);
-                    @Override
-                    public void run() {
-                        if (effect == null || trident.isDead() || trident.isOnGround()) {
-                            cancel();
-                            return;
+                final ParticleEffect effect = PlayerCustomize.getProjectileTrail(p);
+                if (effect != null) {
+                    addRunnable(new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            if (trident.isDead() || trident.isOnGround()) {
+                                cancel();
+                                return;
+                            }
+                            effect.play(p, trident.getLocation());
                         }
-                        p.spawnParticle(effect.getParticle(), trident.getLocation(),
-                                1, 0.3f, 0.3f, 0.3f, effect.getData());
-                    }
-                }.runTaskTimer(PLUGIN, 0, 1L));
+                    }.runTaskTimer(PLUGIN, 0, 1L));
+                }
             }
         }
     }

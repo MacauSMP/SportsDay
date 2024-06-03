@@ -30,6 +30,7 @@ public final class PlayerCustomize {
     private static final NamespacedKey CLOTHING = new NamespacedKey(PLUGIN, "clothing");
     private static final NamespacedKey BOAT_TYPE = new NamespacedKey(PLUGIN, "boat_type");
     private static final NamespacedKey WEAPON_SKIN = new NamespacedKey(PLUGIN, "weapon_skin");
+    private static final NamespacedKey VICTORY_DANCE = new NamespacedKey(PLUGIN, "victory_dance");
     private static final NamespacedKey PROJECTILE_TRAIL = new NamespacedKey(PLUGIN, "projectile_trail");
     private static final NamespacedKey WALKING_EFFECT = new NamespacedKey(PLUGIN, "walking_effect");
     private static final NamespacedKey GRAFFITI_SPRAY = new NamespacedKey(PLUGIN, "graffiti_spray");
@@ -163,35 +164,43 @@ public final class PlayerCustomize {
         set(player.getPersistentDataContainer(), WEAPON_SKIN, type.name());
     }
 
-    public static @Nullable CustomizeParticleEffect getProjectileTrail(@NotNull Player player) {
-        return get(player.getPersistentDataContainer(), PROJECTILE_TRAIL, CustomizeParticleEffect::valueOf);
+    public static @Nullable VictoryDance getVictoryDance(@NotNull Player player) {
+        return get(player.getPersistentDataContainer(), VICTORY_DANCE, VictoryDance::valueOf);
     }
 
-    public static void setProjectileTrail(@NotNull Player player, CustomizeParticleEffect effect) {
+    public static void setVictoryDance(@NotNull Player player, VictoryDance victoryDance) {
+        set(player.getPersistentDataContainer(), VICTORY_DANCE, victoryDance != null ? victoryDance.name() : null);
+    }
+
+    public static @Nullable ParticleEffect getProjectileTrail(@NotNull Player player) {
+        return get(player.getPersistentDataContainer(), PROJECTILE_TRAIL, ParticleEffect::valueOf);
+    }
+
+    public static void setProjectileTrail(@NotNull Player player, ParticleEffect effect) {
         set(player.getPersistentDataContainer(), PROJECTILE_TRAIL, effect != null ? effect.name() : null);
     }
 
-    public static @Nullable CustomizeParticleEffect getWalkingEffect(@NotNull Player player) {
-        return get(player.getPersistentDataContainer(), WALKING_EFFECT, CustomizeParticleEffect::valueOf);
+    public static @Nullable ParticleEffect getWalkingEffect(@NotNull Player player) {
+        return get(player.getPersistentDataContainer(), WALKING_EFFECT, ParticleEffect::valueOf);
     }
 
-    public static void setWalkingEffect(@NotNull Player player, CustomizeParticleEffect effect) {
+    public static void setWalkingEffect(@NotNull Player player, ParticleEffect effect) {
         set(player.getPersistentDataContainer(), WALKING_EFFECT, effect != null ? effect.name() : null);
     }
 
-    public static @Nullable CustomizeGraffitiSpray getGraffitiSpray(@NotNull Player player) {
-        return get(player.getPersistentDataContainer(), GRAFFITI_SPRAY, CustomizeGraffitiSpray::valueOf);
+    public static @Nullable GraffitiSpray getGraffitiSpray(@NotNull Player player) {
+        return get(player.getPersistentDataContainer(), GRAFFITI_SPRAY, GraffitiSpray::valueOf);
     }
 
-    public static void setGraffitiSpray(@NotNull Player player, CustomizeGraffitiSpray graffiti) {
+    public static void setGraffitiSpray(@NotNull Player player, GraffitiSpray graffiti) {
         set(player.getPersistentDataContainer(), GRAFFITI_SPRAY, graffiti != null ? graffiti.name() : null);
     }
 
-    public static @Nullable CustomizeMusickit getMusickit(@NotNull PersistentDataContainer pdc) {
-        return get(pdc, MUSICKIT, CustomizeMusickit::valueOf);
+    public static @Nullable Musickit getMusickit(@NotNull Player player) {
+        return get(player.getPersistentDataContainer(), MUSICKIT, Musickit::valueOf);
     }
 
-    public static void setMusickit(@NotNull Player player, CustomizeMusickit musickit) {
+    public static void setMusickit(@NotNull Player player, Musickit musickit) {
         set(player.getPersistentDataContainer(), MUSICKIT, musickit != null ? musickit.name() : null);
     }
 

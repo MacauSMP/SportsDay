@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.competition.sumo.Sumo;
 import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
@@ -73,7 +74,7 @@ public final class Competitions {
      * Load event data from the event.dat file and start the event.
      */
     public static void loadEventData(CommandSender sender) {
-        if (getCurrentEvent() != null && getCurrentEvent().getStatus() != Status.IDLE && getCurrentEvent().getStatus() != Status.ENDED) {
+        if (getCurrentEvent() != null) {
             sender.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
             return;
         }
@@ -139,7 +140,7 @@ public final class Competitions {
      * @return {@code True} if competition successfully started
      */
     public static boolean start(@NotNull CommandSender sender, String id) {
-        if (getCurrentEvent() != null && getCurrentEvent().getStatus() != Status.IDLE && getCurrentEvent().getStatus() != Status.ENDED) {
+        if (getCurrentEvent() != null) {
             sender.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
             return false;
         }
@@ -254,8 +255,8 @@ public final class Competitions {
      * Gets a view of all registered contestants.
      * @return a view of registered contestants
      */
-    public static @NotNull Collection<ContestantData> getContestants() {
-        return Map.copyOf(CONTESTANTS).values();
+    public static @NotNull @Unmodifiable Collection<ContestantData> getContestants() {
+        return List.copyOf(CONTESTANTS.values());
     }
 
     /**

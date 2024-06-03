@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
+import org.macausmp.sportsday.customize.GraffitiSpray;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
@@ -23,9 +23,9 @@ import java.util.List;
 
 public class GraffitiSprayGUI extends PluginGUI {
     private static final NamespacedKey GRAFFITI_SPRAY = new NamespacedKey(PLUGIN, "graffiti_spray");
-    private final PageBox<CustomizeGraffitiSpray> pageBox = new PageBox<>(this, 10, 54,
-            () -> List.of(CustomizeGraffitiSpray.values()));
-    private CustomizeGraffitiSpray selected;
+    private final PageBox<GraffitiSpray> pageBox = new PageBox<>(this, 10, 54,
+            () -> List.of(GraffitiSpray.values()));
+    private GraffitiSpray selected;
 
     public GraffitiSprayGUI(@NotNull Player player) {
         super(54, Component.translatable("gui.customize.graffiti_spray.title"));
@@ -50,7 +50,7 @@ public class GraffitiSprayGUI extends PluginGUI {
 
     @ButtonHandler("graffiti")
     public void graffiti(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PlayerCustomize.setGraffitiSpray(p, selected = CustomizeGraffitiSpray.values()[e.getSlot() - 10]);
+        PlayerCustomize.setGraffitiSpray(p, selected = GraffitiSpray.values()[e.getSlot() - 10]);
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
         update();
     }
@@ -62,7 +62,7 @@ public class GraffitiSprayGUI extends PluginGUI {
         update();
     }
 
-    private @NotNull ItemStack graffiti(@NotNull CustomizeGraffitiSpray graffiti) {
+    private @NotNull ItemStack graffiti(@NotNull GraffitiSpray graffiti) {
         ItemStack stack = ItemUtil.item(Material.PAINTING, "graffiti", graffiti.getName(),
                 graffiti == selected ? "gui.selected" : "gui.select");
         if (graffiti == selected) {

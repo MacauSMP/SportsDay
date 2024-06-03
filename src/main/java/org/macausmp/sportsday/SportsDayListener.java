@@ -29,8 +29,8 @@ import org.macausmp.sportsday.competition.AbstractEvent;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.competition.Status;
-import org.macausmp.sportsday.customize.CustomizeGraffitiSpray;
-import org.macausmp.sportsday.customize.CustomizeParticleEffect;
+import org.macausmp.sportsday.customize.GraffitiSpray;
+import org.macausmp.sportsday.customize.ParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.gui.competition.CompetitionMenuGUI;
@@ -51,11 +51,11 @@ public final class SportsDayListener implements Listener {
     @EventHandler
     public void onMove(@NotNull PlayerMoveEvent e) {
         Player p = e.getPlayer();
-        CustomizeParticleEffect effect = PlayerCustomize.getWalkingEffect(p);
+        ParticleEffect effect = PlayerCustomize.getWalkingEffect(p);
         if (effect != null) {
             Location loc = p.getLocation().clone();
             loc.setY(loc.y() + 0.3);
-            p.spawnParticle(effect.getParticle(), loc, 1, 0.3, 0.3, 0.3, effect.getData());
+            effect.play(p, loc);
         }
     }
 
@@ -132,7 +132,7 @@ public final class SportsDayListener implements Listener {
                         .color(NamedTextColor.YELLOW));
                 return;
             }
-            CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(p);
+            GraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(p);
             if (graffiti == null || Bukkit.getMap(graffiti.ordinal()) == null)
                 return;
             Block b = p.getTargetBlockExact(4);
@@ -179,7 +179,7 @@ public final class SportsDayListener implements Listener {
                         .color(NamedTextColor.YELLOW));
                 return;
             }
-            CustomizeGraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(p);
+            GraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(p);
             if (graffiti == null || Bukkit.getMap(graffiti.ordinal()) == null)
                 return;
             ItemStack map = new ItemStack(Material.FILLED_MAP);
