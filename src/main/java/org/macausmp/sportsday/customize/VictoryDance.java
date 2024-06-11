@@ -1,7 +1,7 @@
 package org.macausmp.sportsday.customize;
 
 import net.kyori.adventure.text.Component;
-import org.bukkit.*;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;

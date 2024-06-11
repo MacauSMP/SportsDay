@@ -16,12 +16,7 @@ import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.ConfirmationGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
-    private static final Set<CompetitionConsoleGUI> HANDLER = new HashSet<>();
-
     public CompetitionConsoleGUI() {
         super(27, Component.translatable("gui.console.title"));
         for (int i = 0; i < 9; i++)
@@ -47,11 +42,12 @@ public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
             getInventory().setItem(18, status());
             getInventory().setItem(19, player());
         }
-        HANDLER.add(this);
     }
 
     public static void updateGUI() {
-        HANDLER.forEach(CompetitionConsoleGUI::update);
+        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
+                .filter(inv -> inv.getHolder() instanceof CompetitionConsoleGUI)
+                .map(inv -> (CompetitionConsoleGUI) inv.getHolder()).forEach(CompetitionConsoleGUI::update);
     }
 
     @ButtonHandler("start_competitions")
@@ -107,11 +103,6 @@ public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
         Component lore = Component.translatable("competition.contestants.online").color(NamedTextColor.GREEN)
                 .arguments(Component.text(Competitions.getOnlineContestants().size()).color(NamedTextColor.YELLOW));
         return ItemUtil.item(Material.PAPER, null, display, lore);
-    }
-
-    @Override
-    public void onClose() {
-        HANDLER.remove(this);
     }
 
     private static boolean hasEvent() {

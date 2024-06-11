@@ -52,7 +52,6 @@ public class SumoGUI extends AbstractEventGUI<Sumo> {
     public void update() {
         if (Competitions.getCurrentEvent() != event)
             return;
-        HANDLER.add(this);
         if (event.getSumoStage().getCurrentMatch() != null)
             getInventory().setItem(18, currentMatch(event.getSumoStage()));
         stagePageBox.updatePage(this::stage);

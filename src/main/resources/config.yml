@@ -1,5 +1,5 @@
+#file: noinspection SpellCheckingInspection
 # 想要顯示出來的伺服器IP
-# noinspection SpellCheckingInspection
 server_ip: §esample.server.ip
 # 判斷玩家到達終點或完成圈數的方塊
 finish_line_block: GOLD_BLOCK
@@ -13,6 +13,12 @@ ready_time: 15
 event_end_countdown: 60
 # 中途斷線的玩家充許重新連線時間
 reconnect_time: 50
+# enable - 是否啟用該比賽
+# least_players_required - 開始該比賽最少需要的選手人數
+# lap - 徑類項目完成比賽的所需圈數
+# location - 比賽場地開始位置
+# ready_command - 徑類項目準備所運行的指令，可以使用函數指令運行多條指令
+# start_command - 徑類項目開始所運行的指令，可以使用函數指令運行多條指令
 # 飛行賽
 elytra_racing:
   enable: true
@@ -33,6 +39,7 @@ ice_boat_racing:
   enable: true
   least_players_required: 8
   laps: 2
+  # 令玩家般隻向上彈的方塊
   spring_block: SLIME_BLOCK
   location:
     ==: org.bukkit.Location
@@ -90,7 +97,9 @@ parkour:
 sumo:
   enable: true
   least_players_required: 8
+  # 是否啟用武器（擊退棒）
   enable_weapon: true
+  # 武器出現時間（秒）
   weapon_time: 45
   location:
     ==: org.bukkit.Location
@@ -100,6 +109,7 @@ sumo:
     z: 0
     pitch: 0
     yaw: 0
+  # 一號選手開始位置
   p1-location:
     ==: org.bukkit.Location
     world: world
@@ -108,6 +118,7 @@ sumo:
     z: 0
     pitch: 0
     yaw: 0
+  # 二號選手開始位置
   p2-location:
     ==: org.bukkit.Location
     world: world

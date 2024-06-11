@@ -5,13 +5,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.SportsDayListener;
 import org.macausmp.sportsday.util.ItemUtil;
 
 import java.lang.reflect.InvocationTargetException;
@@ -37,14 +35,13 @@ public abstract class PluginGUI implements InventoryHolder {
      * @param title gui title
      */
     public PluginGUI(int size, Component title) {
-        Class<? extends PluginGUI> clazz = this.getClass();
-        if (!BUTTON_HANDLER.containsKey(clazz)) {
-            BUTTON_HANDLER.put(clazz, new HashMap<>());
-            Method[] methods = this.getClass().getMethods();
+        if (!BUTTON_HANDLER.containsKey(getClass())) {
+            BUTTON_HANDLER.put(getClass(), new HashMap<>());
+            Method[] methods = getClass().getMethods();
             for (Method method : methods) {
                 ButtonHandler handler = method.getAnnotation(ButtonHandler.class);
-                if (handler != null && !BUTTON_HANDLER.get(clazz).containsKey(handler.value()))
-                    BUTTON_HANDLER.get(clazz).put(handler.value(), method);
+                if (handler != null && !BUTTON_HANDLER.get(getClass()).containsKey(handler.value()))
+                    BUTTON_HANDLER.get(getClass()).put(handler.value(), method);
             }
         }
         inventory = Bukkit.createInventory(this, size, title);
@@ -80,9 +77,4 @@ public abstract class PluginGUI implements InventoryHolder {
             throw new RuntimeException(e);
         }
     }
-
-    /**
-     * Listener call from {@link SportsDayListener#onClose(InventoryCloseEvent)}.
-     */
-    public void onClose() {}
 }

@@ -17,10 +17,11 @@ import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.UUID;
 
 public class ContestantsListGUI extends AbstractCompetitionGUI {
-    private static final Set<ContestantsListGUI> HANDLER = new HashSet<>();
     private final PageBox<ContestantData> pageBox = new PageBox<>(this, 18, 54,
             () -> Competitions.getContestants().stream().sorted(Comparator.comparingInt(ContestantData::getNumber)).toList());
 
@@ -42,11 +43,12 @@ public class ContestantsListGUI extends AbstractCompetitionGUI {
     public void update() {
         getInventory().setItem(13, pages());
         pageBox.updatePage(i -> icon(i.getUUID()));
-        HANDLER.add(this);
     }
 
     public static void updateGUI() {
-        HANDLER.forEach(ContestantsListGUI::update);
+        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
+                .filter(inv -> inv.getHolder() instanceof ContestantsListGUI)
+                .map(inv -> (ContestantsListGUI) inv.getHolder()).forEach(ContestantsListGUI::update);
     }
 
     @ButtonHandler("player_icon")
@@ -89,10 +91,5 @@ public class ContestantsListGUI extends AbstractCompetitionGUI {
                 number, score, "", detail);
         icon.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(data.getOfflinePlayer()));
         return icon;
-    }
-
-    @Override
-    public void onClose() {
-        HANDLER.remove(this);
     }
 }

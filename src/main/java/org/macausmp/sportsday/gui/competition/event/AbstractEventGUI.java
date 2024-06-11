@@ -5,11 +5,7 @@ import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.competition.AbstractCompetitionGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public abstract class AbstractEventGUI<T extends IEvent> extends AbstractCompetitionGUI {
-    protected static final Set<AbstractEventGUI<? extends IEvent>> HANDLER = new HashSet<>();
     protected final T event;
 
     public AbstractEventGUI(int size, Component title, T event) {
@@ -24,11 +20,8 @@ public abstract class AbstractEventGUI<T extends IEvent> extends AbstractCompeti
     }
 
     public static void updateGUI() {
-        HANDLER.forEach(AbstractEventGUI::update);
-    }
-
-    @Override
-    public void onClose() {
-        HANDLER.remove(this);
+        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
+                .filter(inv -> inv.getHolder() instanceof AbstractEventGUI)
+                .map(inv -> (AbstractEventGUI<? extends IEvent>) inv.getHolder()).forEach(AbstractEventGUI::update);
     }
 }

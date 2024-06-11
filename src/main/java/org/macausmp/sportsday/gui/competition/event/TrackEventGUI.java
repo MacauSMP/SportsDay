@@ -34,7 +34,6 @@ public class TrackEventGUI extends AbstractEventGUI<ITrackEvent> {
     public void update() {
         if (Competitions.getCurrentEvent() != event)
             return;
-        HANDLER.add(this);
         pageBox.updatePage(this::icon);
     }
 

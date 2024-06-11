@@ -33,7 +33,6 @@ public class JavelinGUI extends AbstractEventGUI<JavelinThrow> {
     public void update() {
         if (Competitions.getCurrentEvent() != event)
             return;
-        HANDLER.add(this);
         if (event.getCurrentPlayer() != null)
             getInventory().setItem(18, current());
         pageBox.updatePage(this::icon);

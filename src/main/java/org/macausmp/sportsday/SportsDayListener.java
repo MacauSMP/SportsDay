@@ -16,7 +16,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
@@ -216,12 +215,6 @@ public final class SportsDayListener implements Listener {
             if (current != null && ItemUtil.isBind(current) || button != null && ItemUtil.isBind(button))
                 e.setCancelled(true);
         }
-    }
-
-    @EventHandler
-    public void onClose(@NotNull InventoryCloseEvent e) {
-        if (e.getInventory().getHolder() instanceof PluginGUI gui)
-            gui.onClose();
     }
 
     @EventHandler

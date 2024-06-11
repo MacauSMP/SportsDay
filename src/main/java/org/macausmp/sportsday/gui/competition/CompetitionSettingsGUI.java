@@ -12,15 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.ButtonHandler;
-import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
-    private static final Set<CompetitionSettingsGUI> HANDLER = new HashSet<>();
-
     public CompetitionSettingsGUI() {
         super(54, Component.translatable("gui.settings.title"));
         for (int i = 0; i < 9; i++)
@@ -36,7 +30,6 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
         getInventory().setItem(22, PARKOUR);
         getInventory().setItem(23, SUMO);
         update();
-        HANDLER.add(this);
     }
 
     @Override
@@ -50,7 +43,9 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
     }
 
     public static void updateGUI() {
-        HANDLER.forEach(PluginGUI::update);
+        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
+                .filter(inv -> inv.getHolder() instanceof CompetitionSettingsGUI)
+                .map(inv -> (CompetitionSettingsGUI) inv.getHolder()).forEach(CompetitionSettingsGUI::update);
     }
 
     @ButtonHandler("status_toggle")

@@ -1,7 +1,6 @@
 package org.macausmp.sportsday;
 
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -9,6 +8,7 @@ import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -57,8 +57,8 @@ public final class SportsDay extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
         registerTranslation();
-        getConfig().options().copyDefaults(true);
-        saveConfig();
+        saveDefaultConfig();
+        reloadConfig();
         Competitions.load();
         CONTESTANTS = registerTeam("contestants", Component.translatable("role.contestants"), NamedTextColor.GREEN);
         REFEREES = registerTeam("referees", Component.translatable("role.referees"), NamedTextColor.GOLD);
@@ -72,7 +72,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
     }
 
     private void registerTranslation() {
-        TranslationRegistry registry = TranslationRegistry.create(Key.key("sportsday:resource"));
+        TranslationRegistry registry = TranslationRegistry.create(new NamespacedKey(this, "resource"));
         // There is no way to use an alternative language other than the en_US localization file that ships as part of the vanilla jar
         ResourceBundle bundle = ResourceBundle.getBundle("lang.Bundle", Locale.US, UTF8ResourceBundleControl.get());
         registry.registerAll(Locale.US, bundle, true);
@@ -143,43 +143,38 @@ public final class SportsDay extends JavaPlugin implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        final Component head = getHeader();
-                        final Component time = Component.text(formatter.format(Instant.now()));
-                        for (Player p : getServer().getOnlinePlayers()) {
-                            Component header = head;
-                            if (Competitions.isContestant(p)) {
-                                ContestantData data = Competitions.getContestant(p.getUniqueId());
-                                Component number = Component.newline().append(Component.translatable("tablist.number")
-                                        .arguments(Component.text(data.getNumber())));
-                                Component score = Component.newline().append(Component.translatable("tablist.score")
-                                        .arguments(Component.text(data.getScore())));
-                                header = header.append(number).append(score);
-                            }
-                            Component ping = Component.newline().append(Component.translatable("tablist.ping")
-                                    .arguments(Component.text(p.getPing() + "ms")
-                                            .color(p.getPing() < 50 ? NamedTextColor.GREEN : NamedTextColor.YELLOW)));
-                            Component footer = Component.translatable("tablist.local_time").arguments(time).append(ping);
-                            p.sendPlayerListHeaderAndFooter(header, footer);
-                            p.playerListName(p.teamDisplayName());
-                        }
+                final Component head = getHeader();
+                final Component time = Component.text(formatter.format(Instant.now()));
+                for (Player p : getServer().getOnlinePlayers()) {
+                    Component header = head;
+                    if (Competitions.isContestant(p)) {
+                        ContestantData data = Competitions.getContestant(p.getUniqueId());
+                        Component number = Component.newline().append(Component.translatable("tablist.number")
+                                .arguments(Component.text(data.getNumber())));
+                        Component score = Component.newline().append(Component.translatable("tablist.score")
+                                .arguments(Component.text(data.getScore())));
+                        header = header.append(number).append(score);
                     }
-
-                    private @NotNull Component getHeader() {
-                        IEvent event = Competitions.getCurrentEvent();
-                        Component competition = Component.newline().append(event == null
-                                ? Component.translatable("tablist.idle")
-                                : Component.translatable("tablist.current").arguments(event.getName(), event.getStatus().getName()));
-                        Component count = Component.newline().append(Component.translatable("tablist.contestants_count")
-                                .arguments(Component.text(Competitions.getOnlineContestants().size()),
-                                        Component.text(Competitions.getContestants().size())));
-                        return Component.translatable("tablist.title").append(competition).append(count);
-                    }
-                }.runTaskTimer(instance, 0L, 20L);
+                    Component ping = Component.newline().append(Component.translatable("tablist.ping")
+                            .arguments(Component.text(p.getPing() + "ms")
+                                    .color(p.getPing() < 50 ? NamedTextColor.GREEN : NamedTextColor.YELLOW)));
+                    Component footer = Component.translatable("tablist.local_time").arguments(time).append(ping);
+                    p.sendPlayerListHeaderAndFooter(header, footer);
+                    p.playerListName(p.teamDisplayName());
+                }
             }
-        }.runTaskLater(this, d);
+
+            private @NotNull Component getHeader() {
+                IEvent event = Competitions.getCurrentEvent();
+                Component competition = Component.newline().append(event == null
+                        ? Component.translatable("tablist.idle")
+                        : Component.translatable("tablist.current").arguments(event.getName(), event.getStatus().getName()));
+                Component count = Component.newline().append(Component.translatable("tablist.contestants_count")
+                        .arguments(Component.text(Competitions.getOnlineContestants().size()),
+                                Component.text(Competitions.getContestants().size())));
+                return Component.translatable("tablist.title").append(competition).append(count);
+            }
+        }.runTaskTimer(instance, d, 20L);
     }
 
     @EventHandler

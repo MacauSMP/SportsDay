@@ -16,13 +16,10 @@ import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.ConfirmationGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 public class ContestantProfileGUI extends AbstractCompetitionGUI {
-    private static final Set<ContestantProfileGUI> HANDLER = new HashSet<>();
     private final ContestantData data;
 
     public ContestantProfileGUI(@NotNull ContestantData data) {
@@ -43,11 +40,13 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
         getInventory().setItem(18, icon());
         getInventory().setItem(19, increase());
         getInventory().setItem(20, decrease());
-        HANDLER.add(this);
     }
 
     public static void updateProfile(UUID uuid) {
-        HANDLER.stream().filter(gui -> gui.data.getUUID().equals(uuid)).forEach(ContestantProfileGUI::update);
+        PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
+                .filter(inv -> inv.getHolder() instanceof ContestantProfileGUI)
+                .map(inv -> (ContestantProfileGUI) inv.getHolder())
+                .filter(gui -> gui.data.getUUID().equals(uuid)).forEach(ContestantProfileGUI::update);
     }
 
     @ButtonHandler("increase")
@@ -121,10 +120,5 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
                 .color(NamedTextColor.YELLOW);
         return ItemUtil.item(Material.RED_STAINED_GLASS_PANE, "decrease", "gui.contestant.decrease",
                 score, "gui.contestant.decrease_lore1", "gui.contestant.decrease_lore2");
-    }
-
-    @Override
-    public void onClose() {
-        HANDLER.remove(this);
     }
 }
