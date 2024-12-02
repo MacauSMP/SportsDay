@@ -1,7 +1,9 @@
 package org.macausmp.sportsday.customize;
 
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.*;
-import org.bukkit.entity.Boat;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
@@ -46,10 +48,11 @@ public final class PlayerCustomize {
         TRIM_MATERIAL.put(Material.DIAMOND, TrimMaterial.DIAMOND);
         TRIM_MATERIAL.put(Material.LAPIS_LAZULI, TrimMaterial.LAPIS);
         TRIM_MATERIAL.put(Material.AMETHYST_SHARD, TrimMaterial.AMETHYST);
-        Registry.TRIM_PATTERN.forEach(k -> TRIM_PATTERN.put(k.key().value().toUpperCase(), k));
+        Registry<TrimPattern> registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN);
+        registry.forEach(pattern -> TRIM_PATTERN.put(Objects.requireNonNull(registry.getKey(pattern)).value().toUpperCase(), pattern));
     }
 
-    public static @Unmodifiable List<Material> getTrimMaterial() {
+    public static @Unmodifiable @NotNull List<Material> getTrimMaterial() {
         return List.copyOf(TRIM_MATERIAL.keySet());
     }
 
@@ -82,7 +85,7 @@ public final class PlayerCustomize {
         ItemStack item = new ItemStack(cloth.material);
         item.editMeta(meta -> {
             meta.setUnbreakable(true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
         });
         if (cloth.colorable())
             item.editMeta(ColorableArmorMeta.class, meta -> meta.setColor(cloth.color));
@@ -148,12 +151,12 @@ public final class PlayerCustomize {
         player.getPersistentDataContainer().set(CLOTHING, PersistentDataType.TAG_CONTAINER, container);
     }
 
-    public static Boat.@NotNull Type getBoatType(@NotNull Player player) {
-        return Optional.ofNullable(get(player.getPersistentDataContainer(), BOAT_TYPE, Boat.Type::valueOf)).orElse(Boat.Type.OAK);
+    public static @NotNull EntityType getBoatType(@NotNull Player player) {
+        return Optional.ofNullable(get(player.getPersistentDataContainer(), BOAT_TYPE, EntityType::valueOf)).orElse(EntityType.OAK_BOAT);
     }
 
     public static void setBoatType(@NotNull Player player, @NotNull Material type) {
-        set(player.getPersistentDataContainer(), BOAT_TYPE, type.name().substring(0, type.name().length() - 5));
+        set(player.getPersistentDataContainer(), BOAT_TYPE, type.name());
     }
 
     public static @NotNull Material getWeaponSkin(@NotNull Player player) {
@@ -208,7 +211,12 @@ public final class PlayerCustomize {
         String value = pdc.get(key, PersistentDataType.STRING);
         if (value == null)
             return null;
-        return function.apply(value);
+        try {
+            return function.apply(value);
+        } catch (IllegalArgumentException e) {
+            pdc.remove(key);
+            return null;
+        }
     }
 
     private static void set(@NotNull PersistentDataContainer pdc, @NotNull NamespacedKey key, @Nullable String value) {

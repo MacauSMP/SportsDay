@@ -4,13 +4,9 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.GraffitiSpray;
 import org.macausmp.sportsday.customize.PlayerCustomize;
@@ -22,7 +18,6 @@ import org.macausmp.sportsday.util.ItemUtil;
 import java.util.List;
 
 public class GraffitiSprayGUI extends PluginGUI {
-    private static final NamespacedKey GRAFFITI_SPRAY = new NamespacedKey(PLUGIN, "graffiti_spray");
     private final PageBox<GraffitiSpray> pageBox = new PageBox<>(this, 10, 54,
             () -> List.of(GraffitiSpray.values()));
     private GraffitiSpray selected;
@@ -65,11 +60,8 @@ public class GraffitiSprayGUI extends PluginGUI {
     private @NotNull ItemStack graffiti(@NotNull GraffitiSpray graffiti) {
         ItemStack stack = ItemUtil.item(Material.PAINTING, "graffiti", graffiti.getName(),
                 graffiti == selected ? "gui.selected" : "gui.select");
-        if (graffiti == selected) {
-            stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-        }
-        stack.editMeta(meta -> meta.getPersistentDataContainer().set(GRAFFITI_SPRAY, PersistentDataType.STRING, graffiti.name()));
+        if (graffiti == selected)
+            stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
         return stack;
     }
 

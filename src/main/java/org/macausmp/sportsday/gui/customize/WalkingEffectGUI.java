@@ -4,10 +4,8 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.ParticleEffect;
@@ -62,10 +60,8 @@ public class WalkingEffectGUI extends PluginGUI {
     private @NotNull ItemStack effect(@NotNull ParticleEffect effect) {
         ItemStack stack = ItemUtil.item(effect.getMaterial(), "walking_effect", effect.getName(),
                 effect == selected ? "gui.selected" : "gui.select");
-        if (effect == selected) {
-            stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-        }
+        if (effect == selected)
+            stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
         return stack;
     }
 

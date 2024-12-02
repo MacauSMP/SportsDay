@@ -4,13 +4,9 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.Musickit;
 import org.macausmp.sportsday.customize.PlayerCustomize;
@@ -22,7 +18,6 @@ import org.macausmp.sportsday.util.ItemUtil;
 import java.util.List;
 
 public class MusickitGUI extends PluginGUI {
-    private static final NamespacedKey MUSICKIT = new NamespacedKey(PLUGIN, "musickit");
     private final PageBox<Musickit> pageBox = new PageBox<>(this, 10, 54,
             () -> List.of(Musickit.values()));
     private Musickit selected;
@@ -71,11 +66,8 @@ public class MusickitGUI extends PluginGUI {
     private @NotNull ItemStack musickit(@NotNull Musickit musickit) {
         ItemStack stack = ItemUtil.item(Material.JUKEBOX, "musickit", musickit.getName(), "gui.customize.musickit.view",
                 musickit == selected ? "gui.selected" : "gui.select");
-        if (musickit == selected) {
-            stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-        }
-        stack.editMeta(meta -> meta.getPersistentDataContainer().set(MUSICKIT, PersistentDataType.STRING, musickit.name()));
+        if (musickit == selected)
+            stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
         return stack;
     }
 

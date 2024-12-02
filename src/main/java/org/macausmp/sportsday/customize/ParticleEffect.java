@@ -11,15 +11,15 @@ import org.macausmp.sportsday.util.TextUtil;
 
 public enum ParticleEffect {
     GLOW("customize.particle.glow", Material.GLOWSTONE_DUST, new ParticleBuilder(Particle.GLOW)),
-    ENCHANT("customize.particle.enchant", Material.ENCHANTING_TABLE, new ParticleBuilder(Particle.ENCHANTMENT_TABLE)),
+    ENCHANT("customize.particle.enchant", Material.ENCHANTING_TABLE, new ParticleBuilder(Particle.ENCHANT)),
     LAVA("customize.particle.lava", Material.LAVA_BUCKET, new ParticleBuilder(Particle.LAVA)),
     WATER("customize.particle.water", Material.WATER_BUCKET, new ParticleBuilder(Particle.FALLING_WATER)),
     CHERRY("customize.particle.cherry", Material.CHERRY_LEAVES, new ParticleBuilder(Particle.CHERRY_LEAVES)),
     HEART("customize.particle.heart", Material.GOLDEN_APPLE, new ParticleBuilder(Particle.HEART)),
     NOTE("customize.particle.note", Material.NOTE_BLOCK, new ParticleBuilder(Particle.NOTE)),
-    GREEN_STAR("customize.particle.green_star", Material.EMERALD, new ParticleBuilder(Particle.VILLAGER_HAPPY)),
+    GREEN_STAR("customize.particle.green_star", Material.EMERALD, new ParticleBuilder(Particle.HAPPY_VILLAGER)),
     BLOOD("customize.particle.blood", Material.REDSTONE,
-            new ParticleBuilder(Particle.BLOCK_CRACK).data(Material.REDSTONE_BLOCK.createBlockData()));
+            new ParticleBuilder(Particle.BLOCK).data(Material.REDSTONE_BLOCK.createBlockData()));
 
     private final Component name;
     private final Particle particle;

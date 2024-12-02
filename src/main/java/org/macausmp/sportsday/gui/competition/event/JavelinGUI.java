@@ -20,7 +20,7 @@ public class JavelinGUI extends AbstractEventGUI<JavelinThrow> {
     private final PageBox<ContestantData> pageBox;
 
     public JavelinGUI(@NotNull JavelinThrow event) {
-        super(54, Component.translatable("event.name.javelin_throw"), event);
+        super(54, event);
         this.pageBox = new PageBox<>(this, 36, 54, () -> event.getContestants().stream().toList());
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 27, BOARD);

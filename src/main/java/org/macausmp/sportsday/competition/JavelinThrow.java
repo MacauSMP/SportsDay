@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Trident;
@@ -13,7 +12,6 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -68,8 +66,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
         ItemStack trident = ItemUtil.setBind(ItemUtil.item(Material.TRIDENT, null, display, lore));
         trident.editMeta(meta -> {
             meta.setUnbreakable(true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            trident.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
+            meta.setEnchantmentGlintOverride(true);
         });
         return trident;
     }
@@ -160,7 +157,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
                 reconnectTask.cancel();
                 p.getInventory().setItem(0, TRIDENT);
                 Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.player_reconnected").color(NamedTextColor.YELLOW));
-                p.teleport(getLocation());
+                p.teleportAsync(getLocation());
                 p.setGameMode(GameMode.ADVENTURE);
                 queue.remove(Competitions.getContestant(p.getUniqueId()));
             }
@@ -251,6 +248,10 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
             int i = 3;
             @Override
             public void run() {
+                if (isPaused()) {
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.pause.broadcast"));
+                    return;
+                }
                 if (i > 0)
                     Bukkit.getServer().sendActionBar(Component.translatable("event.javelin.next_round_countdown")
                             .arguments(Component.text(i)).color(NamedTextColor.YELLOW));

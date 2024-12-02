@@ -48,7 +48,7 @@ public class DanceMacabre extends Animation {
             mob.setAggressive(false);
             mob.setVelocity(new Vector(0, 0.6, 0));
             mob.setNoDamageTicks(20);
-            mob.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 5, false, false));
+            mob.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 200, 5, false, false));
             mobs.add(mob);
         }
         mobs.forEach(mob -> {

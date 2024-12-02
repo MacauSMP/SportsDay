@@ -30,7 +30,7 @@ public class ContestantsListGUI extends AbstractCompetitionGUI {
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 9, BOARD);
         getInventory().setItem(0, COMPETITION_CONSOLE);
-        getInventory().setItem(1, ItemUtil.addWrapper(CONTESTANTS_LIST));
+        getInventory().setItem(1, ItemUtil.setGlint(CONTESTANTS_LIST));
         getInventory().setItem(2, COMPETITION_SETTINGS);
         getInventory().setItem(3, VERSION);
         getInventory().setItem(9, PREVIOUS_PAGE);

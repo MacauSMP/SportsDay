@@ -5,11 +5,9 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
@@ -72,10 +70,8 @@ public class ClothingColorGUI extends PluginGUI {
 
     private @NotNull ItemStack dye(Material material) {
         ItemStack stack = ItemUtil.item(material, "dye", material == selected ? "gui.selected" : "gui.select");
-        if (material == selected) {
-            stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-        }
+        if (material == selected)
+            stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
         return stack;
     }
 

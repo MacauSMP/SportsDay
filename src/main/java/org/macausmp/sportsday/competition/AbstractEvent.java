@@ -13,7 +13,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.SportsDayListener;
 import org.macausmp.sportsday.customize.Musickit;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.customize.VictoryDance;
@@ -33,6 +32,7 @@ public abstract class AbstractEvent implements IEvent {
     private final Location location;
     private final World world;
     private Status status = Status.IDLE;
+    private boolean pause = false;
     private long time;
     private final Collection<ContestantData> contestants = new HashSet<>();
     private final List<ContestantData> leaderboard = new ArrayList<>();
@@ -85,11 +85,17 @@ public abstract class AbstractEvent implements IEvent {
 
     /**
      * Set the current event status.
+     *
      * @param status new status
      */
     protected final void setStatus(Status status) {
         this.status = status;
         CompetitionConsoleGUI.updateGUI();
+    }
+
+    @Override
+    public boolean isPaused() {
+        return pause;
     }
 
     @Override
@@ -114,7 +120,11 @@ public abstract class AbstractEvent implements IEvent {
             int i = PLUGIN.getConfig().getInt("ready_time");
             @Override
             public void run() {
-                if (i % 5 == 0 || (i <= 5 && i > 0)) {
+                if (pause) {
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.pause.broadcast"));
+                    return;
+                }
+                if (i % 5 == 0 || i <= 5 && i > 0) {
                     Bukkit.getServer().sendActionBar(Component.translatable("event.start.countdown")
                             .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                     Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
@@ -134,6 +144,7 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     protected void init() {
+        pause = false;
         time = System.currentTimeMillis();
         Bukkit.getOnlinePlayers().forEach(p -> {
             leavePractice(p);
@@ -152,7 +163,7 @@ public abstract class AbstractEvent implements IEvent {
             PlayerCustomize.suitUp(p);
             p.getInventory().setItem(4, ItemUtil.SPRAY);
             p.setRespawnLocation(location, true);
-            p.teleport(location);
+            p.teleportAsync(location);
         });
     }
 
@@ -222,7 +233,7 @@ public abstract class AbstractEvent implements IEvent {
         setStatus(Status.IDLE);
         Bukkit.getOnlinePlayers().forEach(p -> {
             p.getPersistentDataContainer().remove(IN_GAME);
-            p.teleport(location);
+            p.teleportAsync(location);
             p.setGameMode(GameMode.ADVENTURE);
         });
         Competitions.getOnlineContestants().forEach(d -> {
@@ -233,7 +244,17 @@ public abstract class AbstractEvent implements IEvent {
             p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
         });
         getWorld().getEntitiesByClass(ItemFrame.class).stream()
-                .filter(e -> e.getPersistentDataContainer().has(SportsDayListener.GRAFFITI)).forEach(ItemFrame::remove);
+                .filter(e -> e.getPersistentDataContainer().has(SportsDay.GRAFFITI)).forEach(ItemFrame::remove);
+    }
+
+    public void pause() {
+        pause = true;
+        Bukkit.getServer().sendActionBar(Component.translatable("event.pause.broadcast"));
+    }
+
+    public void unpause() {
+        pause = false;
+        Bukkit.getServer().sendActionBar(Component.translatable("event.unpause.broadcast"));
     }
 
     /**
@@ -279,7 +300,7 @@ public abstract class AbstractEvent implements IEvent {
         PlayerCustomize.suitUp(player);
         player.getInventory().setItem(8, ItemUtil.LEAVE_PRACTICE);
         player.setRespawnLocation(location, true);
-        player.teleport(location);
+        player.teleportAsync(location);
         player.sendMessage(Component.translatable("contestant.practice.teleport.venue").arguments(name));
         onPractice(player);
         player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));

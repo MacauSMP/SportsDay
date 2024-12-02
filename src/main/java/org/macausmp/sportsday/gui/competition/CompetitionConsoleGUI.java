@@ -17,17 +17,25 @@ import org.macausmp.sportsday.gui.ConfirmationGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
 public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
+    private static final ItemStack START_COMPETITION = ItemUtil.head(ItemUtil.START, "start_competition", "gui.start.title", "gui.start.lore");
+    private static final ItemStack LOAD_COMPETITION = ItemUtil.head(ItemUtil.START, "load_competition", "gui.load.title", "gui.load.lore");
+    private static final ItemStack PAUSE_COMPETITION = ItemUtil.head(ItemUtil.PAUSE, "pause_competition", "gui.pause.title", "gui.pause.lore");
+    private static final ItemStack UNPAUSE_COMPETITION = ItemUtil.head(ItemUtil.START, "unpause_competition", "gui.unpause.title", "gui.unpause.lore");
+    private static final ItemStack END_COMPETITION = ItemUtil.item(Material.RED_CONCRETE, "end_competition", "gui.end.title", "gui.end.lore");
+
     public CompetitionConsoleGUI() {
         super(27, Component.translatable("gui.console.title"));
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 9, BOARD);
-        getInventory().setItem(0, ItemUtil.addWrapper(COMPETITION_CONSOLE));
+        getInventory().setItem(0, ItemUtil.setGlint(COMPETITION_CONSOLE));
         getInventory().setItem(1, CONTESTANTS_LIST);
         getInventory().setItem(2, COMPETITION_SETTINGS);
         getInventory().setItem(3, VERSION);
         if (hasEvent()) {
             getInventory().setItem(18, status());
             getInventory().setItem(19, player());
+            getInventory().setItem(21, PAUSE_COMPETITION);
+            getInventory().setItem(22, UNPAUSE_COMPETITION);
             getInventory().setItem(26, END_COMPETITION);
         } else {
             getInventory().setItem(18, START_COMPETITION);
@@ -50,32 +58,54 @@ public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
                 .map(inv -> (CompetitionConsoleGUI) inv.getHolder()).forEach(CompetitionConsoleGUI::update);
     }
 
-    @ButtonHandler("start_competitions")
+    @ButtonHandler("start_competition")
     public void start(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (Competitions.getCurrentEvent() != null && Competitions.getCurrentEvent().getStatus() != Status.ENDED) {
             p.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
             p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         p.openInventory(new CompetitionStartGUI().getInventory());
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
     }
 
-    @ButtonHandler("load_competitions")
+    @ButtonHandler("load_competition")
     public void load(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (Competitions.getCurrentEvent() != null && Competitions.getCurrentEvent().getStatus() != Status.ENDED) {
             p.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
             p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
-        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         Competitions.loadEventData(p);
+        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+    }
+
+    @ButtonHandler("pause_competition")
+    public void pause(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        if (Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStatus() == Status.ENDED) {
+            p.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
+            p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+            return;
+        }
+        p.playSound(Sound.sound(Key.key(Competitions.pause(p) ?
+                "minecraft:ui.button.click" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+    }
+
+    @ButtonHandler("unpause_competition")
+    public void unpause(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        if (Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStatus() == Status.ENDED) {
+            p.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
+            p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
+            return;
+        }
+        p.playSound(Sound.sound(Key.key(Competitions.unpause(p) ?
+                "minecraft:ui.button.click" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
     }
 
     @ButtonHandler("end_competition")
     public void end(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (Competitions.getCurrentEvent() == null || Competitions.getCurrentEvent().getStatus() == Status.ENDED) {
-            p.sendMessage(Component.translatable("command.competition.end.failed").color(NamedTextColor.RED));
+            p.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
             p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
             return;
         }
@@ -83,7 +113,7 @@ public class CompetitionConsoleGUI extends AbstractCompetitionGUI {
         p.openInventory(new ConfirmationGUI(this, player -> {
             boolean b = Competitions.forceEnd(player);
             player.playSound(Sound.sound(Key.key(b ?
-                    "minecraft:entity.enderman.teleport" : "minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
+                    "minecraft:ui.button.click" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
             return b;
         }).getInventory());
     }

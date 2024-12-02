@@ -6,10 +6,8 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +33,7 @@ public class SumoGUI extends AbstractEventGUI<Sumo> {
     private final PageBox<SumoMatch> matchPageBox;
 
     public SumoGUI(@NotNull Sumo event) {
-        super(54, Component.translatable("event.name.sumo"), event);
+        super(54, event);
         this.stagePageBox = new PageBox<>(this, 28, 35, () -> List.of(event.getSumoStages()));
         this.selectedStage = event.getSumoStage();
         this.matchPageBox = new PageBox<>(this, 45, 54, () -> selectedStage.getMatchList());
@@ -109,11 +107,11 @@ public class SumoGUI extends AbstractEventGUI<Sumo> {
                         ? Component.translatable("{0} #" + stage.getNumber()).arguments(stage.getName())
                         : stage.getName()),
                 "gui.competition.sumo.stage.lore");
-        stack.editMeta(meta -> meta.getPersistentDataContainer().set(STAGE_NUMBER, PersistentDataType.INTEGER, stage.getNumber()));
-        if (stage == selectedStage) {
-            stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-        }
+        stack.editMeta(meta -> {
+            meta.getPersistentDataContainer().set(STAGE_NUMBER, PersistentDataType.INTEGER, stage.getNumber());
+            if (stage == selectedStage)
+                meta.setEnchantmentGlintOverride(true);
+        });
         return stack;
     }
 

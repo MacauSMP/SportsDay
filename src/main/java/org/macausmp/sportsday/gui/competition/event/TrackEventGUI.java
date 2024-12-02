@@ -20,7 +20,7 @@ public class TrackEventGUI extends AbstractEventGUI<ITrackEvent> {
     private final PageBox<ContestantData> pageBox;
 
     public TrackEventGUI(@NotNull ITrackEvent event) {
-        super(54, Component.translatable("event.name." + event.getID()), event);
+        super(54, event);
         this.pageBox = new PageBox<>(this, 18, 54,
                 () -> event.getContestants().stream()
                         .sorted((d1, d2) -> event.getRecord(d1) > 0 && event.getRecord(d2) > 0

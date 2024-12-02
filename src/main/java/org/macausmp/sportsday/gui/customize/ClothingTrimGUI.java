@@ -4,11 +4,9 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
@@ -90,19 +88,15 @@ public class ClothingTrimGUI extends PluginGUI {
 
     private @NotNull ItemStack material(Material material) {
         ItemStack stack = ItemUtil.item(material, "select_material", material == trimMaterial ? "gui.selected" : "gui.select");
-        if (material == trimMaterial) {
-            stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-        }
+        if (material == trimMaterial)
+            stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
         return stack;
     }
 
     private @NotNull ItemStack pattern(Material material) {
         ItemStack stack = ItemUtil.item(material, "select_pattern", material == trimPattern ? "gui.selected" : "gui.select");
-        if (material == trimPattern) {
-            stack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            stack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-        }
+        if (material == trimPattern)
+            stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
         return stack;
     }
 

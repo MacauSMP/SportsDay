@@ -48,6 +48,10 @@ public final class FileStorage {
     private boolean checkExist() throws IOException {
         if (!file.exists() && file.createNewFile()) {
             PLUGIN.getSLF4JLogger().info("{} file has been created.", file.getName());
+            // init file in nbt format
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(container.serializeToBytes());
+            fos.close();
             return false;
         }
         return true;

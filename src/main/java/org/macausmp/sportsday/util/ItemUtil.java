@@ -6,8 +6,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -25,12 +23,13 @@ public final class ItemUtil {
     public static final NamespacedKey ITEM_ID = new NamespacedKey(PLUGIN, "item_id");
     public static final NamespacedKey EVENT_ID = new NamespacedKey(PLUGIN, "event_id");
     public static final NamespacedKey BIND = new NamespacedKey(PLUGIN, "bind");
-    public static final ItemStack OP_BOOK = addWrapper(item(Material.KNOWLEDGE_BOOK, "competition_book", "item.op_book", "item.op_book_lore"));
+    public static final ItemStack OP_BOOK = setGlint(item(Material.KNOWLEDGE_BOOK, "competition_book", "item.op_book", "item.op_book_lore"));
     public static final ItemStack MENU = setBind(item(Material.COMPASS, "menu", "item.menu", "item.menu_lore"));
     public static final ItemStack LEAVE_PRACTICE = setBind(item(Material.BARRIER, "leave_practice", "item.leave_practice", "item.leave_practice_lore"));
     public static final ItemStack CUSTOMIZE = setBind(item(Material.CHEST, "customize", "item.customize", "item.customize_lore1", "item.customize_lore2"));
     public static final ItemStack SPRAY = setBind(item(Material.DRAGON_BREATH, "graffiti_spray", "item.spray", "item.spray_lore1", "item.spray_lore2", "item.spray_lore3"));
     public static final String START = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0";
+    public static final String PAUSE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzc3YWFlMWEyNmI5NTI0OTNhNzM3MWMzMGFkOGM0OTFmMTJiNTc0Y2M5NGE0MWIyZjkxYTM3M2NhNjhmOTA5OCJ9fX0=";
 
     public static @NotNull ItemStack item(@NotNull ItemStack stack, String id, Object display, Object... lore) {
         ItemStack clone = stack.clone();
@@ -77,10 +76,9 @@ public final class ItemUtil {
         return stack;
     }
 
-    public static @NotNull ItemStack addWrapper(@NotNull ItemStack stack) {
+    public static @NotNull ItemStack setGlint(@NotNull ItemStack stack) {
         ItemStack s = stack.clone();
-        s.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 0);
-        s.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        s.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
         return s;
     }
 

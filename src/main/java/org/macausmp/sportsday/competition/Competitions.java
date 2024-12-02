@@ -39,6 +39,7 @@ public final class Competitions {
 
     /**
      * Register competition event.
+     *
      * @param competition competition event to register
      * @return competition event after registered
      */
@@ -49,6 +50,7 @@ public final class Competitions {
 
     /**
      * Load contestants data from the contestants.dat file, in the server folder.
+     *
      * <p>Note: This will overwrite the contestants current data, with the state from the saved dat file.</p>
      */
     public static void load() {
@@ -135,6 +137,7 @@ public final class Competitions {
 
     /**
      * Start a competition.
+     *
      * @param sender who host the competition
      * @param id competition id
      * @return {@code True} if competition successfully started
@@ -166,12 +169,13 @@ public final class Competitions {
 
     /**
      * Force end current competition.
+     *
      * @param sender who end the competition
-     * @return {@code True} if competition successfully end
+     * @return {@code True} if competition successfully ended
      */
     public static boolean forceEnd(CommandSender sender) {
         if (getCurrentEvent() == null || getCurrentEvent().getStatus() == Status.ENDED) {
-            sender.sendMessage(Component.translatable("command.competition.end.failed").color(NamedTextColor.RED));
+            sender.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
             return false;
         }
         getCurrentEvent().end(true);
@@ -180,7 +184,46 @@ public final class Competitions {
     }
 
     /**
+     * Pause current competition.
+     *
+     * @param sender who pause the competition
+     */
+    public static boolean pause(CommandSender sender) {
+        if (getCurrentEvent() == null || getCurrentEvent().getStatus() == Status.ENDED) {
+            sender.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
+            return false;
+        }
+        if (getCurrentEvent().isPaused() || getCurrentEvent() instanceof ITrackEvent && getCurrentEvent().getStatus() == Status.STARTED) {
+            sender.sendMessage(Component.translatable("command.competition.pause.failed").color(NamedTextColor.RED));
+            return false;
+        }
+        getCurrentEvent().pause();
+        sender.sendMessage(Component.translatable("command.competition.pause.success").color(NamedTextColor.GREEN));
+        return true;
+    }
+
+    /**
+     * Unpause current competition.
+     *
+     * @param sender who unpause the competition
+     */
+    public static boolean unpause(CommandSender sender) {
+        if (getCurrentEvent() == null || getCurrentEvent().getStatus() == Status.ENDED) {
+            sender.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
+            return false;
+        }
+        if (!getCurrentEvent().isPaused()) {
+            sender.sendMessage(Component.translatable("command.competition.unpause.failed").color(NamedTextColor.RED));
+            return false;
+        }
+        getCurrentEvent().unpause();
+        sender.sendMessage(Component.translatable("command.competition.unpause.success").color(NamedTextColor.GREEN));
+        return true;
+    }
+
+    /**
      * Get the current event.
+     *
      * @return current event
      */
     public static IEvent getCurrentEvent() {
@@ -189,6 +232,7 @@ public final class Competitions {
 
     /**
      * Set the current event.
+     *
      * @param event new event
      */
     public static void setCurrentEvent(IEvent event) {
@@ -197,6 +241,7 @@ public final class Competitions {
 
     /**
      * Add a player to contestants list.
+     *
      * @param player player to add to the contestants list
      * @param number player's entry number
      * @return {@code True} if player successfully added to the contestants list
@@ -216,6 +261,7 @@ public final class Competitions {
 
     /**
      * Remove a specific player from contestants list.
+     *
      * @param player player to remove from the contestants list
      * @return {@code True} if player successfully removed from the contestants list
      */
@@ -241,6 +287,7 @@ public final class Competitions {
 
     /**
      * Generate unoccupied contestant numbers.
+     *
      * @return unoccupied contestant number
      */
     public static int genNumber() {
@@ -253,6 +300,7 @@ public final class Competitions {
 
     /**
      * Gets a view of all registered contestants.
+     *
      * @return a view of registered contestants
      */
     public static @NotNull @Unmodifiable Collection<ContestantData> getContestants() {
@@ -261,6 +309,7 @@ public final class Competitions {
 
     /**
      * Gets a view of all currently logged in registered contestants.
+     *
      * @return a view of currently online registered contestants
      */
     public static @NotNull Collection<ContestantData> getOnlineContestants() {
@@ -269,6 +318,7 @@ public final class Competitions {
 
     /**
      * Checks if this player is in contestants list.
+     *
      * @param player specified player
      * @return {@code True} if the player is in contestants list
      */
@@ -286,8 +336,8 @@ public final class Competitions {
      */
     public static @NotNull ContestantData getContestant(@NotNull UUID uuid) {
         ContestantData data = CONTESTANTS.get(uuid);
-        if (data != null)
-            return data;
-        throw new IllegalArgumentException("Contestants data list does not contain this data");
+        if (data == null)
+            throw new IllegalArgumentException("Contestants data collection does not contain this data");
+        return data;
     }
 }

@@ -37,9 +37,8 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
 
     @Override
     public void update() {
-        getInventory().setItem(18, icon());
-        getInventory().setItem(19, increase());
-        getInventory().setItem(20, decrease());
+        getInventory().setItem(18, info());
+        getInventory().setItem(19, score());
     }
 
     public static void updateProfile(UUID uuid) {
@@ -49,28 +48,15 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
                 .filter(gui -> gui.data.getUUID().equals(uuid)).forEach(ContestantProfileGUI::update);
     }
 
-    @ButtonHandler("increase")
-    public void increase(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+    @ButtonHandler("score")
+    public void score(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (data.isRemoved()) {
             p.sendMessage(Component.translatable("command.competition.unregister.failed")
                     .arguments(Component.text(data.getName())).color(NamedTextColor.RED));
             p.closeInventory();
             return;
         }
-        data.addScore(e.isLeftClick() ? 1 : e.isRightClick() ? 5 : 0);
-        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-        update();
-    }
-
-    @ButtonHandler("decrease")
-    public void decrease(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (data.isRemoved()) {
-            p.sendMessage(Component.translatable("command.competition.unregister.failed")
-                    .arguments(Component.text(data.getName())).color(NamedTextColor.RED));
-            p.closeInventory();
-            return;
-        }
-        data.addScore(e.isLeftClick() ? -1 : e.isRightClick() ? -5 : 0);
+        data.addScore(e.isLeftClick() ? 1 : e.isRightClick() ? -1 : 0);
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
         update();
     }
@@ -89,7 +75,7 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
         }).getInventory());
     }
 
-    private @NotNull ItemStack icon() {
+    private @NotNull ItemStack info() {
         Component online = Component.translatable(data.isOnline() ? "contestant.online" : "contestant.offline");
         Component display = Component.translatable(Objects.requireNonNull(data.getName()) + " (%s)").arguments(online);
         Component number = Component.translatable("contestant.number").arguments(Component.text(data.getNumber()))
@@ -108,17 +94,9 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
         return ItemUtil.item(Material.RED_CONCRETE, "unregister", display, lore);
     }
 
-    private @NotNull ItemStack increase() {
-        Component score = Component.translatable("contestant.score").arguments(Component.text(data.getScore()))
-                .color(NamedTextColor.YELLOW);
-        return ItemUtil.item(Material.YELLOW_STAINED_GLASS_PANE,"increase", "gui.contestant.increase",
-                score, "gui.contestant.increase_lore1", "gui.contestant.increase_lore2");
-    }
-
-    private @NotNull ItemStack decrease() {
-        Component score = Component.translatable("contestant.score").arguments(Component.text(data.getScore()))
-                .color(NamedTextColor.YELLOW);
-        return ItemUtil.item(Material.RED_STAINED_GLASS_PANE, "decrease", "gui.contestant.decrease",
-                score, "gui.contestant.decrease_lore1", "gui.contestant.decrease_lore2");
+    private @NotNull ItemStack score() {
+        return ItemUtil.item(Material.GOLD_INGOT,"score",
+                Component.translatable("contestant.score").arguments(Component.text(data.getScore())).color(NamedTextColor.YELLOW),
+                "gui.contestant.score_lore1", "gui.contestant.score_lore2");
     }
 }

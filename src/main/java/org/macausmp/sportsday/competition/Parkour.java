@@ -20,7 +20,7 @@ public class Parkour extends AbstractTrackEvent {
     protected void onStart() {
         Competitions.getOnlineContestants().forEach(d -> {
             Player p = d.getPlayer();
-            p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, PotionEffect.INFINITE_DURATION, 0, false, false, false));
             p.getInventory().setHelmet(null);
             p.getInventory().setChestplate(null);
             p.getInventory().setLeggings(null);
@@ -34,7 +34,7 @@ public class Parkour extends AbstractTrackEvent {
 
     @Override
     protected void onPractice(@NotNull Player player) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, PotionEffect.INFINITE_DURATION, 0, false, false, false));
         player.getInventory().setHelmet(null);
         player.getInventory().setChestplate(null);
         player.getInventory().setLeggings(null);
@@ -47,15 +47,12 @@ public class Parkour extends AbstractTrackEvent {
 
     @EventHandler
     public void onRespawn(@NotNull PlayerRespawnEvent e) {
-        IEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
-        if (event == this && getStatus() == Status.STARTED && Competitions.isContestant(p)
-                && !getLeaderboard().contains(Competitions.getContestant(p.getUniqueId()))
-                || inPractice(p, this)) {
+        if (predicate.test(p)) {
             addRunnable(new BukkitRunnable() {
                 @Override
                 public void run() {
-                    p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false, false));
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, PotionEffect.INFINITE_DURATION, 0, false, false, false));
                     cancel();
                 }
             }.runTaskLater(PLUGIN, 5L));

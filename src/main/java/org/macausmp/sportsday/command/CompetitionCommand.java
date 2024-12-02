@@ -30,6 +30,8 @@ public class CompetitionCommand extends PluginCommand {
                     sender.sendMessage("/competition start " + joiner);
                 }
                 case "end" -> Competitions.forceEnd(sender);
+                case "pause" -> Competitions.pause(sender);
+                case "unpause" -> Competitions.unpause(sender);
                 case "join" -> {
                     if (args.length >= 2) {
                         Player p = Bukkit.getPlayer(args[1]);
@@ -177,6 +179,8 @@ public class CompetitionCommand extends PluginCommand {
             l.add("end");
             l.add("load");
             l.add("save");
+            l.add("pause");
+            l.add("unpause");
             l.add("join");
             l.add("leave");
             l.add("score");

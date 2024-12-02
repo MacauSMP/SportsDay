@@ -19,12 +19,16 @@ import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.gui.competition.event.TrackEventGUI;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public abstract class AbstractTrackEvent extends AbstractEvent implements ITrackEvent {
     private static final Set<UUID> SPAWNPOINT_SET = new HashSet<>();
     public static final @NotNull Material CHECKPOINT = getMaterial("checkpoint_block");
     public static final @NotNull Material DEATH = getMaterial("death_block");
     public static final @NotNull Material FINISH_LINE = getMaterial("finish_line_block");
+    protected final Predicate<Player> predicate = p -> Competitions.getCurrentEvent() == this
+            && Competitions.isContestant(p) && !getLeaderboard().contains(Competitions.getContestant(p.getUniqueId()))
+            || inPractice(p, this);
     private final HashMap<ContestantData, Integer> lapMap = new HashMap<>();
     private final HashMap<ContestantData, Float> record = new HashMap<>();
     private final int laps;
@@ -101,7 +105,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                 lapMap.put(data, lapMap.get(data) + 1);
                 p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
                 if (lapMap.get(data) < laps) {
-                    p.teleport(getLocation());
+                    p.teleportAsync(getLocation());
                     p.setRespawnLocation(getLocation(), true);
                     onCompletedLap(p);
                     Bukkit.broadcast(Component.translatable("event.track.contestant.completed_lap")
@@ -150,7 +154,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
             if (loc.getBlock().getType() == DEATH)
                 p.setHealth(0);
             if (loc.getBlock().getType() == FINISH_LINE) {
-                p.teleport(getLocation());
+                p.teleportAsync(getLocation());
                 p.setRespawnLocation(getLocation(), true);
                 p.sendMessage(Component.translatable("contestant.practice.finished").arguments(getName()));
                 onCompletedLap(p);

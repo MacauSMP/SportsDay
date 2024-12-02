@@ -49,15 +49,16 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onMove(@NotNull PlayerMoveEvent e) {
         Player p = e.getPlayer();
-        if ((check(p) && getStatus() == Status.STARTED || inPractice(p, this)) && boatMap.containsKey(p.getUniqueId()))
-            bounce(p);
+        if (!predicate.test(p) || !boatMap.containsKey(p.getUniqueId()))
+            return;
+        bounce(p);
     }
 
     private void bounce(@NotNull Player p) {
         Location loc = p.getLocation().clone();
         loc.setY(loc.getY() - 0.5f);
         if (loc.getBlock().getType() == SPRING_BLOCK && !SPRING_BLOCK.isAir())
-            boatMap.get(p.getUniqueId()).setVelocity(new Vector(0f, 1.0f, 0f));
+            boatMap.get(p.getUniqueId()).setVelocity(new Vector(0f, 0.5f, 0f));
     }
 
     @Override
@@ -75,7 +76,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onDismount(@NotNull EntityDismountEvent e) {
         if (e.getEntity() instanceof Player p && e.getDismounted() instanceof Boat) {
-            if (check(p) || inPractice(p, this))
+            if (predicate.test(p))
                 e.setCancelled(true);
             else
                 boatMap.remove(p.getUniqueId());
@@ -85,29 +86,29 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @EventHandler
     public void onMount(@NotNull EntityMountEvent e) {
         if (e.getEntity() instanceof Player p && e.getMount() instanceof Boat b) {
-            if (check(p) || inPractice(p, this)) {
-                if (b.getPassengers().isEmpty())
-                    boatMap.put(p.getUniqueId(), b);
-                else
-                    e.setCancelled(true);
-            }
+            if (!predicate.test(p))
+                return;
+            if (b.getPassengers().isEmpty())
+                boatMap.put(p.getUniqueId(), b);
+            else
+                e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onDeath(@NotNull PlayerDeathEvent e) {
         Player p = e.getPlayer();
-        if ((check(p) || inPractice(p, this)) && boatMap.containsKey(p.getUniqueId())) {
-            boatMap.get(p.getUniqueId()).remove();
-            boatMap.put(p.getUniqueId(), boat(p));
-        }
+        if (!predicate.test(p) || !boatMap.containsKey(p.getUniqueId()))
+            return;
+        boatMap.get(p.getUniqueId()).remove();
+        boatMap.put(p.getUniqueId(), boat(p));
     }
 
     @EventHandler
     public void onFall(@NotNull EntityDamageEvent e) {
-        if (!(e.getEntity() instanceof Player p)) return;
-        if ((check(p) || inPractice(p, this))
-                && boatMap.containsKey(p.getUniqueId())
+        if (!(e.getEntity() instanceof Player p))
+            return;
+        if (predicate.test(p) && boatMap.containsKey(p.getUniqueId())
                 && e.getCause().equals(EntityDamageEvent.DamageCause.FALL))
             e.setCancelled(true);
     }
@@ -124,16 +125,9 @@ public class IceBoatRacing extends AbstractTrackEvent {
      * @return a new boat containing the player
      */
     private @NotNull Boat boat(@NotNull Player p) {
-        Boat boat = getWorld().spawn(Objects.requireNonNull(p.getRespawnLocation()), Boat.class);
-        boat.setBoatType(PlayerCustomize.getBoatType(p));
+        Boat boat = (Boat) getWorld().spawnEntity(Objects.requireNonNull(p.getRespawnLocation()), PlayerCustomize.getBoatType(p));
         boat.setInvulnerable(true);
         boat.addPassenger(p);
         return boat;
-    }
-
-    private boolean check(Player p) {
-        return Competitions.getCurrentEvent() == this
-                && Competitions.isContestant(p)
-                && !getLeaderboard().contains(Competitions.getContestant(p.getUniqueId()));
     }
 }

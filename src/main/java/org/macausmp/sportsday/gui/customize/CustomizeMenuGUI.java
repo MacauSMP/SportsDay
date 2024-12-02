@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.Material;
-import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -87,9 +86,8 @@ public class CustomizeMenuGUI extends PluginGUI {
 
     private @NotNull ItemStack boatType() {
         ItemStack stack = customize(Material.OAK_BOAT, "boat_type");
-        Boat.Type type = PlayerCustomize.getBoatType(player);
         List<Component> lore = new ArrayList<>();
-        Component c = getTypeName(Objects.requireNonNull(Material.getMaterial(type.name() + "_BOAT")));
+        Component c = getTypeName(Objects.requireNonNull(Material.getMaterial(PlayerCustomize.getBoatType(player).name())));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(Component.text())).append(c));
         stack.lore(lore);
         return stack;

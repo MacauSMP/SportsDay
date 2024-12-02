@@ -28,9 +28,6 @@ import java.util.List;
 public abstract class AbstractCompetitionGUI extends PluginGUI {
     protected static final ItemStack COMPETITION_CONSOLE = ItemUtil.item(Material.COMMAND_BLOCK, "competition_console", "gui.console.title", "gui.console.lore");
     protected static final ItemStack CONTESTANTS_LIST = ItemUtil.item(Material.PAPER, "contestants_list", "gui.contestants_list.title", "gui.contestants_list.lore");
-    protected static final ItemStack START_COMPETITION = ItemUtil.head(ItemUtil.START, "start_competitions", "gui.start.title", "gui.start.lore");
-    protected static final ItemStack LOAD_COMPETITION = ItemUtil.head(ItemUtil.START, "load_competitions", "gui.load.title", "gui.load.lore");
-    protected static final ItemStack END_COMPETITION = ItemUtil.item(Material.RED_CONCRETE, "end_competition", "gui.end.title", "gui.end.lore");
     protected static final ItemStack COMPETITION_SETTINGS = ItemUtil.item(Material.REPEATER, "competition_settings", "gui.settings.title", "gui.settings.lore");
     @SuppressWarnings("deprecation")
     protected static final ItemStack VERSION = ItemUtil.item(Material.OAK_SIGN, "version", Component.translatable("gui.plugin_version").arguments(Component.text(SportsDay.getInstance().getDescription().getVersion())));

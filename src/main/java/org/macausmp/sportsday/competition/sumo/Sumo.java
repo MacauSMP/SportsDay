@@ -306,6 +306,10 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
             int i = 5;
             @Override
             public void run() {
+                if (isPaused()) {
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.pause.broadcast"));
+                    return;
+                }
                 Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.next_match_countdown")
                         .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                 if (i-- == 0) {

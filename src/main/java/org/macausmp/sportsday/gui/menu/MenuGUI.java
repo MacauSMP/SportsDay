@@ -16,6 +16,7 @@ import org.macausmp.sportsday.competition.IEvent;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
+import org.macausmp.sportsday.util.TextUtil;
 
 public class MenuGUI extends PluginGUI {
     private static final ItemStack GUIDEBOOK = ItemUtil.item(Material.WRITABLE_BOOK, "guidebook", Component.translatable("gui.menu.guidebook.title").color(NamedTextColor.YELLOW), "gui.menu.guidebook.lore");
@@ -62,14 +63,14 @@ public class MenuGUI extends PluginGUI {
 
     private static @NotNull Book guidebook() {
         Book.Builder builder = Book.builder();
-        builder.addPage(Component.translatable("book.guidebook.page_main"));
+        builder.addPage(TextUtil.text(Component.translatable("book.guidebook.page_main")));
         Component b1 = Component.translatable(AbstractTrackEvent.CHECKPOINT.translationKey()).color(NamedTextColor.GREEN);
         Component b2 = Component.translatable(AbstractTrackEvent.DEATH.translationKey()).color(NamedTextColor.RED);
         Component b3 = Component.translatable(AbstractTrackEvent.FINISH_LINE.translationKey()).color(NamedTextColor.GOLD);
-        builder.addPage(Component.translatable("book.guidebook.page_block").arguments(b1, b2, b3));
+        builder.addPage(TextUtil.text(Component.translatable("book.guidebook.page_block").arguments(b1, b2, b3)));
         for (IEvent event : Competitions.EVENTS.values()) {
             Component rule = Component.translatable("event.rule." + event.getID());
-            builder.addPage(Component.translatable("book.guidebook.page_event").arguments(event.getName().color(NamedTextColor.BLACK), rule));
+            builder.addPage(TextUtil.text(Component.translatable("book.guidebook.page_event").arguments(event.getName().color(NamedTextColor.BLACK), rule)));
         }
         return builder.build();
     }
