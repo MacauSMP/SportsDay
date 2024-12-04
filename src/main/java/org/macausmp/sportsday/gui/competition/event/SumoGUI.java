@@ -12,9 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.sumo.Sumo;
-import org.macausmp.sportsday.competition.sumo.SumoMatch;
-import org.macausmp.sportsday.competition.sumo.SumoStage;
+import org.macausmp.sportsday.competition.Sumo;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -22,18 +20,18 @@ import org.macausmp.sportsday.util.ItemUtil;
 import java.util.List;
 import java.util.Objects;
 
-public class SumoGUI extends AbstractEventGUI<Sumo> {
+public class SumoGUI extends EventGUI<Sumo> {
     private static final NamespacedKey STAGE_NUMBER = new NamespacedKey(PLUGIN, "stage_number");
     private static final ItemStack NEXT_PAGE1 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "next_page1", "gui.page.next");
     private static final ItemStack PREVIOUS_PAGE1 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "prev_page1", "gui.page.prev");
     private static final ItemStack NEXT_PAGE2 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "next_page2", "gui.page.next");
     private static final ItemStack PREVIOUS_PAGE2 = ItemUtil.item(Material.BLUE_STAINED_GLASS_PANE, "prev_page2", "gui.page.prev");
-    private final PageBox<SumoStage> stagePageBox;
-    private SumoStage selectedStage;
-    private final PageBox<SumoMatch> matchPageBox;
+    private final PageBox<Sumo.SumoStage> stagePageBox;
+    private Sumo.SumoStage selectedStage;
+    private final PageBox<Sumo.SumoMatch> matchPageBox;
 
     public SumoGUI(@NotNull Sumo event) {
-        super(54, event);
+        super(event);
         this.stagePageBox = new PageBox<>(this, 28, 35, () -> List.of(event.getSumoStages()));
         this.selectedStage = event.getSumoStage();
         this.matchPageBox = new PageBox<>(this, 45, 54, () -> selectedStage.getMatchList());
@@ -50,8 +48,9 @@ public class SumoGUI extends AbstractEventGUI<Sumo> {
     public void update() {
         if (Competitions.getCurrentEvent() != event)
             return;
+        super.update();
         if (event.getSumoStage().getCurrentMatch() != null)
-            getInventory().setItem(18, currentMatch(event.getSumoStage()));
+            getInventory().setItem(21, currentMatch(event.getSumoStage()));
         stagePageBox.updatePage(this::stage);
         matchPageBox.updatePage(this::match);
     }
@@ -87,8 +86,8 @@ public class SumoGUI extends AbstractEventGUI<Sumo> {
         matchPageBox.previousPage();
     }
 
-    private @NotNull ItemStack currentMatch(@NotNull SumoStage stage) {
-        SumoMatch match = stage.getCurrentMatch();
+    private @NotNull ItemStack currentMatch(@NotNull Sumo.SumoStage stage) {
+        Sumo.SumoMatch match = stage.getCurrentMatch();
         return ItemUtil.item(Material.COD, "sumo_match", "gui.competition.sumo.current_match",
                 Component.translatable("gui.competition.sumo.current_match.status").arguments(match.getStatus().getName()),
                 Component.translatable("gui.competition.sumo.match.stage").arguments(stage.getName()),
@@ -101,9 +100,9 @@ public class SumoGUI extends AbstractEventGUI<Sumo> {
                         .arguments(Objects.requireNonNull(Bukkit.getPlayer(match.getWinner())).displayName())));
     }
 
-    private @NotNull ItemStack stage(@NotNull SumoStage stage) {
+    private @NotNull ItemStack stage(@NotNull Sumo.SumoStage stage) {
         ItemStack stack = ItemUtil.item(stage.getIcon(), "sumo_stage",
-                Component.translatable("gui.competition.sumo.stage.title").arguments(stage.getStage() == SumoStage.Stage.ELIMINATE
+                Component.translatable("gui.competition.sumo.stage.title").arguments(stage.getStage() == Sumo.SumoStage.Stage.ELIMINATE
                         ? Component.translatable("{0} #" + stage.getNumber()).arguments(stage.getName())
                         : stage.getName()),
                 "gui.competition.sumo.stage.lore");
@@ -115,7 +114,7 @@ public class SumoGUI extends AbstractEventGUI<Sumo> {
         return stack;
     }
 
-    private @NotNull ItemStack match(@NotNull SumoMatch match) {
+    private @NotNull ItemStack match(@NotNull Sumo.SumoMatch match) {
         return ItemUtil.item(Material.COD, "sumo_match",
                 Component.translatable("gui.competition.sumo.match.number").arguments(Component.text(match.getNumber())),
                 match.isSet()

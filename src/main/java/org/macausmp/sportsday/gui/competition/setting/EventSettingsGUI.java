@@ -103,9 +103,9 @@ public class EventSettingsGUI<T extends IEvent> extends AbstractCompetitionGUI {
                 Material.BEACON,
                 "location",
                 Component.translatable("gui.event_settings.location").color(NamedTextColor.YELLOW),
-                Component.text("world=" + location.getWorld()).color(NamedTextColor.GRAY),
-                Component.text("x=" + location.x() + ", y=" + location.y() + ", z=" + location.z()).color(NamedTextColor.GRAY),
-                Component.text("pitch=" + location.getPitch() + ", yaw=" + location.getYaw()).color(NamedTextColor.GRAY),
+                Component.text("world=" + location.getWorld()).color(NamedTextColor.YELLOW),
+                Component.text("x=" + location.x() + ", y=" + location.y() + ", z=" + location.z()).color(NamedTextColor.YELLOW),
+                Component.text("pitch=" + location.getPitch() + ", yaw=" + location.getYaw()).color(NamedTextColor.YELLOW),
                 "gui.event_settings.location_lore", "gui.event_settings.reload_require");
     }
 }

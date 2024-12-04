@@ -1,6 +1,7 @@
 package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.Keyed;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * Represents a competition event
  */
-public interface IEvent extends Listener {
+public interface IEvent extends Keyed, Listener {
     /**
      * Get the event's id from the config file.
      *
@@ -102,10 +103,8 @@ public interface IEvent extends Listener {
 
     /**
      * End the event.
-     *
-     * @param force {@code True} if end the event via command or gui instead of natural end
      */
-    void end(boolean force);
+    void end();
 
     /**
      * Pause the event.
@@ -116,6 +115,11 @@ public interface IEvent extends Listener {
      * Unpause the event.
      */
     void unpause();
+
+    /**
+     * Terminate the event.
+     */
+    void terminate();
 
     /**
      * Disqualification of contestant.

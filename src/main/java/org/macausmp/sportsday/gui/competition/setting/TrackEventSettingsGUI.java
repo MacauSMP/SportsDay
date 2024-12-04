@@ -35,7 +35,8 @@ public class TrackEventSettingsGUI extends EventSettingsGUI<ITrackEvent> {
             PLUGIN.saveConfig();
             updateGUI();
         }
-        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
+        p.playSound(Sound.sound(Key.key(e.getClick().isLeftClick() ?
+                "minecraft:entity.arrow.hit_player" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
     }
 
     private @NotNull ItemStack laps() {

@@ -16,11 +16,11 @@ import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.util.ItemUtil;
 
-public class JavelinGUI extends AbstractEventGUI<JavelinThrow> {
+public class JavelinGUI extends EventGUI<JavelinThrow> {
     private final PageBox<ContestantData> pageBox;
 
     public JavelinGUI(@NotNull JavelinThrow event) {
-        super(54, event);
+        super(event);
         this.pageBox = new PageBox<>(this, 36, 54, () -> event.getContestants().stream().toList());
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 27, BOARD);
@@ -33,8 +33,9 @@ public class JavelinGUI extends AbstractEventGUI<JavelinThrow> {
     public void update() {
         if (Competitions.getCurrentEvent() != event)
             return;
+        super.update();
         if (event.getCurrentPlayer() != null)
-            getInventory().setItem(18, current());
+            getInventory().setItem(21, current());
         pageBox.updatePage(this::icon);
     }
 

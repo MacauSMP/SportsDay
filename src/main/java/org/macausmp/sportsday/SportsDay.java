@@ -38,10 +38,10 @@ import org.macausmp.sportsday.customize.GraffitiSpray;
 import org.macausmp.sportsday.customize.ParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.PluginGUI;
-import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
 import org.macausmp.sportsday.gui.competition.CompetitionMenuGUI;
 import org.macausmp.sportsday.gui.competition.ContestantProfileGUI;
 import org.macausmp.sportsday.gui.competition.ContestantsListGUI;
+import org.macausmp.sportsday.gui.competition.event.EventGUI;
 import org.macausmp.sportsday.gui.customize.CustomizeMenuGUI;
 import org.macausmp.sportsday.gui.customize.GraffitiSprayGUI;
 import org.macausmp.sportsday.gui.menu.MenuGUI;
@@ -142,7 +142,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
             CommandSender sender = getServer().getConsoleSender();
             if (event instanceof Savable)
                 Competitions.saveEventData(sender);
-            Competitions.forceEnd(sender);
+            Competitions.terminate(sender);
             getServer().getOnlinePlayers().forEach(p -> {
                 p.getInventory().clear();
                 PlayerCustomize.suitUp(p);
@@ -229,7 +229,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         }
         if (!Competitions.isContestant(p))
             return;
-        CompetitionConsoleGUI.updateGUI();
+        EventGUI.updateGUI();
         ContestantsListGUI.updateGUI();
         ContestantProfileGUI.updateProfile(p.getUniqueId());
     }
@@ -243,7 +243,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                CompetitionConsoleGUI.updateGUI();
+                EventGUI.updateGUI();
                 ContestantsListGUI.updateGUI();
                 ContestantProfileGUI.updateProfile(p.getUniqueId());
             }

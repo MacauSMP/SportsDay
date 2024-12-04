@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.sumo.Sumo;
+import org.macausmp.sportsday.competition.Sumo;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.util.ItemUtil;
 
@@ -39,6 +39,6 @@ public class SumoSettingsGUI extends EventSettingsGUI<Sumo>{
         return ItemUtil.item(weapon ? Material.BLAZE_ROD : Material.STICK, "weapon",
                 Component.translatable("gui.event_settings.weapon").color(NamedTextColor.YELLOW)
                         .arguments(Component.translatable(weapon ? "gui.enabled" : "gui.disabled")),
-                "gui.increase", "gui.decrease", "gui.event_settings.reload_require");
+                "gui.toggle", "gui.event_settings.reload_require");
     }
 }

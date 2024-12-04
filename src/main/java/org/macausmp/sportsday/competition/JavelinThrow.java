@@ -72,11 +72,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
     }
 
     @Override
-    public void onEnd(boolean force) {
-        Competitions.getOnlineContestants().forEach(d -> d.getPlayer().getInventory().remove(TRIDENT));
-        getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
-        if (force)
-            return;
+    public void onEnd() {
         List<ScoreResult> results = resultMap.values().stream().sorted().toList();
         getLeaderboard().addAll(results.stream().map(r -> Competitions.getContestant(r.uuid)).toList());
         TranslatableComponent.Builder builder = Component.translatable("event.result").toBuilder();
@@ -90,6 +86,13 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
             d.addScore(1);
         }
         Bukkit.broadcast(builder.build());
+    }
+
+    @Override
+    protected void cleanup() {
+        super.cleanup();
+        Competitions.getOnlineContestants().forEach(d -> d.getPlayer().getInventory().remove(TRIDENT));
+        getLocation().getWorld().getEntitiesByClass(Trident.class).forEach(Trident::remove);
     }
 
     @EventHandler
@@ -238,7 +241,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
         if (!queue.isEmpty())
             nextMatch();
         else
-            end(false);
+            end();
         JavelinGUI.updateGUI();
     }
 
@@ -249,7 +252,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
             @Override
             public void run() {
                 if (isPaused()) {
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.pause.broadcast"));
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.pause"));
                     return;
                 }
                 if (i > 0)

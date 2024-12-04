@@ -48,7 +48,7 @@ public final class PlayerCustomize {
         TRIM_MATERIAL.put(Material.DIAMOND, TrimMaterial.DIAMOND);
         TRIM_MATERIAL.put(Material.LAPIS_LAZULI, TrimMaterial.LAPIS);
         TRIM_MATERIAL.put(Material.AMETHYST_SHARD, TrimMaterial.AMETHYST);
-        Registry<TrimPattern> registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN);
+        final Registry<TrimPattern> registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN);
         registry.forEach(pattern -> TRIM_PATTERN.put(Objects.requireNonNull(registry.getKey(pattern)).value().toUpperCase(), pattern));
     }
 

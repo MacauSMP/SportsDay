@@ -19,7 +19,11 @@ public class ObstacleCourse extends AbstractTrackEvent {
     protected void onStart() {}
 
     @Override
-    protected void onEnd(boolean force) {
+    protected void onEnd() {}
+
+    @Override
+    protected void cleanup() {
+        super.cleanup();
         SportsDay.CONTESTANTS.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
     }
 

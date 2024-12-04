@@ -11,9 +11,8 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.competition.sumo.Sumo;
-import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
 import org.macausmp.sportsday.gui.competition.ContestantsListGUI;
+import org.macausmp.sportsday.gui.competition.event.EventGUI;
 import org.macausmp.sportsday.util.FileStorage;
 import org.macausmp.sportsday.util.PlayerHolder;
 
@@ -168,18 +167,18 @@ public final class Competitions {
     }
 
     /**
-     * Force end current competition.
+     * Terminate current competition.
      *
-     * @param sender who end the competition
-     * @return {@code True} if competition successfully ended
+     * @param sender who terminate the competition
+     * @return {@code True} if competition successfully terminated
      */
-    public static boolean forceEnd(CommandSender sender) {
+    public static boolean terminate(CommandSender sender) {
         if (getCurrentEvent() == null || getCurrentEvent().getStatus() == Status.ENDED) {
             sender.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
             return false;
         }
-        getCurrentEvent().end(true);
-        sender.sendMessage(Component.translatable("command.competition.end.success").color(NamedTextColor.GREEN));
+        getCurrentEvent().terminate();
+        sender.sendMessage(Component.translatable("command.competition.terminate.success").color(NamedTextColor.GREEN));
         return true;
     }
 
@@ -251,7 +250,7 @@ public final class Competitions {
         if (CONTESTANTS.containsKey(uuid))
             return false;
         CONTESTANTS.put(uuid, new ContestantData(uuid, number));
-        CompetitionConsoleGUI.updateGUI();
+        EventGUI.updateGUI();
         ContestantsListGUI.updateGUI();
         player.sendMessage(Component.translatable("competition.register.success")
                 .arguments(Component.text(number)).color(NamedTextColor.GREEN));
@@ -279,7 +278,7 @@ public final class Competitions {
         }
         REGISTERED_NUMBER_LIST.remove(data.getNumber());
         CONTESTANTS.remove(uuid);
-        CompetitionConsoleGUI.updateGUI();
+        EventGUI.updateGUI();
         ContestantsListGUI.updateGUI();
         SportsDay.AUDIENCES.addPlayer(player);
         return true;

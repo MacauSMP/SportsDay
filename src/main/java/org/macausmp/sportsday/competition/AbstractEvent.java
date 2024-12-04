@@ -16,7 +16,7 @@ import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.customize.Musickit;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.customize.VictoryDance;
-import org.macausmp.sportsday.gui.competition.CompetitionConsoleGUI;
+import org.macausmp.sportsday.gui.competition.event.EventGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
@@ -26,6 +26,7 @@ public abstract class AbstractEvent implements IEvent {
     protected static final SportsDay PLUGIN = SportsDay.getInstance();
     private static final Set<BukkitTask> EVENT_TASKS = new HashSet<>();
     private static final Map<Player, IEvent> PRACTICE = new HashMap<>();
+    private final NamespacedKey key;
     private final String id;
     private final Component name;
     private final int least;
@@ -33,19 +34,25 @@ public abstract class AbstractEvent implements IEvent {
     private final World world;
     private Status status = Status.IDLE;
     private boolean pause = false;
-    private long time;
+    private long time = 0L;
     private final Collection<ContestantData> contestants = new HashSet<>();
     private final List<ContestantData> leaderboard = new ArrayList<>();
-    private VictoryDance victoryDance;
-    private Musickit mvpAnthem;
+    private VictoryDance victoryDance = null;
+    private Musickit mvpAnthem = null;
     public static final NamespacedKey IN_GAME = new NamespacedKey(PLUGIN, "in_game");
 
     public AbstractEvent(String id) {
+        this.key = new NamespacedKey(PLUGIN, id);
         this.id = id;
         this.name = TextUtil.convert(Component.translatable("event.name." + id));
         this.least = PLUGIN.getConfig().getInt(id + ".least_players_required");
         this.location = Objects.requireNonNull(PLUGIN.getConfig().getLocation(id + ".location"));
         this.world = location.getWorld();
+    }
+
+    @Override
+    public @NotNull NamespacedKey getKey() {
+        return key;
     }
 
     @Override
@@ -90,7 +97,7 @@ public abstract class AbstractEvent implements IEvent {
      */
     protected final void setStatus(Status status) {
         this.status = status;
-        CompetitionConsoleGUI.updateGUI();
+        EventGUI.updateGUI();
     }
 
     @Override
@@ -121,11 +128,11 @@ public abstract class AbstractEvent implements IEvent {
             @Override
             public void run() {
                 if (pause) {
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.pause.broadcast"));
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.pause"));
                     return;
                 }
                 if (i % 5 == 0 || i <= 5 && i > 0) {
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.start.countdown")
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.start_countdown")
                             .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                     Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
                             Sound.Source.MASTER, 1f, 0.5f));
@@ -136,7 +143,7 @@ public abstract class AbstractEvent implements IEvent {
                 }
             }
         }.runTaskTimer(PLUGIN, 0L, 20L));
-        Bukkit.broadcast(Component.translatable("event.ready.broadcast")
+        Bukkit.broadcast(Component.translatable("event.broadcast.ready")
                 .arguments(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
         Bukkit.broadcast(Component.translatable("event.rule." + id));
         onSetup();
@@ -171,63 +178,60 @@ public abstract class AbstractEvent implements IEvent {
     public void start() {
         setStatus(Status.STARTED);
         onStart();
-        Bukkit.getServer().sendActionBar(Component.translatable("event.start.broadcast"));
+        Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.start"));
         Bukkit.getServer().playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"),
                 Sound.Source.MASTER, 1f, 1f));
     }
 
     @Override
-    public void end(boolean force) {
+    public void end() {
+        if (status == Status.ENDED)
+            return;
         setStatus(Status.ENDED);
-        onEnd(force);
+        onEnd();
         EVENT_TASKS.forEach(BukkitTask::cancel);
-        if (!force) {
-            Competitions.clearEventData();
-            if (!leaderboard.isEmpty()) {
-                addRunnable(new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        OfflinePlayer mvp = leaderboard.getFirst().getOfflinePlayer();
-                        if (!mvp.isOnline())
-                            return;
-                        Player p = Objects.requireNonNull(mvp.getPlayer());
-                        victoryDance = PlayerCustomize.getVictoryDance(p);
-                        if (victoryDance != null)
-                            victoryDance.play(p);
-                        mvpAnthem = PlayerCustomize.getMusickit(mvp.getPlayer());
-                        if (mvpAnthem != null) {
-                            Bukkit.getServer().playSound(Sound.sound(mvpAnthem.getKey(), Sound.Source.MASTER, 1f, 1f));
-                            Bukkit.getServer().sendActionBar(Component.translatable("broadcast.play_mvp_anthem")
-                                    .arguments(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW),
-                                            mvpAnthem.getName()));
-                        }
-                    }
-                }.runTaskLater(PLUGIN, 40L));
-            }
+        Competitions.clearEventData();
+        if (!leaderboard.isEmpty()) {
             addRunnable(new BukkitRunnable() {
                 @Override
                 public void run() {
-                    end();
+                    OfflinePlayer mvp = leaderboard.getFirst().getOfflinePlayer();
+                    if (!mvp.isOnline())
+                        return;
+                    Player p = Objects.requireNonNull(mvp.getPlayer());
+                    victoryDance = PlayerCustomize.getVictoryDance(p);
+                    if (victoryDance != null)
+                        victoryDance.play(p);
+                    mvpAnthem = PlayerCustomize.getMusickit(mvp.getPlayer());
+                    if (mvpAnthem != null) {
+                        Bukkit.getServer().playSound(Sound.sound(mvpAnthem.getKey(), Sound.Source.MASTER, 1f, 1f));
+                        Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.play_mvp_anthem")
+                                .arguments(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW),
+                                        mvpAnthem.getName()));
+                    }
                 }
-            }.runTaskLater(PLUGIN, 200L));
-        } else {
-            end();
+            }.runTaskLater(PLUGIN, 40L));
         }
-        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.end.broadcast"));
-        PLUGIN.getComponentLogger()
-                .info(Component.translatable(force ? "console.competition.force_end" : "console.competition.end").arguments(name));
+        addRunnable(new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!leaderboard.isEmpty() && victoryDance != null)
+                    victoryDance.stop(leaderboard.getFirst().getOfflinePlayer().getUniqueId());
+                victoryDance = null;
+                mvpAnthem = null;
+                cleanup();
+            }
+        }.runTaskLater(PLUGIN, 200L));
+        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.broadcast.end"));
+        PLUGIN.getComponentLogger().info(Component.translatable("console.competition.end").arguments(name));
     }
 
-    private void end() {
+    protected void cleanup() {
         if (status != Status.ENDED)
             return;
         EVENT_TASKS.forEach(BukkitTask::cancel);
         EVENT_TASKS.clear();
         contestants.clear();
-        if (!leaderboard.isEmpty() && victoryDance != null)
-            victoryDance.stop(leaderboard.getFirst().getOfflinePlayer().getUniqueId());
-        victoryDance = null;
-        mvpAnthem = null;
         leaderboard.clear();
         Competitions.setCurrentEvent(null);
         setStatus(Status.IDLE);
@@ -247,14 +251,26 @@ public abstract class AbstractEvent implements IEvent {
                 .filter(e -> e.getPersistentDataContainer().has(SportsDay.GRAFFITI)).forEach(ItemFrame::remove);
     }
 
+    @Override
     public void pause() {
         pause = true;
-        Bukkit.getServer().sendActionBar(Component.translatable("event.pause.broadcast"));
+        Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.pause"));
     }
 
+    @Override
     public void unpause() {
         pause = false;
-        Bukkit.getServer().sendActionBar(Component.translatable("event.unpause.broadcast"));
+        Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.unpause"));
+    }
+
+    @Override
+    public void terminate() {
+        if (status == Status.ENDED)
+            return;
+        setStatus(Status.ENDED);
+        cleanup();
+        Bukkit.getServer().sendTitlePart(TitlePart.TITLE, Component.translatable("event.broadcast.terminate"));
+        PLUGIN.getComponentLogger().info(Component.translatable("console.competition.terminate").arguments(name));
     }
 
     /**
@@ -271,9 +287,9 @@ public abstract class AbstractEvent implements IEvent {
 
     /**
      * Called when the event ends.
-     * @see #end(boolean)
+     * @see #end()
      */
-    protected abstract void onEnd(boolean force);
+    protected abstract void onEnd();
 
     @Override
     public void onDisqualification(@NotNull ContestantData contestant) {

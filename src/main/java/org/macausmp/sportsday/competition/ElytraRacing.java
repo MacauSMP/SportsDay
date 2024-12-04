@@ -31,8 +31,7 @@ public class ElytraRacing extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onEnd(boolean force) {
-    }
+    protected void onEnd() {}
 
     @Override
     protected void onPractice(@NotNull Player player) {

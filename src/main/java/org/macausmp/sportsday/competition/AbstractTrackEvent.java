@@ -72,10 +72,8 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     }
 
     @Override
-    public void end(boolean force) {
-        super.end(force);
-        if (force)
-            return;
+    public void end() {
+        super.end();
         TranslatableComponent.Builder builder = Component.translatable("event.result").toBuilder();
         for (int i = 0; i < getLeaderboard().size();) {
             ContestantData data = getLeaderboard().get(i);
@@ -123,7 +121,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                         if (task != null && !task.isCancelled())
                             task.cancel();
                         PLUGIN.getServer().sendActionBar(Component.translatable("event.track.end.all_completed"));
-                        end(false);
+                        end();
                         return;
                     }
                     if (getLeaderboard().size() >= 3 && !endCountdown) {
@@ -139,7 +137,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                                             .arguments(Component.text(i)).color(NamedTextColor.GREEN));
                                 if (i-- == 0) {
                                     PLUGIN.getServer().sendActionBar(Component.translatable("event.track.end.countdown_end"));
-                                    end(false);
+                                    end();
                                     cancel();
                                 }
                             }
@@ -181,7 +179,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         if (getLeaderboard().size() == getContestants().size()) {
             if (task != null && !task.isCancelled())
                 task.cancel();
-            end(false);
+            end();
         }
     }
 

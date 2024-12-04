@@ -9,6 +9,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 public class Parkour extends AbstractTrackEvent {
+    private static final PotionEffect INVISIBILITY = new PotionEffect(PotionEffectType.INVISIBILITY,
+            PotionEffect.INFINITE_DURATION, 0, false, false, false);
+
     public Parkour() {
         super("parkour");
     }
@@ -20,7 +23,7 @@ public class Parkour extends AbstractTrackEvent {
     protected void onStart() {
         Competitions.getOnlineContestants().forEach(d -> {
             Player p = d.getPlayer();
-            p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, PotionEffect.INFINITE_DURATION, 0, false, false, false));
+            p.addPotionEffect(INVISIBILITY);
             p.getInventory().setHelmet(null);
             p.getInventory().setChestplate(null);
             p.getInventory().setLeggings(null);
@@ -28,13 +31,13 @@ public class Parkour extends AbstractTrackEvent {
     }
 
     @Override
-    protected void onEnd(boolean force) {
+    protected void onEnd() {
         Competitions.getOnlineContestants().forEach(d -> d.getPlayer().clearActivePotionEffects());
     }
 
     @Override
     protected void onPractice(@NotNull Player player) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, PotionEffect.INFINITE_DURATION, 0, false, false, false));
+        player.addPotionEffect(INVISIBILITY);
         player.getInventory().setHelmet(null);
         player.getInventory().setChestplate(null);
         player.getInventory().setLeggings(null);
@@ -52,7 +55,7 @@ public class Parkour extends AbstractTrackEvent {
             addRunnable(new BukkitRunnable() {
                 @Override
                 public void run() {
-                    p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, PotionEffect.INFINITE_DURATION, 0, false, false, false));
+                    p.addPotionEffect(INVISIBILITY);
                     cancel();
                 }
             }.runTaskLater(PLUGIN, 5L));

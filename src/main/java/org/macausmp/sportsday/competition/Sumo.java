@@ -1,4 +1,4 @@
-package org.macausmp.sportsday.competition.sumo;
+package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -15,16 +15,19 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.gui.competition.event.SumoGUI;
 import org.macausmp.sportsday.util.ItemUtil;
+import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
     private final Set<ContestantData> alive = new HashSet<>();
@@ -84,9 +87,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
     }
 
     @Override
-    public void onEnd(boolean force) {
-        if (force)
-            return;
+    public void onEnd() {
         for (int i = 0, length = stages.length; i < length; i++) {
             SumoStage stage = stages[i];
             for (SumoMatch match : stage.getMatchList()) {
@@ -295,7 +296,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
             if (getSumoStage().hasNextStage())
                 nextSumoStage();
             else
-                end(false);
+                end();
         }
         SumoGUI.updateGUI();
     }
@@ -307,7 +308,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
             @Override
             public void run() {
                 if (isPaused()) {
-                    Bukkit.getServer().sendActionBar(Component.translatable("event.pause.broadcast"));
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.pause"));
                     return;
                 }
                 Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.next_match_countdown")
@@ -372,6 +373,9 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
     @Override
     protected void onPractice(@NotNull Player player) {}
 
+    private static final SumoMatchDataType SUMO_MATCH = new SumoMatchDataType();
+    private static final SumoStageDataType SUMO_STAGE = new SumoStageDataType();
+
     @Override
     public void load(@NotNull PersistentDataContainer data) {
         init();
@@ -382,7 +386,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
                 .forEach(uuid -> alive.add(Competitions.getContestant(UUID.fromString(uuid))));
         stageIndex = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER));
         stages = Objects.requireNonNull(data.get(new NamespacedKey(PLUGIN, "stages"),
-                PersistentDataType.LIST.listTypeFrom(SumoStage.SUMO_STAGE))).toArray(SumoStage[]::new);
+                PersistentDataType.LIST.listTypeFrom(SUMO_STAGE))).toArray(SumoStage[]::new);
         TranslatableComponent.Builder builder = Component.translatable("event.sumo.current_stage")
                 .arguments(getSumoStage().getName()).toBuilder();
         for (int i = getSumoStage().getCurrentMatchIndex() + 1, j = 0; i < getSumoStage().getMatchList().size(); i++) {
@@ -401,7 +405,275 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
                 PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING),
                 alive.stream().map(d -> d.getUUID().toString()).toList());
         data.set(new NamespacedKey(PLUGIN, "current_stage"), PersistentDataType.INTEGER, stageIndex);
-        data.set(new NamespacedKey(PLUGIN, "stages"), PersistentDataType.LIST.listTypeFrom(SumoStage.SUMO_STAGE),
+        data.set(new NamespacedKey(PLUGIN, "stages"), PersistentDataType.LIST.listTypeFrom(SUMO_STAGE),
                 Arrays.stream(stages).toList());
+    }
+
+    public static class SumoMatch {
+        private final int number;
+        private final UUID[] contestants = new UUID[2];
+        private MatchStatus status = MatchStatus.IDLE;
+        private UUID winner;
+        private UUID loser;
+
+        protected SumoMatch(int number) {
+            this.number = number;
+        }
+
+        protected void setPlayer(UUID uuid) {
+            if (isSet())
+                return;
+            contestants[contestants[0] == null ? 0 : 1] = uuid;
+        }
+
+        public boolean isSet() {
+            return contestants[0] != null && contestants[1] != null;
+        }
+
+        public boolean isEnd() {
+            return status == MatchStatus.ENDED;
+        }
+
+        protected void setResult(UUID defeated) {
+            if (isEnd())
+                return;
+            int i = indexOf(defeated);
+            if (i == -1)
+                return;
+            winner = contestants[i ^ 1];
+            loser = contestants[i];
+            status = MatchStatus.ENDED;
+        }
+
+        public OfflinePlayer getFirstPlayer() {
+            return Bukkit.getOfflinePlayer(contestants[0]);
+        }
+
+        public Component getFirstPlayerName() {
+            return Component.text(Objects.requireNonNull(getFirstPlayer().getName()));
+        }
+
+        public OfflinePlayer getSecondPlayer() {
+            return Bukkit.getOfflinePlayer(contestants[1]);
+        }
+
+        public Component getSecondPlayerName() {
+            return Component.text(Objects.requireNonNull(getSecondPlayer().getName()));
+        }
+
+        public boolean contain(@NotNull UUID uuid) {
+            if (!isSet())
+                return false;
+            return contestants[0].equals(uuid) || contestants[1].equals(uuid);
+        }
+
+        @MagicConstant(intValues = {-1, 0, 1})
+        private int indexOf(UUID uuid) {
+            if (!isSet())
+                return -1;
+            if (contestants[0].equals(uuid))
+                return 0;
+            if (contestants[1].equals(uuid))
+                return 1;
+            return -1;
+        }
+
+        public void forEachPlayer(@NotNull Consumer<Player> consumer) {
+            if (!isSet())
+                return;
+            consumer.accept(Bukkit.getPlayer(contestants[0]));
+            consumer.accept(Bukkit.getPlayer(contestants[1]));
+        }
+
+        public int getNumber() {
+            return number;
+        }
+
+        public MatchStatus getStatus() {
+            return status;
+        }
+
+        protected void setStatus(MatchStatus status) {
+            this.status = status;
+        }
+
+        public UUID getWinner() {
+            return winner;
+        }
+
+        public UUID getLoser() {
+            return loser;
+        }
+
+        public enum MatchStatus {
+            IDLE("competition.status.idle"),
+            COMING("competition.status.coming"),
+            STARTED("competition.status.started"),
+            ENDED("competition.status.ended");
+
+            private final Component name;
+
+            MatchStatus(String code) {
+                this.name = TextUtil.convert(Component.translatable(code));
+            }
+
+            public Component getName() {
+                return name;
+            }
+        }
+    }
+
+    public static class SumoStage {
+        private final int number;
+        private final SumoStage.Stage stage;
+        private final List<SumoMatch> matchList = new ArrayList<>();
+        private int matchIndex = -1;
+        private SumoMatch currentMatch;
+
+        protected SumoStage(int number, SumoStage.Stage stage) {
+            this.number = number;
+            this.stage = stage;
+        }
+
+        public int getNumber() {
+            return number;
+        }
+
+        public SumoStage.Stage getStage() {
+            return stage;
+        }
+
+        public List<SumoMatch> getMatchList() {
+            return matchList;
+        }
+
+        public boolean hasNextStage() {
+            return stage != SumoStage.Stage.FINAL;
+        }
+
+        public SumoMatch getCurrentMatch() {
+            return currentMatch;
+        }
+
+        public int getCurrentMatchIndex() {
+            return matchIndex;
+        }
+
+        public void nextMatch() {
+            currentMatch = matchList.get(++matchIndex);
+        }
+
+        protected SumoMatch newMatch() {
+            SumoMatch match = new SumoMatch(matchList.size() + 1);
+            matchList.add(match);
+            return match;
+        }
+
+        public boolean hasNextMatch() {
+            return matchIndex + 1 < matchList.size();
+        }
+
+        public SumoMatch getNextMatch() {
+            return hasNextMatch() ? matchList.get(matchIndex + 1) : null;
+        }
+
+        public Component getName() {
+            return stage.name;
+        }
+
+        public Material getIcon() {
+            return stage.icon;
+        }
+
+        public enum Stage {
+            ELIMINATE(Component.translatable("event.sumo.eliminate"), Material.IRON_BLOCK),
+            QUARTER_FINAL(Component.translatable("event.sumo.quarter_final"), Material.LAPIS_BLOCK),
+            SEMI_FINAL(Component.translatable("event.sumo.semi_final"), Material.REDSTONE_BLOCK),
+            THIRD_PLACE(Component.translatable("event.sumo.third_place"), Material.COPPER_BLOCK),
+            FINAL(Component.translatable("event.sumo.final"), Material.GOLD_BLOCK);
+
+            final Component name;
+            final Material icon;
+
+            Stage(Component name, Material icon) {
+                this.name = name;
+                this.icon = icon;
+            }
+        }
+    }
+
+    private static final class SumoMatchDataType implements PersistentDataType<PersistentDataContainer, SumoMatch> {
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<SumoMatch> getComplexType() {
+            return SumoMatch.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull SumoMatch complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer pdc = context.newPersistentDataContainer();
+            pdc.set(new NamespacedKey(PLUGIN, "number"), INTEGER, complex.number);
+            if (complex.contestants[0] != null)
+                pdc.set(new NamespacedKey(PLUGIN, "p1"), STRING, complex.contestants[0].toString());
+            if (complex.contestants[1] != null)
+                pdc.set(new NamespacedKey(PLUGIN, "p2"), STRING, complex.contestants[1].toString());
+            boolean end = complex.isEnd();
+            pdc.set(new NamespacedKey(PLUGIN, "end"), BOOLEAN, end);
+            if (end)
+                pdc.set(new NamespacedKey(PLUGIN, "loser"), STRING, complex.loser.toString());
+            return pdc;
+        }
+
+        @Override
+        public @NotNull SumoMatch fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            SumoMatch match = new SumoMatch(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "number"), INTEGER)));
+            if (primitive.has(new NamespacedKey(PLUGIN, "p1")))
+                match.setPlayer(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p1"), STRING))));
+            if (primitive.has(new NamespacedKey(PLUGIN, "p2")))
+                match.setPlayer(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "p2"), STRING))));
+            if (Boolean.TRUE.equals(primitive.get(new NamespacedKey(PLUGIN, "end"), BOOLEAN)))
+                match.setResult(UUID.fromString(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "loser"), STRING))));
+            return match;
+        }
+    }
+
+    private static final class SumoStageDataType implements PersistentDataType<PersistentDataContainer, SumoStage> {
+        @Override
+        public @NotNull Class<PersistentDataContainer> getPrimitiveType() {
+            return PersistentDataContainer.class;
+        }
+
+        @Override
+        public @NotNull Class<SumoStage> getComplexType() {
+            return SumoStage.class;
+        }
+
+        @Override
+        public @NotNull PersistentDataContainer toPrimitive(@NotNull SumoStage complex, @NotNull PersistentDataAdapterContext context) {
+            PersistentDataContainer pdc = context.newPersistentDataContainer();
+            pdc.set(new NamespacedKey(PLUGIN, "number"), INTEGER, complex.number);
+            pdc.set(new NamespacedKey(PLUGIN, "stage"), STRING, complex.stage.name());
+            pdc.set(new NamespacedKey(PLUGIN, "index"), INTEGER,
+                    complex.matchIndex - (complex.currentMatch == null || complex.currentMatch.isEnd() ? 0 : 1));
+            pdc.set(new NamespacedKey(PLUGIN, "match_list"), LIST.listTypeFrom(SUMO_MATCH), complex.matchList);
+            return pdc;
+        }
+
+        @Override
+        public @NotNull SumoStage fromPrimitive(@NotNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+            int number = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "number"), INTEGER));
+            SumoStage.Stage stage = SumoStage.Stage.valueOf(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "stage"), STRING)));
+            SumoStage sumoStage = new SumoStage(number, stage);
+            sumoStage.matchList.addAll(Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "match_list"),
+                    LIST.listTypeFrom(SUMO_MATCH))));
+            sumoStage.matchIndex = Objects.requireNonNull(primitive.get(new NamespacedKey(PLUGIN, "index"), INTEGER));
+            if (sumoStage.matchIndex != -1)
+                sumoStage.currentMatch = sumoStage.matchList.get(sumoStage.matchIndex);
+            return sumoStage;
+        }
     }
 }

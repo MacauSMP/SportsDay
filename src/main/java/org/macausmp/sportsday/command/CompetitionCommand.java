@@ -29,9 +29,11 @@ public class CompetitionCommand extends PluginCommand {
                     Competitions.EVENTS.keySet().forEach(joiner::add);
                     sender.sendMessage("/competition start " + joiner);
                 }
-                case "end" -> Competitions.forceEnd(sender);
+                case "load" -> Competitions.loadEventData(sender);
+                case "save" -> Competitions.saveEventData(sender);
                 case "pause" -> Competitions.pause(sender);
                 case "unpause" -> Competitions.unpause(sender);
+                case "terminate" -> Competitions.terminate(sender);
                 case "join" -> {
                     if (args.length >= 2) {
                         Player p = Bukkit.getPlayer(args[1]);
@@ -156,8 +158,6 @@ public class CompetitionCommand extends PluginCommand {
                     sender.sendMessage(Component.translatable("competition.enabled").color(NamedTextColor.GREEN)
                             .arguments(Component.text(Arrays.toString(el.toArray())).color(NamedTextColor.YELLOW)));
                 }
-                case "load" -> Competitions.loadEventData(sender);
-                case "save" -> Competitions.saveEventData(sender);
                 default -> sender.sendMessage(Component.translatable("command.unknown.argument")
                         .color(NamedTextColor.RED));
             }
@@ -176,7 +176,7 @@ public class CompetitionCommand extends PluginCommand {
         List<String> l = new ArrayList<>();
         if (args.length == 1) {
             l.add("start");
-            l.add("end");
+            l.add("terminate");
             l.add("load");
             l.add("save");
             l.add("pause");

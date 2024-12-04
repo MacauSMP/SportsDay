@@ -16,17 +16,19 @@ import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.util.ItemUtil;
 
-public class TrackEventGUI extends AbstractEventGUI<ITrackEvent> {
+public class TrackEventGUI extends EventGUI<ITrackEvent> {
     private final PageBox<ContestantData> pageBox;
 
     public TrackEventGUI(@NotNull ITrackEvent event) {
-        super(54, event);
-        this.pageBox = new PageBox<>(this, 18, 54,
+        super(event);
+        this.pageBox = new PageBox<>(this, 36, 54,
                 () -> event.getContestants().stream()
                         .sorted((d1, d2) -> event.getRecord(d1) > 0 && event.getRecord(d2) > 0
                                 ? Float.compare(event.getRecord(d1), event.getRecord(d2)) : 0).toList());
-        getInventory().setItem(9, PREVIOUS_PAGE);
-        getInventory().setItem(17, NEXT_PAGE);
+        for (int i = 0; i < 9; i++)
+            getInventory().setItem(i + 27, BOARD);
+        getInventory().setItem(27, PREVIOUS_PAGE);
+        getInventory().setItem(35, NEXT_PAGE);
         update();
     }
 
@@ -34,6 +36,7 @@ public class TrackEventGUI extends AbstractEventGUI<ITrackEvent> {
     public void update() {
         if (Competitions.getCurrentEvent() != event)
             return;
+        super.update();
         pageBox.updatePage(this::icon);
     }
 
