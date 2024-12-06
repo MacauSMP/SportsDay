@@ -55,11 +55,10 @@ import java.util.*;
 
 public final class SportsDay extends JavaPlugin implements Listener {
     private static SportsDay instance;
-    private CommandManager commandManager;
+    private static BossBar BOSSBAR;
     public static Team CONTESTANTS;
     public static Team REFEREES;
     public static Team AUDIENCES;
-    private static BossBar BOSSBAR;
     public static NamespacedKey GRAFFITI;
     private static final Set<UUID> EASTER_EGG = new HashSet<>();
 
@@ -78,15 +77,24 @@ public final class SportsDay extends JavaPlugin implements Listener {
         saveDefaultConfig();
         reloadConfig();
         Competitions.load();
+        BOSSBAR = BossBar.bossBar(Component.translatable("bossbar.title"), 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
         CONTESTANTS = registerTeam("contestants", Component.translatable("role.contestants"), NamedTextColor.GREEN);
         REFEREES = registerTeam("referees", Component.translatable("role.referees"), NamedTextColor.GOLD);
         AUDIENCES = registerTeam("audiences", Component.translatable("role.audiences"), NamedTextColor.GRAY);
-        if (BOSSBAR == null)
-            BOSSBAR = BossBar.bossBar(Component.translatable("bossbar.title"), 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
         GRAFFITI = new NamespacedKey(this, "graffiti_frame");
-        registerCommand();
-        registerListener();
-        setGameRules();
+        new CommandManager().register();
+        getServer().getPluginManager().registerEvents(this, this);
+        Competitions.EVENTS.values().forEach(e -> getServer().getPluginManager().registerEvents(e, this));
+        getServer().getWorlds().forEach(w -> {
+            w.setGameRule(GameRule.DISABLE_ELYTRA_MOVEMENT_CHECK, false);
+            w.setGameRule(GameRule.DO_ENTITY_DROPS, false);
+            w.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+            w.setGameRule(GameRule.DO_INSOMNIA, false);
+            w.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+            w.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
+            w.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
+            w.setGameRule(GameRule.KEEP_INVENTORY, true);
+        });
         setTabList();
     }
 
@@ -109,50 +117,6 @@ public final class SportsDay extends JavaPlugin implements Listener {
             team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         }
         return team;
-    }
-
-    private void registerCommand() {
-        if (commandManager == null)
-            commandManager = new CommandManager();
-        commandManager.register();
-    }
-
-    private void registerListener() {
-        getServer().getPluginManager().registerEvents(this, this);
-        Competitions.EVENTS.values().forEach(e -> getServer().getPluginManager().registerEvents(e, this));
-    }
-
-    private void setGameRules() {
-        getServer().getWorlds().forEach(w -> {
-            w.setGameRule(GameRule.DISABLE_ELYTRA_MOVEMENT_CHECK, false);
-            w.setGameRule(GameRule.DO_ENTITY_DROPS, false);
-            w.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
-            w.setGameRule(GameRule.DO_INSOMNIA, false);
-            w.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-            w.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
-            w.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
-            w.setGameRule(GameRule.KEEP_INVENTORY, true);
-        });
-    }
-
-    @Override
-    public void onDisable() {
-        IEvent event = Competitions.getCurrentEvent();
-        if (event != null) {
-            CommandSender sender = getServer().getConsoleSender();
-            if (event instanceof Savable)
-                Competitions.saveEventData(sender);
-            Competitions.terminate(sender);
-            getServer().getOnlinePlayers().forEach(p -> {
-                p.getInventory().clear();
-                PlayerCustomize.suitUp(p);
-                p.getInventory().setItem(0, ItemUtil.MENU);
-                p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
-                p.teleport(p.getWorld().getSpawnLocation());
-                p.setGameMode(GameMode.ADVENTURE);
-            });
-        }
-        Competitions.save();
     }
 
     private void setTabList() {
@@ -193,6 +157,26 @@ public final class SportsDay extends JavaPlugin implements Listener {
                 return Component.translatable("tablist.title").append(competition).append(count);
             }
         }.runTaskTimer(instance, d, 20L);
+    }
+
+    @Override
+    public void onDisable() {
+        IEvent event = Competitions.getCurrentEvent();
+        if (event != null) {
+            CommandSender sender = getServer().getConsoleSender();
+            if (event instanceof Savable)
+                Competitions.saveEventData(sender);
+            Competitions.terminate(sender);
+            getServer().getOnlinePlayers().forEach(p -> {
+                p.getInventory().clear();
+                PlayerCustomize.suitUp(p);
+                p.getInventory().setItem(0, ItemUtil.MENU);
+                p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
+                p.teleport(p.getWorld().getSpawnLocation());
+                p.setGameMode(GameMode.ADVENTURE);
+            });
+        }
+        Competitions.save();
     }
 
     @EventHandler
@@ -318,9 +302,11 @@ public final class SportsDay extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onSpray(@NotNull PlayerInteractEvent e) {
+        Player p = e.getPlayer();
+        if (p.getGameMode() == GameMode.SPECTATOR)
+            return;
         if (e.getItem() != null && ItemUtil.equals(e.getItem(), ItemUtil.SPRAY)) {
             e.setCancelled(true);
-            Player p = e.getPlayer();
             if (e.getAction().equals(Action.RIGHT_CLICK_AIR)) {
                 p.openInventory(new GraffitiSprayGUI(p).getInventory());
                 p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
@@ -369,12 +355,14 @@ public final class SportsDay extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onChangeSpray(@NotNull PlayerInteractEntityEvent e) {
-        ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
+        Player p = e.getPlayer();
+        if (p.getGameMode() == GameMode.SPECTATOR)
+            return;
+        ItemStack item = p.getInventory().getItemInMainHand();
         if (ItemUtil.equals(item, ItemUtil.SPRAY) && e.getRightClicked() instanceof ItemFrame frame) {
             if (!frame.getPersistentDataContainer().has(GRAFFITI))
                 return;
             e.setCancelled(true);
-            Player p = e.getPlayer();
             if (p.getCooldown(ItemUtil.SPRAY.getType()) > 0 && !p.isOp()) {
                 p.sendActionBar(Component.translatable("item.spray.cooldown")
                         .arguments(Component.text(p.getCooldown(ItemUtil.SPRAY.getType()) / 20f))

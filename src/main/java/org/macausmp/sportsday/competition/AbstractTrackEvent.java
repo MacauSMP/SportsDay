@@ -31,13 +31,13 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
             || inPractice(p, this);
     private final HashMap<ContestantData, Integer> lapMap = new HashMap<>();
     private final HashMap<ContestantData, Float> record = new HashMap<>();
-    private final int laps;
+    private int laps;
     private int time = 0;
     private boolean endCountdown = false;
     private BukkitTask task;
 
-    public AbstractTrackEvent(String id) {
-        super(id);
+    public AbstractTrackEvent(String id, Material icon) {
+        super(id, icon);
         this.laps = PLUGIN.getConfig().getInt(getID() + ".laps");
     }
 
@@ -45,6 +45,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
     public void setup() {
         lapMap.clear();
         record.clear();
+        laps = PLUGIN.getConfig().getInt(getID() + ".laps");
         endCountdown = false;
         PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(),
                 Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".ready_command")));

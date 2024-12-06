@@ -29,9 +29,10 @@ public abstract class AbstractEvent implements IEvent {
     private final NamespacedKey key;
     private final String id;
     private final Component name;
-    private final int least;
-    private final Location location;
-    private final World world;
+    private final Material icon;
+    private int least;
+    private Location location;
+    private World world;
     private Status status = Status.IDLE;
     private boolean pause = false;
     private long time = 0L;
@@ -41,10 +42,11 @@ public abstract class AbstractEvent implements IEvent {
     private Musickit mvpAnthem = null;
     public static final NamespacedKey IN_GAME = new NamespacedKey(PLUGIN, "in_game");
 
-    public AbstractEvent(String id) {
+    public AbstractEvent(String id, Material icon) {
         this.key = new NamespacedKey(PLUGIN, id);
         this.id = id;
         this.name = TextUtil.convert(Component.translatable("event.name." + id));
+        this.icon = icon;
         this.least = PLUGIN.getConfig().getInt(id + ".least_players_required");
         this.location = Objects.requireNonNull(PLUGIN.getConfig().getLocation(id + ".location"));
         this.world = location.getWorld();
@@ -63,6 +65,11 @@ public abstract class AbstractEvent implements IEvent {
     @Override
     public final Component getName() {
         return name;
+    }
+
+    @Override
+    public Material getDisplayItem() {
+        return icon;
     }
 
     @Override
@@ -151,6 +158,9 @@ public abstract class AbstractEvent implements IEvent {
     }
 
     protected void init() {
+        least = PLUGIN.getConfig().getInt(id + ".least_players_required");
+        location = Objects.requireNonNull(PLUGIN.getConfig().getLocation(id + ".location"));
+        world = location.getWorld();
         pause = false;
         time = System.currentTimeMillis();
         Bukkit.getOnlinePlayers().forEach(p -> {
@@ -333,7 +343,8 @@ public abstract class AbstractEvent implements IEvent {
      * @param player who leave practicing this event
      */
     public static void leavePractice(@NotNull Player player) {
-        if (!PRACTICE.containsKey(player)) return;
+        if (!PRACTICE.containsKey(player))
+            return;
         PRACTICE.remove(player);
         if (player.isInsideVehicle())
             Objects.requireNonNull(player.getVehicle()).remove();

@@ -43,7 +43,7 @@ public class TrackEventSettingsGUI extends EventSettingsGUI<ITrackEvent> {
         int laps = PLUGIN.getConfig().getInt(event.getID() + ".laps");
         ItemStack stack = ItemUtil.item(Material.LEAD, "laps",
                 Component.translatable("gui.event_settings.laps").arguments(Component.text(laps)).color(NamedTextColor.YELLOW),
-                "gui.increase", "gui.decrease", "gui.event_settings.reload_require");
+                "gui.increase", "gui.decrease");
         stack.setAmount(laps);
         return stack;
     }

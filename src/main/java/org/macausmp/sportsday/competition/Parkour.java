@@ -1,5 +1,6 @@
 package org.macausmp.sportsday.competition;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -13,7 +14,7 @@ public class Parkour extends AbstractTrackEvent {
             PotionEffect.INFINITE_DURATION, 0, false, false, false);
 
     public Parkour() {
-        super("parkour");
+        super("parkour", Material.LEATHER_BOOTS);
     }
 
     @Override

@@ -24,7 +24,7 @@ public class IceBoatRacing extends AbstractTrackEvent {
     private final HashMap<UUID, Boat> boatMap = new HashMap<>();
 
     public IceBoatRacing() {
-        super("ice_boat_racing");
+        super("ice_boat_racing", Material.OAK_BOAT);
     }
 
     @Override
@@ -42,8 +42,8 @@ public class IceBoatRacing extends AbstractTrackEvent {
 
     @Override
     protected void cleanup() {
-        super.cleanup();
         boatMap.values().forEach(Boat::remove);
+        super.cleanup();
     }
 
     @Override

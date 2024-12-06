@@ -3,6 +3,7 @@ package org.macausmp.sportsday.gui.competition.event;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -27,6 +28,7 @@ public class TrackEventGUI extends EventGUI<ITrackEvent> {
                                 ? Float.compare(event.getRecord(d1), event.getRecord(d2)) : 0).toList());
         for (int i = 0; i < 9; i++)
             getInventory().setItem(i + 27, BOARD);
+        getInventory().setItem(20, laps());
         getInventory().setItem(27, PREVIOUS_PAGE);
         getInventory().setItem(35, NEXT_PAGE);
         update();
@@ -50,6 +52,13 @@ public class TrackEventGUI extends EventGUI<ITrackEvent> {
     public void prev(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.playSound(Sound.sound(Key.key("minecraft:item.book.page_turn"), Sound.Source.MASTER, 1f, 1f));
         pageBox.previousPage();
+    }
+
+    private @NotNull ItemStack laps() {
+        ItemStack stack = ItemUtil.item(Material.LEAD, null,
+                Component.translatable("event.track.laps").arguments(Component.text(event.getMaxLaps())).color(NamedTextColor.YELLOW));
+        stack.setAmount(event.getMaxLaps());
+        return stack;
     }
 
     private @NotNull ItemStack icon(@NotNull ContestantData data) {

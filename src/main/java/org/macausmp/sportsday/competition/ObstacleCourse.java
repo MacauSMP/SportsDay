@@ -1,5 +1,6 @@
 package org.macausmp.sportsday.competition;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
@@ -7,7 +8,7 @@ import org.macausmp.sportsday.SportsDay;
 
 public class ObstacleCourse extends AbstractTrackEvent {
     public ObstacleCourse() {
-        super("obstacle_course");
+        super("obstacle_course", Material.OAK_FENCE_GATE);
     }
 
     @Override

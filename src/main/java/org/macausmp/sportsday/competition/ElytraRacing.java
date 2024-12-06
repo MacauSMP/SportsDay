@@ -17,7 +17,7 @@ public class ElytraRacing extends AbstractTrackEvent {
     private static final ItemStack FIREWORK = firework();
 
     public ElytraRacing() {
-        super("elytra_racing");
+        super("elytra_racing", Material.ELYTRA);
     }
 
     @Override

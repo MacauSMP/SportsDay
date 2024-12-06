@@ -35,7 +35,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
     private static final ItemStack TRIDENT = trident();
 
     public JavelinThrow() {
-        super("javelin_throw");
+        super("javelin_throw", Material.TRIDENT);
     }
 
     @Override

@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -15,10 +16,6 @@ import org.macausmp.sportsday.gui.competition.setting.EventSettingsGUI;
 import org.macausmp.sportsday.gui.competition.setting.SumoSettingsGUI;
 import org.macausmp.sportsday.gui.competition.setting.TrackEventSettingsGUI;
 import org.macausmp.sportsday.util.ItemUtil;
-import org.macausmp.sportsday.util.TextUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
     public CompetitionSettingsGUI() {
@@ -29,16 +26,16 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
         getInventory().setItem(1, CONTESTANTS_LIST);
         getInventory().setItem(2, ItemUtil.setGlint(COMPETITION_SETTINGS));
         getInventory().setItem(3, VERSION);
-        getInventory().setItem(18, setting(ELYTRA_RACING));
-        getInventory().setItem(19, setting(ICE_BOAT_RACING));
-        getInventory().setItem(20, setting(JAVELIN_THROW));
-        getInventory().setItem(21, setting(OBSTACLE_COURSE));
-        getInventory().setItem(22, setting(PARKOUR));
-        getInventory().setItem(23, setting(SUMO));
+        getInventory().setItem(18, setting(Competitions.ELYTRA_RACING));
+        getInventory().setItem(19, setting(Competitions.ICE_BOAT_RACING));
+        getInventory().setItem(20, setting(Competitions.JAVELIN_THROW));
+        getInventory().setItem(21, setting(Competitions.OBSTACLE_COURSE));
+        getInventory().setItem(22, setting(Competitions.PARKOUR));
+        getInventory().setItem(23, setting(Competitions.SUMO));
         update();
     }
 
-    @ButtonHandler("event")
+    @ButtonHandler("event_setting")
     public void setting(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         IEvent event = Competitions.EVENTS.get(item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
         if (event == null)
@@ -52,15 +49,15 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
             p.openInventory(new TrackEventSettingsGUI(track).getInventory());
     }
 
-    private @NotNull ItemStack setting(@NotNull ItemStack event) {
-        ItemStack clone = event.clone();
-        Component name = Competitions.EVENTS.get(clone.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING)).getName();
-        clone.editMeta(meta -> {
-            meta.displayName(TextUtil.text(Component.translatable("gui.event_settings.title").color(NamedTextColor.YELLOW).arguments(name)));
-            List<Component> lore = new ArrayList<>();
-            lore.add(TextUtil.text(Component.translatable("gui.event_settings.lore").arguments(name)));
-            meta.lore(lore);
+    private @NotNull ItemStack setting(@NotNull IEvent event) {
+        ItemStack stack = ItemUtil.item(event.getDisplayItem(), "event_setting",
+                Component.translatable("gui.event_settings.title").color(NamedTextColor.YELLOW).arguments(event.getName()),
+                Component.translatable(event instanceof ITrackEvent ? "event.type.track" : "event.type.field").color(NamedTextColor.GRAY),
+                Component.translatable("gui.event_settings.lore").arguments(event.getName()));
+        stack.editMeta(meta -> {
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID());
         });
-        return clone;
+        return stack;
     }
 }

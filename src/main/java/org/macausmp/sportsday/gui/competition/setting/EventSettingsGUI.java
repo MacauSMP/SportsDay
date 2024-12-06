@@ -92,7 +92,7 @@ public class EventSettingsGUI<T extends IEvent> extends AbstractCompetitionGUI {
                 Material.PLAYER_HEAD,
                 "amount",
                 Component.translatable("gui.event_settings.amount").arguments(Component.text(amount)).color(NamedTextColor.YELLOW),
-                "gui.increase", "gui.decrease", "gui.event_settings.reload_require");
+                "gui.increase", "gui.decrease");
         stack.setAmount(amount);
         return stack;
     }
@@ -106,6 +106,6 @@ public class EventSettingsGUI<T extends IEvent> extends AbstractCompetitionGUI {
                 Component.text("world=" + location.getWorld()).color(NamedTextColor.YELLOW),
                 Component.text("x=" + location.x() + ", y=" + location.y() + ", z=" + location.z()).color(NamedTextColor.YELLOW),
                 Component.text("pitch=" + location.getPitch() + ", yaw=" + location.getYaw()).color(NamedTextColor.YELLOW),
-                "gui.event_settings.location_lore", "gui.event_settings.reload_require");
+                "gui.event_settings.location_lore");
     }
 }

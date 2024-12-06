@@ -3,6 +3,7 @@ package org.macausmp.sportsday.competition;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Keyed;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -15,18 +16,25 @@ import java.util.List;
  */
 public interface IEvent extends Keyed, Listener {
     /**
-     * Get the event's id from the config file.
+     * Get the event's id.
      *
      * @return id of event
      */
     String getID();
 
     /**
-     * Get the event's name from the config file.
+     * Get the event's name.
      *
      * @return name of event
      */
     Component getName();
+
+    /**
+     * Get the event's display item.
+     *
+     * @return display item of event
+     */
+    Material getDisplayItem();
 
     /**
      * Get the event's minimum required number of players from the config file.

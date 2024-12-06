@@ -34,11 +34,18 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
     private final List<ContestantData> queue = new ArrayList<>();
     private SumoStage[] stages;
     private int stageIndex = 0;
-    private final boolean weapon = PLUGIN.getConfig().getBoolean(getID() + ".enable_weapon");
-    private final int time = PLUGIN.getConfig().getInt(getID() + ".weapon_time");
+    private boolean weapon = PLUGIN.getConfig().getBoolean(getID() + ".enable_weapon");
+    private int time = PLUGIN.getConfig().getInt(getID() + ".weapon_time");
 
     public Sumo() {
-        super("sumo");
+        super("sumo", Material.COD);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        weapon = PLUGIN.getConfig().getBoolean(getID() + ".enable_weapon");
+        time = PLUGIN.getConfig().getInt(getID() + ".weapon_time");
     }
 
     @Override

@@ -100,8 +100,7 @@ public final class Competitions {
         }
         Competitions.setCurrentEvent(event);
         savable.load(pdc);
-        sender.sendMessage(Component.translatable("command.competition.load.success")
-                .color(NamedTextColor.GREEN));
+        sender.sendMessage(Component.translatable("command.competition.load.success").color(NamedTextColor.GREEN));
     }
 
     /**
