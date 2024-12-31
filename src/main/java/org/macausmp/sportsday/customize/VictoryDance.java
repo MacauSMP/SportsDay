@@ -1,6 +1,7 @@
 package org.macausmp.sportsday.customize;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -14,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
-public enum VictoryDance {
+public enum VictoryDance implements ComponentLike {
     DRAGON_RIDER("customize.victory_dance.dragon_rider", Material.DRAGON_HEAD, DragonRider::new),
     MADE_IN_HEAVEN("customize.victory_dance.made_in_heaven", Material.CLOCK, MadeInHeaven::new),
     DANCE_MACABRE("customize.victory_dance.dance_macabre", Material.WITHER_SKELETON_SKULL, DanceMacabre::new),
@@ -31,7 +32,8 @@ public enum VictoryDance {
         this.function = function;
     }
 
-    public Component getName() {
+    @Override
+    public @NotNull Component asComponent() {
         return name;
     }
 

@@ -10,14 +10,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.IEvent;
+import org.macausmp.sportsday.competition.SportingEvent;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.competition.AbstractCompetitionGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-import java.util.Objects;
-
-public class EventSettingsGUI<T extends IEvent> extends AbstractCompetitionGUI {
+public class EventSettingsGUI<T extends SportingEvent> extends AbstractCompetitionGUI {
     protected final T event;
 
     public EventSettingsGUI(@NotNull T event) {
@@ -42,14 +40,13 @@ public class EventSettingsGUI<T extends IEvent> extends AbstractCompetitionGUI {
     public static void updateGUI() {
         PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
                 .filter(inv -> inv.getHolder() instanceof EventSettingsGUI)
-                .map(inv -> (EventSettingsGUI<? extends IEvent>) inv.getHolder()).forEach(EventSettingsGUI::update);
+                .map(inv -> (EventSettingsGUI<? extends SportingEvent>) inv.getHolder())
+                .forEach(EventSettingsGUI::update);
     }
 
     @ButtonHandler("enable")
     public void enable(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PLUGIN.getConfig().set(event.getID() + ".enable", !event.isEnable());
-        PLUGIN.saveConfig();
-        updateGUI();
+        event.setSetting(SportingEvent.ENABLE, !event.isEnable());
         p.playSound(Sound.sound(Key.key(event.isEnable() ?
                 "minecraft:entity.arrow.hit_player" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
     }
@@ -58,22 +55,16 @@ public class EventSettingsGUI<T extends IEvent> extends AbstractCompetitionGUI {
     public void amount(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (!e.getClick().isLeftClick() && !e.getClick().isRightClick())
             return;
-        String path = event.getID() + ".least_players_required";
-        int amount = PLUGIN.getConfig().getInt(path) + (e.getClick().isLeftClick() ? 1 : -1);
-        if (amount > 0) {
-            PLUGIN.getConfig().set(path, amount);
-            PLUGIN.saveConfig();
-            updateGUI();
-        }
+        int amount = event.getSetting(SportingEvent.LEAST_PLAYERS_REQUIRED) + (e.getClick().isLeftClick() ? 1 : -1);
+        if (amount > 0)
+            event.setSetting(SportingEvent.LEAST_PLAYERS_REQUIRED, amount);
         p.playSound(Sound.sound(Key.key(e.getClick().isLeftClick() ?
                 "minecraft:entity.arrow.hit_player" : "minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
     }
 
     @ButtonHandler("location")
     public void location(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PLUGIN.getConfig().set(event.getID() + ".location", p.getLocation());
-        PLUGIN.saveConfig();
-        updateGUI();
+        event.setSetting(SportingEvent.LOCATION, p.getLocation());
         p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
     }
 
@@ -87,7 +78,7 @@ public class EventSettingsGUI<T extends IEvent> extends AbstractCompetitionGUI {
     }
 
     private @NotNull ItemStack amount() {
-        int amount = PLUGIN.getConfig().getInt(event.getID() + ".least_players_required");
+        int amount = event.getSetting(SportingEvent.LEAST_PLAYERS_REQUIRED);
         ItemStack stack = ItemUtil.item(
                 Material.PLAYER_HEAD,
                 "amount",
@@ -98,7 +89,7 @@ public class EventSettingsGUI<T extends IEvent> extends AbstractCompetitionGUI {
     }
 
     private @NotNull ItemStack location() {
-        Location location = Objects.requireNonNull(PLUGIN.getConfig().getLocation(event.getID() + ".location"));
+        Location location = event.getSetting(SportingEvent.LOCATION);
         return ItemUtil.item(
                 Material.BEACON,
                 "location",

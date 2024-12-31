@@ -58,7 +58,7 @@ public class ProjectileTrailGUI extends PluginGUI {
     }
 
     private @NotNull ItemStack effect(@NotNull ParticleEffect effect) {
-        ItemStack stack = ItemUtil.item(effect.getMaterial(), "projectile_trail", effect.getName(),
+        ItemStack stack = ItemUtil.item(effect.getMaterial(), "projectile_trail", effect,
                 effect == selected ? "gui.selected" : "gui.select");
         if (effect == selected)
             stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));

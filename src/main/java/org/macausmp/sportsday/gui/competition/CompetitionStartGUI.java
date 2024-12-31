@@ -8,14 +8,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.IEvent;
-import org.macausmp.sportsday.competition.IFieldEvent;
-import org.macausmp.sportsday.competition.ITrackEvent;
+import org.macausmp.sportsday.competition.FieldEvent;
+import org.macausmp.sportsday.competition.SportingEvent;
+import org.macausmp.sportsday.competition.TrackEvent;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.util.ItemUtil;
+import org.macausmp.sportsday.util.KeyDataType;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.ArrayList;
@@ -40,26 +40,26 @@ public class CompetitionStartGUI extends AbstractCompetitionGUI {
 
     @ButtonHandler("event_start")
     public void start(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (!Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING)))
+        if (!Competitions.start(p, item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, KeyDataType.KEY_DATA_TYPE)))
             p.playSound(Sound.sound(Key.key("minecraft:entity.enderman.teleport"), Sound.Source.MASTER, 1f, 1f));
     }
 
-    private @NotNull ItemStack start(@NotNull IEvent event) {
+    private @NotNull ItemStack start(@NotNull SportingEvent event) {
         ItemStack stack = ItemUtil.item(event.getDisplayItem(), "event_start", event.getName());
         stack.editMeta(meta -> {
             List<Component> lore = new ArrayList<>();
-            if (event instanceof ITrackEvent) {
+            if (event instanceof TrackEvent trackEvent) {
                 lore.add(Component.translatable("event.type.track").color(NamedTextColor.GRAY));
                 lore.add(Component.translatable("event.track.laps")
-                        .arguments(Component.text((PLUGIN.getConfig().getInt(event.getID() + ".laps"))))
+                        .arguments(Component.text(trackEvent.getMaxLaps()))
                         .color(NamedTextColor.YELLOW));
-            } else if (event instanceof IFieldEvent) {
+            } else if (event instanceof FieldEvent) {
                 lore.add(Component.translatable("event.type.field").color(NamedTextColor.GRAY));
             }
             lore.add(Component.translatable("gui.start_competition"));
             meta.lore(lore.stream().map(TextUtil::text).toList());
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID());
+            meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, KeyDataType.KEY_DATA_TYPE, event.getKey());
         });
         return stack;
     }

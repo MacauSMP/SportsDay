@@ -45,7 +45,8 @@ public class ContestantProfileGUI extends AbstractCompetitionGUI {
         PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
                 .filter(inv -> inv.getHolder() instanceof ContestantProfileGUI)
                 .map(inv -> (ContestantProfileGUI) inv.getHolder())
-                .filter(gui -> gui.data.getUUID().equals(uuid)).forEach(ContestantProfileGUI::update);
+                .filter(gui -> gui.data.getUUID().equals(uuid))
+                .forEach(ContestantProfileGUI::update);
     }
 
     @ButtonHandler("score")

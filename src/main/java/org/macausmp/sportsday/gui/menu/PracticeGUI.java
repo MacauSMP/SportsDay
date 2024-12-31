@@ -8,15 +8,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.AbstractEvent;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.IEvent;
-import org.macausmp.sportsday.competition.ITrackEvent;
+import org.macausmp.sportsday.competition.SportingEvent;
+import org.macausmp.sportsday.competition.TrackEvent;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
+import org.macausmp.sportsday.util.KeyDataType;
+
+import java.util.Objects;
 
 public class PracticeGUI extends PluginGUI {
     public PracticeGUI() {
@@ -41,21 +42,22 @@ public class PracticeGUI extends PluginGUI {
     @ButtonHandler("event_practice")
     public void practice(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         if (Competitions.getCurrentEvent() == null) {
-            IEvent event = Competitions.EVENTS.get(item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
+            SportingEvent event = Competitions.EVENTS.get(Objects.requireNonNull(item.getItemMeta()
+                    .getPersistentDataContainer().get(ItemUtil.EVENT_ID, KeyDataType.KEY_DATA_TYPE)));
             if (event == null)
                 return;
-            AbstractEvent.leavePractice(p);
+            SportingEvent.leavePractice(p);
             event.joinPractice(p);
         }
     }
 
-    private @NotNull ItemStack practice(@NotNull IEvent event) {
+    private @NotNull ItemStack practice(@NotNull SportingEvent event) {
         ItemStack stack = ItemUtil.item(event.getDisplayItem(), "event_practice",
                 Component.translatable("gui.menu.practice").arguments(event.getName()),
-                Component.translatable(event instanceof ITrackEvent ? "event.type.track" : "event.type.field").color(NamedTextColor.GRAY));
+                Component.translatable(event instanceof TrackEvent ? "event.type.track" : "event.type.field").color(NamedTextColor.GRAY));
         stack.editMeta(meta -> {
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID());
+            meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, KeyDataType.KEY_DATA_TYPE, event.getKey());
         });
         return stack;
     }

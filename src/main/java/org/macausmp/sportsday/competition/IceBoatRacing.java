@@ -1,6 +1,5 @@
 package org.macausmp.sportsday.competition;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
@@ -9,9 +8,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDismountEvent;
 import org.bukkit.event.entity.EntityMountEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 
@@ -19,8 +16,7 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
-public class IceBoatRacing extends AbstractTrackEvent {
-    private static final Material SPRING_BLOCK = getMaterial("ice_boat_racing.spring_block");
+public class IceBoatRacing extends TrackEvent {
     private final HashMap<UUID, Boat> boatMap = new HashMap<>();
 
     public IceBoatRacing() {
@@ -49,21 +45,6 @@ public class IceBoatRacing extends AbstractTrackEvent {
     @Override
     protected void onPractice(@NotNull Player player) {
         boatMap.put(player.getUniqueId(), boat(player));
-    }
-
-    @EventHandler
-    public void onMove(@NotNull PlayerMoveEvent e) {
-        Player p = e.getPlayer();
-        if (!predicate.test(p) || !boatMap.containsKey(p.getUniqueId()))
-            return;
-        bounce(p);
-    }
-
-    private void bounce(@NotNull Player p) {
-        Location loc = p.getLocation().clone();
-        loc.setY(loc.getY() - 0.5f);
-        if (loc.getBlock().getType() == SPRING_BLOCK && !SPRING_BLOCK.isAir())
-            boatMap.get(p.getUniqueId()).setVelocity(new Vector(0f, 0.5f, 0f));
     }
 
     @Override

@@ -12,15 +12,15 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
 import org.macausmp.sportsday.competition.ContestantData;
-import org.macausmp.sportsday.competition.ITrackEvent;
+import org.macausmp.sportsday.competition.TrackEvent;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PageBox;
 import org.macausmp.sportsday.util.ItemUtil;
 
-public class TrackEventGUI extends EventGUI<ITrackEvent> {
+public class TrackEventGUI extends EventGUI<TrackEvent> {
     private final PageBox<ContestantData> pageBox;
 
-    public TrackEventGUI(@NotNull ITrackEvent event) {
+    public TrackEventGUI(@NotNull TrackEvent event) {
         super(event);
         this.pageBox = new PageBox<>(this, 36, 54,
                 () -> event.getContestants().stream()

@@ -58,7 +58,7 @@ public class VictoryDanceGUI extends PluginGUI {
     }
 
     private @NotNull ItemStack victoryDance(@NotNull VictoryDance victoryDance) {
-        ItemStack stack = ItemUtil.item(victoryDance.getMaterial(), "victory_dance", victoryDance.getName(),
+        ItemStack stack = ItemUtil.item(victoryDance.getMaterial(), "victory_dance", victoryDance,
                 victoryDance == selected ? "gui.selected" : "gui.select");
         if (victoryDance == selected)
             stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));

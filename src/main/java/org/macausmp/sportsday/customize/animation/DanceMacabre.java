@@ -2,10 +2,7 @@ package org.macausmp.sportsday.customize.animation;
 
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Mob;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -60,6 +57,8 @@ public class DanceMacabre extends Animation {
             if (mob.isOnGround())
                 mob.setJumping(true);
         });
+        world.getEntities().stream().filter(entity -> entity instanceof Projectile projectile
+                && projectile.getShooter() instanceof Mob mob && mobs.contains(mob)).forEach(Entity::remove);
         Set<BlockState> set = new HashSet<>();
         final int m = timer * timer, m1 = (timer - 2) * (timer - 2);
         for (int x = -timer; x < timer; x++) {

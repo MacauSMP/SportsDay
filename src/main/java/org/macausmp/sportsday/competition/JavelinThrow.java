@@ -21,13 +21,17 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.ParticleEffect;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.competition.event.EventGUI;
 import org.macausmp.sportsday.gui.competition.event.JavelinGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.PlayerHolder;
 
 import java.util.*;
+import java.util.function.Predicate;
 
-public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable {
+public class JavelinThrow extends FieldEvent {
+    private final Predicate<Player> predicate = p -> Competitions.getCurrentEvent() == this
+            && getStatus() == Status.STARTED && Competitions.isContestant(p);
     private final List<ContestantData> queue = new ArrayList<>();
     private final Map<UUID, ScoreResult> resultMap = new HashMap<>();
     private ContestantData currentPlayer = null;
@@ -36,6 +40,11 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
 
     public JavelinThrow() {
         super("javelin_throw", Material.TRIDENT);
+    }
+
+    @Override
+    public EventGUI<? extends SportingEvent> getEventGUI() {
+        return new JavelinGUI(this);
     }
 
     @Override
@@ -98,7 +107,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
     @EventHandler
     public void onThrow(@NotNull ProjectileLaunchEvent e) {
         if (e.getEntity().getShooter() instanceof Player p && e.getEntity() instanceof Trident trident) {
-            if (check(p) || inPractice(p, this)) {
+            if (predicate.test(p) || inPractice(p, this)) {
                 resultMap.put(p.getUniqueId(), new ScoreResult(p.getUniqueId(), p.getLocation()));
                 trident.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
                 trident.setCustomNameVisible(true);
@@ -130,7 +139,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
                 if (result == null)
                     return;
                 result.setTridentLocation(trident);
-                if (check(p) && currentPlayer.getUUID().equals(uuid)) {
+                if (predicate.test(p) && currentPlayer.getUUID().equals(uuid)) {
                     trident.customName(Component.translatable("event.javelin.javelin_name")
                             .arguments(p.displayName(), Component.text(result.distance)));
                     getWorld().strikeLightningEffect(trident.getLocation());
@@ -153,7 +162,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if (check(p)) {
+        if (predicate.test(p)) {
             if (resultMap.containsKey(p.getUniqueId()))
                 return;
             if (currentPlayer != null && currentPlayer.getUUID().equals(p.getUniqueId())) {
@@ -170,7 +179,7 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
-        if (check(p)) {
+        if (predicate.test(p)) {
             if (resultMap.containsKey(p.getUniqueId()))
                 return;
             if (currentPlayer != null && currentPlayer.getUUID().equals(p.getUniqueId())) {
@@ -190,10 +199,6 @@ public class JavelinThrow extends AbstractEvent implements IFieldEvent, Savable 
                 }.runTaskTimer(PLUGIN, 0L, 20L));
             }
         }
-    }
-
-    private boolean check(Player p) {
-        return Competitions.getCurrentEvent() == this && getStatus() == Status.STARTED && Competitions.isContestant(p);
     }
 
     @Override

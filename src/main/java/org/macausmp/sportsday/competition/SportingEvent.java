@@ -8,6 +8,7 @@ import net.kyori.adventure.title.TitlePart;
 import org.bukkit.*;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -17,39 +18,39 @@ import org.macausmp.sportsday.customize.Musickit;
 import org.macausmp.sportsday.customize.PlayerCustomize;
 import org.macausmp.sportsday.customize.VictoryDance;
 import org.macausmp.sportsday.gui.competition.event.EventGUI;
+import org.macausmp.sportsday.gui.competition.setting.EventSettingsGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
 
 import java.util.*;
 
-public abstract class AbstractEvent implements IEvent {
+/**
+ * Represents a sporting event
+ */
+public abstract sealed class SportingEvent implements Keyed, Listener permits TrackEvent, FieldEvent {
     protected static final SportsDay PLUGIN = SportsDay.getInstance();
+    public static final NamespacedKey IN_GAME = new NamespacedKey(PLUGIN, "in_game");
     private static final Set<BukkitTask> EVENT_TASKS = new HashSet<>();
-    private static final Map<Player, IEvent> PRACTICE = new HashMap<>();
+    private static final Map<Player, SportingEvent> PRACTICE = new HashMap<>();
     private final NamespacedKey key;
-    private final String id;
     private final Component name;
-    private final Material icon;
-    private int least;
-    private Location location;
-    private World world;
-    private Status status = Status.IDLE;
+    private final Material displayItem;
+    public static final Setting<Boolean> ENABLE = new Setting<>("enable", Boolean.class);
+    public static final Setting<Integer> LEAST_PLAYERS_REQUIRED = new Setting<>("least_players_required", Integer.class);
+    public static final Setting<Location> LOCATION = new Setting<>("location", Location.class);
+    private final Map<Setting<?>, Object> settings = new HashMap<>();
+    private Status status = Status.UPCOMING;
     private boolean pause = false;
     private long time = 0L;
     private final Collection<ContestantData> contestants = new HashSet<>();
     private final List<ContestantData> leaderboard = new ArrayList<>();
     private VictoryDance victoryDance = null;
     private Musickit mvpAnthem = null;
-    public static final NamespacedKey IN_GAME = new NamespacedKey(PLUGIN, "in_game");
 
-    public AbstractEvent(String id, Material icon) {
+    public SportingEvent(String id, Material displayItem) {
         this.key = new NamespacedKey(PLUGIN, id);
-        this.id = id;
         this.name = TextUtil.convert(Component.translatable("event.name." + id));
-        this.icon = icon;
-        this.least = PLUGIN.getConfig().getInt(id + ".least_players_required");
-        this.location = Objects.requireNonNull(PLUGIN.getConfig().getLocation(id + ".location"));
-        this.world = location.getWorld();
+        this.displayItem = displayItem;
     }
 
     @Override
@@ -57,42 +58,96 @@ public abstract class AbstractEvent implements IEvent {
         return key;
     }
 
-    @Override
-    public final String getID() {
-        return id;
-    }
-
-    @Override
+    /**
+     * Get the event's name.
+     *
+     * @return name of event
+     */
     public final Component getName() {
         return name;
     }
 
-    @Override
+    /**
+     * Get the event's display item.
+     *
+     * @return display item of event
+     */
     public Material getDisplayItem() {
-        return icon;
+        return displayItem;
     }
 
-    @Override
+    /**
+     * Get the event's minimum required number of players from the config file.
+     *
+     * @return minimum required number of players of event
+     */
     public final int getLeastPlayersRequired() {
-        return least;
+        return getSetting(LEAST_PLAYERS_REQUIRED);
     }
 
-    @Override
+    /**
+     * Get the event's location from the config file.
+     *
+     * @return location of event
+     */
     public final Location getLocation() {
-        return location;
+        return getSetting(LOCATION);
     }
 
-    @Override
+    /**
+     * Get the event's world.
+     *
+     * @return world of event
+     */
     public final World getWorld() {
-        return world;
+        return getLocation().getWorld();
     }
 
-    @Override
+    /**
+     * Return {@code True} if event is enabled.
+     *
+     * @return {@code True} if event is enabled
+     */
     public final boolean isEnable() {
-        return PLUGIN.getConfig().getBoolean(id + ".enable");
+        return getSetting(ENABLE);
     }
 
-    @Override
+    /**
+     * Get the event's settings from the config file.
+     *
+     * @param setting specified setting
+     * @return specified setting of event
+     * @param <T> type of specified setting
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getSetting(@NotNull Setting<T> setting) {
+        T value = (T) settings.get(setting);
+        if (value == null) {
+            settings.put(setting, PLUGIN.getConfig().getObject(key.getKey() + "." + setting.name(), setting.type()));
+            value = (T) settings.get(setting);
+        }
+        return value;
+    }
+
+    /**
+     * Set the event's settings to the config file.
+     *
+     * @param setting specified setting
+     * @param value new value of setting
+     * @param <T> type of specified setting
+     */
+    public <T> void setSetting(@NotNull Setting<T> setting, T value) {
+        PLUGIN.getConfig().set(key.getKey() + "." + setting.name(), value);
+        PLUGIN.saveConfig();
+        settings.put(setting, value);
+        EventSettingsGUI.updateGUI();
+    }
+
+    /**
+     * Get the current event status.
+     *
+     * @return current status of event
+     */
     public final Status getStatus() {
         return status;
     }
@@ -107,29 +162,55 @@ public abstract class AbstractEvent implements IEvent {
         EventGUI.updateGUI();
     }
 
-    @Override
+    /**
+     * Return {@code True} if event is paused.
+     *
+     * @return {@code True} if event is paused
+     */
     public boolean isPaused() {
         return pause;
     }
 
-    @Override
+    /**
+     * Get the last event time.
+     *
+     * @return the time of the last event
+     */
     public final long getLastTime() {
         return time;
     }
 
-    @Override
+    /**
+     * Gets a view of {@link ContestantData} of current event.
+     *
+     * @return a view of {@link ContestantData} of current event
+     */
     public final Collection<ContestantData> getContestants() {
         return contestants;
     }
 
-    @Override
+    /**
+     * Get the leaderboard of event.
+     *
+     * @return leaderboard of event
+     */
     public final List<ContestantData> getLeaderboard() {
         return leaderboard;
     }
 
-    @Override
+    /**
+     * Get the gui of event.
+     *
+     * @return gui of event
+     */
+    public abstract EventGUI<? extends SportingEvent> getEventGUI();
+
+    /**
+     * Set up the event and make it get ready to start.
+     */
     public void setup() {
         init();
+        onSetup();
         addRunnable(new BukkitRunnable() {
             int i = PLUGIN.getConfig().getInt("ready_time");
             @Override
@@ -152,15 +233,14 @@ public abstract class AbstractEvent implements IEvent {
         }.runTaskTimer(PLUGIN, 0L, 20L));
         Bukkit.broadcast(Component.translatable("event.broadcast.ready")
                 .arguments(name, Component.text(PLUGIN.getConfig().getInt("ready_time"))).color(NamedTextColor.GREEN));
-        Bukkit.broadcast(Component.translatable("event.rule." + id));
-        onSetup();
+        Bukkit.broadcast(Component.translatable("event.rule." + key.getKey()));
         PLUGIN.getComponentLogger().info(Component.translatable("console.competition.coming").arguments(name));
     }
 
+    /**
+     * Init the event.
+     */
     protected void init() {
-        least = PLUGIN.getConfig().getInt(id + ".least_players_required");
-        location = Objects.requireNonNull(PLUGIN.getConfig().getLocation(id + ".location"));
-        world = location.getWorld();
         pause = false;
         time = System.currentTimeMillis();
         Bukkit.getOnlinePlayers().forEach(p -> {
@@ -179,12 +259,14 @@ public abstract class AbstractEvent implements IEvent {
             p.setGameMode(GameMode.ADVENTURE);
             PlayerCustomize.suitUp(p);
             p.getInventory().setItem(4, ItemUtil.SPRAY);
-            p.setRespawnLocation(location, true);
-            p.teleportAsync(location);
+            p.setRespawnLocation(getLocation(), true);
+            p.teleportAsync(getLocation());
         });
     }
 
-    @Override
+    /**
+     * Start the event.
+     */
     public void start() {
         setStatus(Status.STARTED);
         onStart();
@@ -193,7 +275,9 @@ public abstract class AbstractEvent implements IEvent {
                 Sound.Source.MASTER, 1f, 1f));
     }
 
-    @Override
+    /**
+     * End the event.
+     */
     public void end() {
         if (status == Status.ENDED)
             return;
@@ -214,10 +298,10 @@ public abstract class AbstractEvent implements IEvent {
                         victoryDance.play(p);
                     mvpAnthem = PlayerCustomize.getMusickit(mvp.getPlayer());
                     if (mvpAnthem != null) {
-                        Bukkit.getServer().playSound(Sound.sound(mvpAnthem.getKey(), Sound.Source.MASTER, 1f, 1f));
+                        Bukkit.getServer().playSound(Sound.sound(mvpAnthem.key(), Sound.Source.MASTER, 1f, 1f));
                         Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.play_mvp_anthem")
                                 .arguments(Component.text(Objects.requireNonNull(mvp.getName())).color(NamedTextColor.YELLOW),
-                                        mvpAnthem.getName()));
+                                        mvpAnthem));
                     }
                 }
             }.runTaskLater(PLUGIN, 40L));
@@ -244,10 +328,10 @@ public abstract class AbstractEvent implements IEvent {
         contestants.clear();
         leaderboard.clear();
         Competitions.setCurrentEvent(null);
-        setStatus(Status.IDLE);
+        setStatus(Status.UPCOMING);
         Bukkit.getOnlinePlayers().forEach(p -> {
             p.getPersistentDataContainer().remove(IN_GAME);
-            p.teleportAsync(location);
+            p.teleportAsync(getLocation());
             p.setGameMode(GameMode.ADVENTURE);
         });
         Competitions.getOnlineContestants().forEach(d -> {
@@ -261,19 +345,25 @@ public abstract class AbstractEvent implements IEvent {
                 .filter(e -> e.getPersistentDataContainer().has(SportsDay.GRAFFITI)).forEach(ItemFrame::remove);
     }
 
-    @Override
+    /**
+     * Pause the event.
+     */
     public void pause() {
         pause = true;
         Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.pause"));
     }
 
-    @Override
+    /**
+     * Unpause the event.
+     */
     public void unpause() {
         pause = false;
         Bukkit.getServer().sendActionBar(Component.translatable("event.broadcast.unpause"));
     }
 
-    @Override
+    /**
+     * Terminate the event.
+     */
     public void terminate() {
         if (status == Status.ENDED)
             return;
@@ -285,23 +375,30 @@ public abstract class AbstractEvent implements IEvent {
 
     /**
      * Called when the event sets up.
+     *
      * @see #setup()
      */
     protected abstract void onSetup();
 
     /**
      * Called when the event starts.
+     *
      * @see #start()
      */
     protected abstract void onStart();
 
     /**
      * Called when the event ends.
+     *
      * @see #end()
      */
     protected abstract void onEnd();
 
-    @Override
+    /**
+     * Disqualification of contestant.
+     *
+     * @param contestant who is going to be disqualified
+     */
     public void onDisqualification(@NotNull ContestantData contestant) {
         contestants.remove(contestant);
         leaderboard.remove(contestant);
@@ -317,7 +414,11 @@ public abstract class AbstractEvent implements IEvent {
         p.setRespawnLocation(p.getWorld().getSpawnLocation(), true);
     }
 
-    @Override
+    /**
+     * Teleport player to event location and sets up practice environment for the player.
+     *
+     * @param player who is going to practice this event
+     */
     public void joinPractice(@NotNull Player player) {
         PRACTICE.put(player, this);
         player.clearActivePotionEffects();
@@ -325,8 +426,8 @@ public abstract class AbstractEvent implements IEvent {
         player.getInventory().clear();
         PlayerCustomize.suitUp(player);
         player.getInventory().setItem(8, ItemUtil.LEAVE_PRACTICE);
-        player.setRespawnLocation(location, true);
-        player.teleportAsync(location);
+        player.setRespawnLocation(getLocation(), true);
+        player.teleportAsync(getLocation());
         player.sendMessage(Component.translatable("contestant.practice.teleport.venue").arguments(name));
         onPractice(player);
         player.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
@@ -334,12 +435,14 @@ public abstract class AbstractEvent implements IEvent {
 
     /**
      * Called when a player participates in practice.
+     *
      * @param player who going to practice this event
      */
     protected abstract void onPractice(@NotNull Player player);
 
     /**
      * Let players leave this practice.
+     *
      * @param player who leave practicing this event
      */
     public static void leavePractice(@NotNull Player player) {
@@ -360,6 +463,7 @@ public abstract class AbstractEvent implements IEvent {
 
     /**
      * Check if player is practicing.
+     *
      * @param player who going to be checked
      * @return {@code True} if player is practicing
      */
@@ -369,17 +473,19 @@ public abstract class AbstractEvent implements IEvent {
 
     /**
      * Check if player is practicing at specified event.
+     *
      * @param player who going to be checked
      * @param event the specified event
      * @return {@code True} if player is practicing at specified event
      * @param <T> the event type
      */
-    public static <T extends IEvent> boolean inPractice(Player player, T event) {
+    public static <T extends SportingEvent> boolean inPractice(Player player, T event) {
         return PRACTICE.containsKey(player) && PRACTICE.get(player) == event;
     }
 
     /**
      * Add a {@link BukkitTask} to this event.
+     *
      * @param task {@link BukkitTask} to add
      */
     protected final BukkitTask addRunnable(BukkitTask task) {

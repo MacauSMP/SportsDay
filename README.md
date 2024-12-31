@@ -5,12 +5,16 @@ Macau SMP SportsDay papermc plugin
 > Competition hosting command
 > * `start <event_id>`
 > Start a competition new event
-> * `end`
-> Forcefully end the current event
 > * `load`
 > Load last saved event
 > * `save`
 > Save current event
+> * `pause`
+> Pause the current event
+> * `unpause`
+> Unpause the current event
+> * `terminate`
+> Terminate the current event
 > * `join <player> <number>`
 > Register new contestant
 > * `leave | leave <player>`

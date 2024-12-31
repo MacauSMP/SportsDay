@@ -48,7 +48,7 @@ public class MusickitGUI extends PluginGUI {
         Musickit musickit = selected = Musickit.values()[e.getSlot() - 10];
         if (e.isRightClick()) {
             p.stopAllSounds();
-            p.playSound(Sound.sound(musickit.getKey(), Sound.Source.MASTER, 1f, 1f));
+            p.playSound(Sound.sound(musickit.key(), Sound.Source.MASTER, 1f, 1f));
         } else {
             PlayerCustomize.setMusickit(p, musickit);
             p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
@@ -64,7 +64,7 @@ public class MusickitGUI extends PluginGUI {
     }
 
     private @NotNull ItemStack musickit(@NotNull Musickit musickit) {
-        ItemStack stack = ItemUtil.item(Material.JUKEBOX, "musickit", musickit.getName(), "gui.customize.musickit.view",
+        ItemStack stack = ItemUtil.item(Material.JUKEBOX, "musickit", musickit, "gui.customize.musickit.view",
                 musickit == selected ? "gui.selected" : "gui.select");
         if (musickit == selected)
             stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));

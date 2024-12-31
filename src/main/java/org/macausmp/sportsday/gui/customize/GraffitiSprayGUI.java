@@ -58,7 +58,7 @@ public class GraffitiSprayGUI extends PluginGUI {
     }
 
     private @NotNull ItemStack graffiti(@NotNull GraffitiSpray graffiti) {
-        ItemStack stack = ItemUtil.item(Material.PAINTING, "graffiti", graffiti.getName(),
+        ItemStack stack = ItemUtil.item(Material.PAINTING, "graffiti", graffiti,
                 graffiti == selected ? "gui.selected" : "gui.select");
         if (graffiti == selected)
             stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));

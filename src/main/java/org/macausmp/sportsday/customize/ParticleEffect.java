@@ -2,6 +2,7 @@ package org.macausmp.sportsday.customize;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -9,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.util.TextUtil;
 
-public enum ParticleEffect {
+public enum ParticleEffect implements ComponentLike {
     GLOW("customize.particle.glow", Material.GLOWSTONE_DUST, new ParticleBuilder(Particle.GLOW)),
     ENCHANT("customize.particle.enchant", Material.ENCHANTING_TABLE, new ParticleBuilder(Particle.ENCHANT)),
     LAVA("customize.particle.lava", Material.LAVA_BUCKET, new ParticleBuilder(Particle.LAVA)),
@@ -33,7 +34,8 @@ public enum ParticleEffect {
         this.material = material;
     }
 
-    public Component getName() {
+    @Override
+    public @NotNull Component asComponent() {
         return name;
     }
 

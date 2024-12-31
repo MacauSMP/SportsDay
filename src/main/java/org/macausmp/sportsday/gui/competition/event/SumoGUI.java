@@ -89,7 +89,7 @@ public class SumoGUI extends EventGUI<Sumo> {
     private @NotNull ItemStack currentMatch(@NotNull Sumo.SumoStage stage) {
         Sumo.SumoMatch match = stage.getCurrentMatch();
         return ItemUtil.item(Material.COD, "sumo_match", "gui.competition.sumo.current_match",
-                Component.translatable("gui.competition.sumo.current_match.status").arguments(match.getStatus().getName()),
+                Component.translatable("gui.competition.sumo.current_match.status").arguments(match.getStatus()),
                 Component.translatable("gui.competition.sumo.match.stage").arguments(stage.getName()),
                 Component.translatable("gui.competition.sumo.match.number").arguments(Component.text(match.getNumber())),
                 Component.translatable("gui.competition.sumo.match.players")

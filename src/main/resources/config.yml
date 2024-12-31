@@ -39,8 +39,6 @@ ice_boat_racing:
   enable: true
   least_players_required: 8
   laps: 2
-  # 令玩家般隻向上彈的方塊
-  spring_block: SLIME_BLOCK
   location:
     ==: org.bukkit.Location
     world: world

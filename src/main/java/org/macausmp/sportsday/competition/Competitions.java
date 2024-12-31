@@ -7,13 +7,13 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.macausmp.sportsday.SportsDay;
 import org.macausmp.sportsday.gui.competition.ContestantsListGUI;
 import org.macausmp.sportsday.gui.competition.event.EventGUI;
 import org.macausmp.sportsday.util.FileStorage;
+import org.macausmp.sportsday.util.KeyDataType;
 import org.macausmp.sportsday.util.PlayerHolder;
 
 import java.io.File;
@@ -27,14 +27,14 @@ public final class Competitions {
     private static final Map<UUID, ContestantData> CONTESTANTS = new HashMap<>();
     private static final Set<Integer> REGISTERED_NUMBER_LIST = new HashSet<>();
     private static int NUMBER = 1;
-    public static final Map<String, IEvent> EVENTS = new LinkedHashMap<>();
-    public static final IEvent ELYTRA_RACING = register(new ElytraRacing());
-    public static final IEvent ICE_BOAT_RACING = register(new IceBoatRacing());
-    public static final IEvent JAVELIN_THROW = register(new JavelinThrow());
-    public static final IEvent OBSTACLE_COURSE = register(new ObstacleCourse());
-    public static final IEvent PARKOUR = register(new Parkour());
-    public static final IEvent SUMO = register(new Sumo());
-    private static IEvent CURRENT_EVENT;
+    public static final Map<NamespacedKey, SportingEvent> EVENTS = new LinkedHashMap<>();
+    public static final SportingEvent ELYTRA_RACING = register(new ElytraRacing());
+    public static final SportingEvent ICE_BOAT_RACING = register(new IceBoatRacing());
+    public static final SportingEvent JAVELIN_THROW = register(new JavelinThrow());
+    public static final SportingEvent OBSTACLE_COURSE = register(new ObstacleCourse());
+    public static final SportingEvent PARKOUR = register(new Parkour());
+    public static final SportingEvent SUMO = register(new Sumo());
+    private static SportingEvent CURRENT_EVENT;
 
     /**
      * Register competition event.
@@ -42,8 +42,8 @@ public final class Competitions {
      * @param competition competition event to register
      * @return competition event after registered
      */
-    private static <T extends IEvent> @NotNull T register(T competition) {
-        EVENTS.put(competition.getID(), competition);
+    private static <T extends SportingEvent> @NotNull T register(T competition) {
+        EVENTS.put(competition.getKey(), competition);
         return competition;
     }
 
@@ -81,18 +81,18 @@ public final class Competitions {
         }
         EVENT_DATA.read();
         PersistentDataContainer pdc = EVENT_DATA.getPersistentDataContainer();
-        String id = pdc.get(new NamespacedKey(PLUGIN, "event_id"), PersistentDataType.STRING);
-        if (id == null) {
+        NamespacedKey key = pdc.get(new NamespacedKey(PLUGIN, "event_id"), KeyDataType.KEY_DATA_TYPE);
+        if (key == null) {
             sender.sendMessage(Component.translatable("command.competition.load.failed")
                     .color(NamedTextColor.RED));
             return;
         }
-        if (!Competitions.EVENTS.containsKey(id)) {
+        if (!Competitions.EVENTS.containsKey(key)) {
             sender.sendMessage(Component.translatable("command.competition.load_unknown")
                     .color(NamedTextColor.RED));
             return;
         }
-        IEvent event = Competitions.EVENTS.get(id);
+        SportingEvent event = Competitions.EVENTS.get(key);
         if (!(event instanceof Savable savable)) {
             sender.sendMessage(Component.translatable("command.competition.not_savable")
                     .color(NamedTextColor.RED));
@@ -107,7 +107,7 @@ public final class Competitions {
      * Save event data into the event.dat file.
      */
     public static void saveEventData(CommandSender sender) {
-        IEvent event = Competitions.getCurrentEvent();
+        SportingEvent event = Competitions.getCurrentEvent();
         if (event == null || event.getStatus() != Status.STARTED) {
             sender.sendMessage(Component.translatable("command.competition.invalid_status")
                     .color(NamedTextColor.RED));
@@ -120,7 +120,7 @@ public final class Competitions {
         }
         PersistentDataContainer pdc = EVENT_DATA.getPersistentDataContainer();
         savable.save(pdc);
-        pdc.set(new NamespacedKey(PLUGIN, "event_id"), PersistentDataType.STRING, event.getID());
+        pdc.set(new NamespacedKey(PLUGIN, "event_id"), KeyDataType.KEY_DATA_TYPE, event.getKey());
         EVENT_DATA.write();
         sender.sendMessage(Component.translatable("command.competition.save.success")
                 .color(NamedTextColor.GREEN));
@@ -137,15 +137,15 @@ public final class Competitions {
      * Start a competition.
      *
      * @param sender who host the competition
-     * @param id competition id
+     * @param key competition key
      * @return {@code True} if competition successfully started
      */
-    public static boolean start(@NotNull CommandSender sender, String id) {
+    public static boolean start(@NotNull CommandSender sender, NamespacedKey key) {
         if (getCurrentEvent() != null) {
             sender.sendMessage(Component.translatable("command.competition.start.failed").color(NamedTextColor.RED));
             return false;
         }
-        IEvent event = EVENTS.get(id);
+        SportingEvent event = EVENTS.get(key);
         if (event == null) {
             sender.sendMessage(Component.translatable("event.name.unknown").color(NamedTextColor.RED));
             return false;
@@ -191,7 +191,7 @@ public final class Competitions {
             sender.sendMessage(Component.translatable("command.competition.null_event").color(NamedTextColor.RED));
             return false;
         }
-        if (getCurrentEvent().isPaused() || getCurrentEvent() instanceof ITrackEvent && getCurrentEvent().getStatus() == Status.STARTED) {
+        if (getCurrentEvent().isPaused() || getCurrentEvent() instanceof TrackEvent && getCurrentEvent().getStatus() == Status.STARTED) {
             sender.sendMessage(Component.translatable("command.competition.pause.failed").color(NamedTextColor.RED));
             return false;
         }
@@ -224,7 +224,7 @@ public final class Competitions {
      *
      * @return current event
      */
-    public static IEvent getCurrentEvent() {
+    public static SportingEvent getCurrentEvent() {
         return CURRENT_EVENT;
     }
 
@@ -233,7 +233,7 @@ public final class Competitions {
      *
      * @param event new event
      */
-    public static void setCurrentEvent(IEvent event) {
+    public static void setCurrentEvent(SportingEvent event) {
         CURRENT_EVENT = event;
     }
 

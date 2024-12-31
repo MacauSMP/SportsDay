@@ -1,12 +1,10 @@
 package org.macausmp.sportsday.competition;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,6 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.customize.PlayerCustomize;
+import org.macausmp.sportsday.gui.competition.event.EventGUI;
 import org.macausmp.sportsday.gui.competition.event.SumoGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 import org.macausmp.sportsday.util.TextUtil;
@@ -29,23 +28,28 @@ import org.macausmp.sportsday.util.TextUtil;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
+public class Sumo extends FieldEvent {
+    public static final Setting<Boolean> ENABLE_WEAPON = new Setting<>("enable_weapon", Boolean.class);
+    public static final Setting<Integer> WEAPON_TIME = new Setting<>("weapon_time", Integer.class);
+    public static final Setting<Location> P1_LOCATION = new Setting<>("p1-location", Location.class);
+    public static final Setting<Location> P2_LOCATION = new Setting<>("p2-location", Location.class);
     private final Set<ContestantData> alive = new HashSet<>();
     private final List<ContestantData> queue = new ArrayList<>();
     private SumoStage[] stages;
     private int stageIndex = 0;
-    private boolean weapon = PLUGIN.getConfig().getBoolean(getID() + ".enable_weapon");
-    private int time = PLUGIN.getConfig().getInt(getID() + ".weapon_time");
 
     public Sumo() {
         super("sumo", Material.COD);
     }
 
     @Override
+    public EventGUI<? extends SportingEvent> getEventGUI() {
+        return new SumoGUI(this);
+    }
+
+    @Override
     protected void init() {
         super.init();
-        weapon = PLUGIN.getConfig().getBoolean(getID() + ".enable_weapon");
-        time = PLUGIN.getConfig().getInt(getID() + ".weapon_time");
     }
 
     @Override
@@ -166,7 +170,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
                     return;
                 }
             }
-            if (AbstractEvent.inPractice(player, this) && AbstractEvent.inPractice(damager, this)) {
+            if (SportingEvent.inPractice(player, this) && SportingEvent.inPractice(damager, this)) {
                 e.setDamage(0);
                 return;
             }
@@ -213,41 +217,41 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
         SumoGUI.updateGUI();
         OfflinePlayer p1 = match.getFirstPlayer();
         OfflinePlayer p2 = match.getSecondPlayer();
-        if (Competitions.isContestant(p1) && Competitions.isContestant(p2)) {
-            if (p1.isOnline() && p2.isOnline()) {
-                ((Player) p1).teleport(Objects.requireNonNull(PLUGIN.getConfig().getLocation(getID() + ".p1-location")));
-                ((Player) p2).teleport(Objects.requireNonNull(PLUGIN.getConfig().getLocation(getID() + ".p2-location")));
-                match.forEachPlayer(p -> p.getInventory().clear());
-                addRunnable(new BukkitRunnable() {
-                    int i = 5;
-                    @Override
-                    public void run() {
-                        if (i != 0)
-                            Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start_countdown")
-                                    .arguments(Component.text(i)).color(NamedTextColor.YELLOW));
-                        if (i-- == 0) {
-                            match.setStatus(SumoMatch.MatchStatus.STARTED);
-                            Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start"));
-                            giveWeapon();
-                            SumoGUI.updateGUI();
-                            cancel();
-                        }
-                    }
-                }.runTaskTimer(PLUGIN, 0L, 20L));
-                return;
-            }
+        if (!Competitions.isContestant(p1) || !Competitions.isContestant(p2)) {
+            match.setResult((Competitions.isContestant(p1) ? p2 : p1).getUniqueId());
+            onMatchEnd();
+            return;
+        }
+        if (!p1.isOnline() || !p2.isOnline()) {
             match.setResult((p1.isOnline() ? p2 : p1).getUniqueId());
             onMatchEnd();
             return;
         }
-        match.setResult((Competitions.isContestant(p1) ? p2 : p1).getUniqueId());
-        onMatchEnd();
+        ((Player) p1).teleport(getSetting(P1_LOCATION));
+        ((Player) p2).teleport(getSetting(P2_LOCATION));
+        match.forEachPlayer(p -> p.getInventory().clear());
+        addRunnable(new BukkitRunnable() {
+            int i = 5;
+            @Override
+            public void run() {
+                if (i != 0)
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start_countdown")
+                            .arguments(Component.text(i)).color(NamedTextColor.YELLOW));
+                if (i-- == 0) {
+                    match.setStatus(SumoMatch.MatchStatus.STARTED);
+                    Bukkit.getServer().sendActionBar(Component.translatable("event.sumo.match_start"));
+                    giveWeapon();
+                    SumoGUI.updateGUI();
+                    cancel();
+                }
+            }
+        }.runTaskTimer(PLUGIN, 0L, 20L));
     }
 
     private void giveWeapon() {
-        if (weapon) {
+        if (getSetting(ENABLE_WEAPON)) {
             addRunnable(new BukkitRunnable() {
-                int i = time;
+                int i = getSetting(WEAPON_TIME);
                 @Override
                 public void run() {
                     SumoMatch match = getSumoStage().getCurrentMatch();
@@ -419,7 +423,7 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
     public static class SumoMatch {
         private final int number;
         private final UUID[] contestants = new UUID[2];
-        private MatchStatus status = MatchStatus.IDLE;
+        private MatchStatus status = MatchStatus.UPCOMING;
         private UUID winner;
         private UUID loser;
 
@@ -512,8 +516,8 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
             return loser;
         }
 
-        public enum MatchStatus {
-            IDLE("competition.status.idle"),
+        public enum MatchStatus implements ComponentLike {
+            UPCOMING("competition.status.upcoming"),
             COMING("competition.status.coming"),
             STARTED("competition.status.started"),
             ENDED("competition.status.ended");
@@ -524,7 +528,8 @@ public class Sumo extends AbstractEvent implements IFieldEvent, Savable {
                 this.name = TextUtil.convert(Component.translatable(code));
             }
 
-            public Component getName() {
+            @Override
+            public @NotNull Component asComponent() {
                 return name;
             }
         }

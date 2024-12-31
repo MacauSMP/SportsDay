@@ -1,9 +1,11 @@
 package org.macausmp.sportsday.customize;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.util.TextUtil;
 
-public enum GraffitiSpray {
+public enum GraffitiSpray implements ComponentLike {
     GGWP("customize.graffiti_spray.ggwp"),
     DISMAL("customize.graffiti_spray.d"),
     CRAZY("customize.graffiti_spray.c"),
@@ -19,7 +21,8 @@ public enum GraffitiSpray {
         this.name = TextUtil.text(Component.translatable(code));
     }
 
-    public Component getName() {
+    @Override
+    public @NotNull Component asComponent() {
         return name;
     }
 }

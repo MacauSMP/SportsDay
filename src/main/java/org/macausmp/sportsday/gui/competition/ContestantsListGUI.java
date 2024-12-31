@@ -48,7 +48,8 @@ public class ContestantsListGUI extends AbstractCompetitionGUI {
     public static void updateGUI() {
         PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
                 .filter(inv -> inv.getHolder() instanceof ContestantsListGUI)
-                .map(inv -> (ContestantsListGUI) inv.getHolder()).forEach(ContestantsListGUI::update);
+                .map(inv -> (ContestantsListGUI) inv.getHolder())
+                .forEach(ContestantsListGUI::update);
     }
 
     @ButtonHandler("player_icon")

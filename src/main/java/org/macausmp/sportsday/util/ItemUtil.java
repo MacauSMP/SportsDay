@@ -3,6 +3,7 @@ package org.macausmp.sportsday.util;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -35,22 +36,22 @@ public final class ItemUtil {
         ItemStack clone = stack.clone();
         clone.editMeta(meta -> {
             if (display != null) {
-                if (display instanceof Component c)
-                    meta.displayName(TextUtil.text(c));
+                if (display instanceof ComponentLike like)
+                    meta.displayName(TextUtil.text(like));
                 else if (display instanceof String s)
                     meta.displayName(TextUtil.text(Component.translatable(s)));
                 else
-                    throw new IllegalArgumentException("Object type must be Component or String");
+                    throw new IllegalArgumentException("Object type must be ComponentLike or String");
             }
             if (lore != null) {
                 List<Component> components = new ArrayList<>();
                 for (Object o : lore) {
-                    if (o instanceof Component c)
-                        components.add(TextUtil.text(c));
+                    if (o instanceof ComponentLike like)
+                        components.add(TextUtil.text(like));
                     else if (o instanceof String s)
                         components.add(TextUtil.text(Component.translatable(s)));
                     else
-                        throw new IllegalArgumentException("Object type must be Component or String");
+                        throw new IllegalArgumentException("Object type must be ComponentLike or String");
                 }
                 meta.lore(components);
             }

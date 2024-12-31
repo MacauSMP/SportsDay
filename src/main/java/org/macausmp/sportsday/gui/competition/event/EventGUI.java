@@ -10,14 +10,14 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.IEvent;
+import org.macausmp.sportsday.competition.SportingEvent;
 import org.macausmp.sportsday.competition.Status;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.ConfirmationGUI;
 import org.macausmp.sportsday.gui.competition.AbstractCompetitionGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
-public class EventGUI<T extends IEvent> extends AbstractCompetitionGUI {
+public class EventGUI<T extends SportingEvent> extends AbstractCompetitionGUI {
     private static final ItemStack PAUSE_COMPETITION = ItemUtil.head(ItemUtil.PAUSE, "pause_competition", "gui.pause.title", "gui.pause.lore");
     private static final ItemStack UNPAUSE_COMPETITION = ItemUtil.head(ItemUtil.START, "unpause_competition", "gui.unpause.title", "gui.unpause.lore");
     private static final ItemStack TERMINATE_COMPETITION = ItemUtil.item(Material.RED_CONCRETE, "terminate_competition", "gui.terminate.title", "gui.terminate.lore");
@@ -48,7 +48,8 @@ public class EventGUI<T extends IEvent> extends AbstractCompetitionGUI {
     public static void updateGUI() {
         PLUGIN.getServer().getOnlinePlayers().stream().map(p -> p.getOpenInventory().getTopInventory())
                 .filter(inv -> inv.getHolder() instanceof EventGUI)
-                .map(inv -> (EventGUI<? extends IEvent>) inv.getHolder()).forEach(EventGUI::update);
+                .map(inv -> (EventGUI<? extends SportingEvent>) inv.getHolder())
+                .forEach(EventGUI::update);
     }
 
     @ButtonHandler("pause_competition")
@@ -94,7 +95,7 @@ public class EventGUI<T extends IEvent> extends AbstractCompetitionGUI {
         Component display = Component.translatable("competition.current").color(NamedTextColor.GREEN)
                 .arguments(b ? Competitions.getCurrentEvent().getName() : Component.translatable("gui.text.none"));
         Component lore = Component.translatable("competition.status").color(NamedTextColor.GREEN)
-                .arguments(b ? Competitions.getCurrentEvent().getStatus().getName() : Status.IDLE.getName());
+                .arguments(b ? Competitions.getCurrentEvent().getStatus() : Status.UPCOMING);
         return ItemUtil.item(Material.BEACON, null, display, lore);
     }
 

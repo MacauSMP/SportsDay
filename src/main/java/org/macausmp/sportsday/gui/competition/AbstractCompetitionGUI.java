@@ -9,13 +9,11 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
-import org.macausmp.sportsday.competition.*;
+import org.macausmp.sportsday.competition.Competitions;
+import org.macausmp.sportsday.competition.SportingEvent;
+import org.macausmp.sportsday.competition.Status;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PluginGUI;
-import org.macausmp.sportsday.gui.competition.event.EventGUI;
-import org.macausmp.sportsday.gui.competition.event.JavelinGUI;
-import org.macausmp.sportsday.gui.competition.event.SumoGUI;
-import org.macausmp.sportsday.gui.competition.event.TrackEventGUI;
 import org.macausmp.sportsday.util.ItemUtil;
 
 public abstract class AbstractCompetitionGUI extends PluginGUI {
@@ -32,19 +30,12 @@ public abstract class AbstractCompetitionGUI extends PluginGUI {
     @ButtonHandler("competition_console")
     public void console(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-        IEvent event = Competitions.getCurrentEvent();
+        SportingEvent event = Competitions.getCurrentEvent();
         if (event == null || event.getStatus() == Status.ENDED) {
             p.openInventory(new CompetitionConsoleGUI().getInventory());
             return;
         }
-        if (event == Competitions.JAVELIN_THROW)
-            p.openInventory(new JavelinGUI((JavelinThrow) event).getInventory());
-        else if (event == Competitions.SUMO)
-            p.openInventory(new SumoGUI((Sumo) event).getInventory());
-        else if (event instanceof ITrackEvent track)
-            p.openInventory(new TrackEventGUI(track).getInventory());
-        else
-            p.openInventory(new EventGUI<>(event).getInventory());
+        p.openInventory(event.getEventGUI().getInventory());
     }
 
     @ButtonHandler("contestants_list")

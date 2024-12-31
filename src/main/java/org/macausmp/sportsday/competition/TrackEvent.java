@@ -16,13 +16,20 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import org.macausmp.sportsday.gui.competition.event.EventGUI;
 import org.macausmp.sportsday.gui.competition.event.TrackEventGUI;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-public abstract class AbstractTrackEvent extends AbstractEvent implements ITrackEvent {
+/**
+ * Represents a track event
+ */
+public abstract non-sealed class TrackEvent extends SportingEvent {
     private static final Set<UUID> SPAWNPOINT_SET = new HashSet<>();
+    public static final Setting<Integer> LAPS = new Setting<>("laps", Integer.class);
+    public static final Setting<String> READY_COMMAND = new Setting<>("ready_command", String.class);
+    public static final Setting<String> START_COMMAND = new Setting<>("start_command", String.class);
     public static final @NotNull Material CHECKPOINT = getMaterial("checkpoint_block");
     public static final @NotNull Material DEATH = getMaterial("death_block");
     public static final @NotNull Material FINISH_LINE = getMaterial("finish_line_block");
@@ -31,34 +38,34 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
             || inPractice(p, this);
     private final HashMap<ContestantData, Integer> lapMap = new HashMap<>();
     private final HashMap<ContestantData, Float> record = new HashMap<>();
-    private int laps;
     private int time = 0;
     private boolean endCountdown = false;
     private BukkitTask task;
 
-    public AbstractTrackEvent(String id, Material icon) {
-        super(id, icon);
-        this.laps = PLUGIN.getConfig().getInt(getID() + ".laps");
+    public TrackEvent(String id, Material displayItem) {
+        super(id, displayItem);
+    }
+
+    @Override
+    public EventGUI<? extends SportingEvent> getEventGUI() {
+        return new TrackEventGUI(this);
     }
 
     @Override
     public void setup() {
         lapMap.clear();
         record.clear();
-        laps = PLUGIN.getConfig().getInt(getID() + ".laps");
         endCountdown = false;
-        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(),
-                Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".ready_command")));
+        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), getSetting(READY_COMMAND));
         super.setup();
         getContestants().forEach(data -> lapMap.put(data, 0));
-        Bukkit.broadcast(Component.translatable("event.track.laps").arguments(Component.text(laps)).color(NamedTextColor.GREEN));
+        Bukkit.broadcast(Component.translatable("event.track.laps").arguments(Component.text(getMaxLaps())).color(NamedTextColor.GREEN));
     }
 
     @Override
     public void start() {
         super.start();
-        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(),
-                Objects.requireNonNull(PLUGIN.getConfig().getString(getID() + ".start_command")));
+        PLUGIN.getServer().dispatchCommand(Bukkit.getConsoleSender(), getSetting(START_COMMAND));
         time = 0;
         addRunnable(new BukkitRunnable() {
             @Override
@@ -67,7 +74,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
                     cancel();
                     return;
                 }
-                time++;
+                ++time;
             }
         }.runTaskTimer(PLUGIN, 0L, 1L));
     }
@@ -89,7 +96,7 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
 
     @EventHandler
     public void onEvent(@NotNull PlayerMoveEvent e) {
-        IEvent event = Competitions.getCurrentEvent();
+        SportingEvent event = Competitions.getCurrentEvent();
         Player p = e.getPlayer();
         if (event == this && getStatus() == Status.STARTED && Competitions.isContestant(p)) {
             ContestantData data = Competitions.getContestant(p.getUniqueId());
@@ -101,14 +108,15 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
             if (loc.getBlock().getType() == DEATH)
                 p.setHealth(0);
             if (loc.getBlock().getType() == FINISH_LINE) {
-                lapMap.put(data, lapMap.get(data) + 1);
+                int lap = lapMap.get(data) + 1;
+                lapMap.put(data, lap);
                 p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
-                if (lapMap.get(data) < laps) {
+                if (lap < getMaxLaps()) {
                     p.teleportAsync(getLocation());
                     p.setRespawnLocation(getLocation(), true);
                     onCompletedLap(p);
                     Bukkit.broadcast(Component.translatable("event.track.contestant.completed_lap")
-                            .arguments(p.displayName()).color(NamedTextColor.YELLOW));
+                            .arguments(p.displayName(), Component.text(lap)).color(NamedTextColor.YELLOW));
                     TrackEventGUI.updateGUI();
                 } else {
                     record.put(data, time / 20f);
@@ -184,21 +192,35 @@ public abstract class AbstractTrackEvent extends AbstractEvent implements ITrack
         }
     }
 
-    protected void onCompletedLap(@NotNull Player player) {}
-
-    protected void onRaceFinish(@NotNull Player player) {}
-
-    @Override
+    /**
+     * Get the number of laps required to complete.
+     *
+     * @return number of laps required to complete
+     */
     public int getMaxLaps() {
-        return laps;
+        return getSetting(LAPS);
     }
 
-    @Override
+    /**
+     * Get the record of a specified contestant.
+     *
+     * @return record of a specified contestant
+     */
     public float getRecord(ContestantData data) {
         return Optional.ofNullable(record.get(data)).orElse(-1f);
     }
 
-    public static @NotNull Material getMaterial(@NotNull String path) {
+    /**
+     * Called when a player completed a lap.
+     */
+    protected abstract void onCompletedLap(@NotNull Player player);
+
+    /**
+     * Called when a player finished whole race.
+     */
+    protected abstract void onRaceFinish(@NotNull Player player);
+
+    protected static @NotNull Material getMaterial(@NotNull String path) {
         return Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(PLUGIN.getConfig().getString(path))));
     }
 }

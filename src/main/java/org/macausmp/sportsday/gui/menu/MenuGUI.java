@@ -10,9 +10,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.macausmp.sportsday.competition.AbstractTrackEvent;
 import org.macausmp.sportsday.competition.Competitions;
-import org.macausmp.sportsday.competition.IEvent;
+import org.macausmp.sportsday.competition.SportingEvent;
+import org.macausmp.sportsday.competition.TrackEvent;
 import org.macausmp.sportsday.gui.ButtonHandler;
 import org.macausmp.sportsday.gui.PluginGUI;
 import org.macausmp.sportsday.util.ItemUtil;
@@ -64,12 +64,12 @@ public class MenuGUI extends PluginGUI {
     private static @NotNull Book guidebook() {
         Book.Builder builder = Book.builder();
         builder.addPage(TextUtil.text(Component.translatable("book.guidebook.page_main")));
-        Component b1 = Component.translatable(AbstractTrackEvent.CHECKPOINT.translationKey()).color(NamedTextColor.GREEN);
-        Component b2 = Component.translatable(AbstractTrackEvent.DEATH.translationKey()).color(NamedTextColor.RED);
-        Component b3 = Component.translatable(AbstractTrackEvent.FINISH_LINE.translationKey()).color(NamedTextColor.GOLD);
+        Component b1 = Component.translatable(TrackEvent.CHECKPOINT.translationKey()).color(NamedTextColor.GREEN);
+        Component b2 = Component.translatable(TrackEvent.DEATH.translationKey()).color(NamedTextColor.RED);
+        Component b3 = Component.translatable(TrackEvent.FINISH_LINE.translationKey()).color(NamedTextColor.GOLD);
         builder.addPage(TextUtil.text(Component.translatable("book.guidebook.page_block").arguments(b1, b2, b3)));
-        for (IEvent event : Competitions.EVENTS.values()) {
-            Component rule = Component.translatable("event.rule." + event.getID());
+        for (SportingEvent event : Competitions.EVENTS.values()) {
+            Component rule = Component.translatable("event.rule." + event.getKey().getKey());
             builder.addPage(TextUtil.text(Component.translatable("book.guidebook.page_event").arguments(event.getName().color(NamedTextColor.BLACK), rule)));
         }
         return builder.build();

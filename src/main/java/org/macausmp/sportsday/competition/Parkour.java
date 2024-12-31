@@ -9,7 +9,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
-public class Parkour extends AbstractTrackEvent {
+public class Parkour extends TrackEvent {
     private static final PotionEffect INVISIBILITY = new PotionEffect(PotionEffectType.INVISIBILITY,
             PotionEffect.INFINITE_DURATION, 0, false, false, false);
 
@@ -43,6 +43,9 @@ public class Parkour extends AbstractTrackEvent {
         player.getInventory().setChestplate(null);
         player.getInventory().setLeggings(null);
     }
+
+    @Override
+    protected void onCompletedLap(@NotNull Player player) {}
 
     @Override
     protected void onRaceFinish(@NotNull Player p) {

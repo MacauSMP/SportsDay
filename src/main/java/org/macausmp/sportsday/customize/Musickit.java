@@ -2,10 +2,13 @@ package org.macausmp.sportsday.customize;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.KeyPattern;
+import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.util.TextUtil;
 
-public enum Musickit {
+public enum Musickit implements Keyed, ComponentLike {
     TAKE_ON_ME("customize.musickit.take_on_me", "take_on_me"),
     BAKA_MITAI("customize.musickit.baka_mitai", "baka_mitai"),
     KABUTACK("customize.musickit.kabutack", "kabutack"),
@@ -27,14 +30,16 @@ public enum Musickit {
 
     Musickit(String code, @KeyPattern.Value String key) {
         this.name = TextUtil.text(Component.translatable(code));
-        this.key = Key.key("minecraft", "mvp." + key);
+        this.key = Key.key(Key.MINECRAFT_NAMESPACE, "mvp." + key);
     }
 
-    public Component getName() {
+    @Override
+    public @NotNull Component asComponent() {
         return name;
     }
 
-    public Key getKey() {
+    @Override
+    public @NotNull Key key() {
         return key;
     }
 }

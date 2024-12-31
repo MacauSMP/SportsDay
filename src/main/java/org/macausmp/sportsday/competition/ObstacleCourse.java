@@ -6,7 +6,7 @@ import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.SportsDay;
 
-public class ObstacleCourse extends AbstractTrackEvent {
+public class ObstacleCourse extends TrackEvent {
     public ObstacleCourse() {
         super("obstacle_course", Material.OAK_FENCE_GATE);
     }
@@ -30,4 +30,10 @@ public class ObstacleCourse extends AbstractTrackEvent {
 
     @Override
     protected void onPractice(@NotNull Player player) {}
+
+    @Override
+    protected void onCompletedLap(@NotNull Player player) {}
+
+    @Override
+    protected void onRaceFinish(@NotNull Player player) {}
 }

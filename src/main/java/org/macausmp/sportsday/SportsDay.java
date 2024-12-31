@@ -147,10 +147,10 @@ public final class SportsDay extends JavaPlugin implements Listener {
             }
 
             private @NotNull Component getHeader() {
-                IEvent event = Competitions.getCurrentEvent();
+                SportingEvent event = Competitions.getCurrentEvent();
                 Component competition = Component.newline().append(event == null
                         ? Component.translatable("tablist.idle")
-                        : Component.translatable("tablist.current").arguments(event.getName(), event.getStatus().getName()));
+                        : Component.translatable("tablist.current").arguments(event.getName(), event.getStatus()));
                 Component count = Component.newline().append(Component.translatable("tablist.contestants_count")
                         .arguments(Component.text(Competitions.getOnlineContestants().size()),
                                 Component.text(Competitions.getContestants().size())));
@@ -161,7 +161,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        IEvent event = Competitions.getCurrentEvent();
+        SportingEvent event = Competitions.getCurrentEvent();
         if (event != null) {
             CommandSender sender = getServer().getConsoleSender();
             if (event instanceof Savable)
@@ -189,13 +189,13 @@ public final class SportsDay extends JavaPlugin implements Listener {
             p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
             p.setGameMode(GameMode.ADVENTURE);
         }
-        IEvent curr = Competitions.getCurrentEvent();
+        SportingEvent curr = Competitions.getCurrentEvent();
         if (curr == null) {
             p.getInventory().setItem(0, ItemUtil.MENU);
             p.getInventory().setItem(4, ItemUtil.CUSTOMIZE);
         }
-        if (p.getPersistentDataContainer().has(AbstractEvent.IN_GAME)) {
-            long last = Objects.requireNonNull(p.getPersistentDataContainer().get(AbstractEvent.IN_GAME, PersistentDataType.LONG));
+        if (p.getPersistentDataContainer().has(SportingEvent.IN_GAME)) {
+            long last = Objects.requireNonNull(p.getPersistentDataContainer().get(SportingEvent.IN_GAME, PersistentDataType.LONG));
             if (curr == null || last != curr.getLastTime()) {
                 if (p.isInsideVehicle())
                     Objects.requireNonNull(p.getVehicle()).remove();
@@ -208,7 +208,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
                 p.setRespawnLocation(p.getWorld().getSpawnLocation(), true);
                 p.teleport(p.getWorld().getSpawnLocation());
                 p.setGameMode(GameMode.ADVENTURE);
-                p.getPersistentDataContainer().remove(AbstractEvent.IN_GAME);
+                p.getPersistentDataContainer().remove(SportingEvent.IN_GAME);
             }
         }
         if (!Competitions.isContestant(p))
@@ -221,7 +221,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent e) {
         Player p = e.getPlayer();
-        AbstractEvent.leavePractice(p);
+        SportingEvent.leavePractice(p);
         if (!Competitions.isContestant(p))
             return;
         new BukkitRunnable() {
@@ -248,8 +248,8 @@ public final class SportsDay extends JavaPlugin implements Listener {
     @EventHandler
     public void onDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
-            IEvent current = Competitions.getCurrentEvent();
-            if (current != null && current.getStatus() == Status.STARTED || AbstractEvent.inPractice(player))
+            SportingEvent current = Competitions.getCurrentEvent();
+            if (current != null && current.getStatus() == Status.STARTED || SportingEvent.inPractice(player))
                 return;
             e.setCancelled(true);
         }
@@ -296,7 +296,7 @@ public final class SportsDay extends JavaPlugin implements Listener {
         Player p = e.getPlayer();
         if (!ItemUtil.equals(e.getItem(), ItemUtil.LEAVE_PRACTICE))
             return;
-        AbstractEvent.leavePractice(p);
+        SportingEvent.leavePractice(p);
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
     }
 

@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.competition.*;
 import org.macausmp.sportsday.gui.ButtonHandler;
@@ -16,6 +15,9 @@ import org.macausmp.sportsday.gui.competition.setting.EventSettingsGUI;
 import org.macausmp.sportsday.gui.competition.setting.SumoSettingsGUI;
 import org.macausmp.sportsday.gui.competition.setting.TrackEventSettingsGUI;
 import org.macausmp.sportsday.util.ItemUtil;
+import org.macausmp.sportsday.util.KeyDataType;
+
+import java.util.Objects;
 
 public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
     public CompetitionSettingsGUI() {
@@ -37,7 +39,8 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
 
     @ButtonHandler("event_setting")
     public void setting(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        IEvent event = Competitions.EVENTS.get(item.getItemMeta().getPersistentDataContainer().get(ItemUtil.EVENT_ID, PersistentDataType.STRING));
+        SportingEvent event = Competitions.EVENTS.get(Objects.requireNonNull(item.getItemMeta()
+                .getPersistentDataContainer().get(ItemUtil.EVENT_ID,KeyDataType.KEY_DATA_TYPE)));
         if (event == null)
             return;
         p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
@@ -45,18 +48,18 @@ public class CompetitionSettingsGUI extends AbstractCompetitionGUI {
             p.openInventory(new EventSettingsGUI<>((JavelinThrow) event).getInventory());
         else if (event == Competitions.SUMO)
             p.openInventory(new SumoSettingsGUI((Sumo) event).getInventory());
-        else if (event instanceof ITrackEvent track)
+        else if (event instanceof TrackEvent track)
             p.openInventory(new TrackEventSettingsGUI(track).getInventory());
     }
 
-    private @NotNull ItemStack setting(@NotNull IEvent event) {
+    private @NotNull ItemStack setting(@NotNull SportingEvent event) {
         ItemStack stack = ItemUtil.item(event.getDisplayItem(), "event_setting",
                 Component.translatable("gui.event_settings.title").color(NamedTextColor.YELLOW).arguments(event.getName()),
-                Component.translatable(event instanceof ITrackEvent ? "event.type.track" : "event.type.field").color(NamedTextColor.GRAY),
+                Component.translatable(event instanceof TrackEvent ? "event.type.track" : "event.type.field").color(NamedTextColor.GRAY),
                 Component.translatable("gui.event_settings.lore").arguments(event.getName()));
         stack.editMeta(meta -> {
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, PersistentDataType.STRING, event.getID());
+            meta.getPersistentDataContainer().set(ItemUtil.EVENT_ID, KeyDataType.KEY_DATA_TYPE, event.getKey());
         });
         return stack;
     }

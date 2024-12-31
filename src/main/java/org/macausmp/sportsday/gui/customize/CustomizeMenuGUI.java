@@ -3,6 +3,7 @@ package org.macausmp.sportsday.gui.customize;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.ArrayUtils;
@@ -111,9 +112,9 @@ public class CustomizeMenuGUI extends PluginGUI {
 
     private @NotNull ItemStack victoryDance() {
         ItemStack stack = customize(Material.PLAYER_HEAD, "victory_dance");
-        VictoryDance victoryDance = PlayerCustomize.getVictoryDance(player);
+        VictoryDance dance = PlayerCustomize.getVictoryDance(player);
         List<Component> lore = new ArrayList<>();
-        Component c = victoryDance != null ? victoryDance.getName() : TextUtil.text(Component.translatable("gui.text.none"));
+        ComponentLike c = dance != null ? dance : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
         stack.lore(lore);
         return stack;
@@ -123,7 +124,7 @@ public class CustomizeMenuGUI extends PluginGUI {
         ItemStack stack = customize(Material.ARROW, "projectile_trail");
         ParticleEffect effect = PlayerCustomize.getProjectileTrail(player);
         List<Component> lore = new ArrayList<>();
-        Component c = effect != null ? effect.getName() : TextUtil.text(Component.translatable("gui.text.none"));
+        ComponentLike c = effect != null ? effect : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
         stack.lore(lore);
         return stack;
@@ -133,7 +134,7 @@ public class CustomizeMenuGUI extends PluginGUI {
         ItemStack stack = customize(Material.NETHER_STAR, "walking_effect");
         ParticleEffect effect = PlayerCustomize.getWalkingEffect(player);
         List<Component> lore = new ArrayList<>();
-        Component c = effect != null ? effect.getName() : TextUtil.text(Component.translatable("gui.text.none"));
+        ComponentLike c = effect != null ? effect : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
         stack.lore(lore);
         return stack;
@@ -143,7 +144,7 @@ public class CustomizeMenuGUI extends PluginGUI {
         ItemStack stack = customize(Material.PAINTING, "graffiti_spray");
         GraffitiSpray graffiti = PlayerCustomize.getGraffitiSpray(player);
         List<Component> lore = new ArrayList<>();
-        Component c = graffiti != null ? graffiti.getName() : TextUtil.text(Component.translatable("gui.text.none"));
+        ComponentLike c = graffiti != null ? graffiti : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
         stack.lore(lore);
         return stack;
@@ -153,7 +154,7 @@ public class CustomizeMenuGUI extends PluginGUI {
         ItemStack stack = customize(Material.JUKEBOX, "musickit");
         Musickit musickit = PlayerCustomize.getMusickit(player);
         List<Component> lore = new ArrayList<>();
-        Component c = musickit != null ? musickit.getName() : TextUtil.text(Component.translatable("gui.text.none"));
+        ComponentLike c = musickit != null ? musickit : TextUtil.text(Component.translatable("gui.text.none"));
         lore.add(TextUtil.text(Component.translatable("gui.customize.selected").arguments(c)));
         stack.lore(lore);
         return stack;

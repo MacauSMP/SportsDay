@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.jetbrains.annotations.NotNull;
 import org.macausmp.sportsday.util.ItemUtil;
 
-public class ElytraRacing extends AbstractTrackEvent {
+public class ElytraRacing extends TrackEvent {
     private static final ItemStack ELYTRA = elytra();
     private static final ItemStack FIREWORK = firework();
 
@@ -38,6 +38,12 @@ public class ElytraRacing extends AbstractTrackEvent {
         player.getInventory().setItem(EquipmentSlot.CHEST, ELYTRA);
         player.getInventory().setItem(0, FIREWORK);
     }
+
+    @Override
+    protected void onCompletedLap(@NotNull Player player) {}
+
+    @Override
+    protected void onRaceFinish(@NotNull Player player) {}
 
     @EventHandler
     public void onElytraBoost(@NotNull PlayerElytraBoostEvent e) {
