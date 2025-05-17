@@ -3,13 +3,13 @@ package org.macausmp.sportsday.command;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
-import org.macausmp.sportsday.competition.Competitions;
+import org.macausmp.sportsday.SportsDay;
 
 public class RegisterCommand extends PluginCommand {
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         requirePlayer(sender, p -> {
-            if (!Competitions.isContestant(p)) {
+            if (!SportsDay.isContestant(p)) {
                 int number;
                 if (args.length >= 1) {
                     try {
@@ -25,13 +25,13 @@ public class RegisterCommand extends PluginCommand {
                         return;
                     }
                 } else {
-                    number = Competitions.genNumber();
+                    number = SportsDay.genNumber();
                 }
-                if (!Competitions.join(p, number))
-                    sender.sendMessage(Component.translatable("competition.register.failed.number_occupied")
+                if (!SportsDay.join(p, number))
+                    sender.sendMessage(Component.translatable("contestant.register.failed.number_occupied")
                             .arguments(Component.text(number)).color(NamedTextColor.RED));
             } else {
-                sender.sendMessage(Component.translatable("competition.register.failed")
+                sender.sendMessage(Component.translatable("contestant.register.failed")
                         .arguments(p.displayName()).color(NamedTextColor.RED));
             }
         });

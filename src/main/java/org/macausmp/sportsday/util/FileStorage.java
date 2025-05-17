@@ -16,8 +16,8 @@ public final class FileStorage {
     private final PersistentDataAdapterContext context;
     private PersistentDataContainer container;
 
-    public FileStorage(File file) {
-        this.file = file;
+    public FileStorage(String filename) {
+        this.file = new File(PLUGIN.getDataFolder(), filename);
         this.context = PLUGIN.getServer().getWorlds().getFirst().getPersistentDataContainer().getAdapterContext();
         this.container = context.newPersistentDataContainer();
     }

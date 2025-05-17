@@ -1,10 +1,13 @@
 # SportsDay
 Macau SMP SportsDay papermc plugin
 ## Commands
-* `/competition`
-> Competition hosting command
+* `/sportsday`
+> Open sportsday GUI
+> * `book`
+* `/event`
+> Event hosting command
 > * `start <event_id>`
-> Start a competition new event
+> Start new event
 > * `load`
 > Load last saved event
 > * `save`
@@ -15,17 +18,18 @@ Macau SMP SportsDay papermc plugin
 > Unpause the current event
 > * `terminate`
 > Terminate the current event
+> * `info`
+> Display current status information list
+* `/contestant`
+> Contestant management command
 > * `join <player> <number>`
 > Register new contestant
 > * `leave | leave <player>`
 > Unregister contestant
 > * `score <player> <new_score>`
 > Modify contestant's score
-> * `info`
-> Display current status information list
-* `/competitiongui`
-> Open competition GUI
-> * `book`
+> * `list`
+> Show a list of all registered contestants
 * `/register`
 > Register as a contestant
 > * `<number>`

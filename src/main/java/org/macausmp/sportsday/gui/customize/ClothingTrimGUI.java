@@ -1,7 +1,5 @@
 package org.macausmp.sportsday.gui.customize;
 
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -30,60 +28,28 @@ public class ClothingTrimGUI extends PluginGUI {
         PlayerCustomize.Cloth cloth = Objects.requireNonNull(PlayerCustomize.getCloth(player, slot));
         trimMaterial = Material.getMaterial(cloth.getTrimMaterial());
         trimPattern = Material.getMaterial(cloth.getTrimPattern() + "_ARMOR_TRIM_SMITHING_TEMPLATE");
-        for (int i = 0; i < 9; i++)
+        for (int i = 45; i < 54; i++)
             getInventory().setItem(i, BOARD);
-        getInventory().setItem(8, BACK);
+        getInventory().setItem(53, BACK);
         update();
     }
 
     @Override
-    public void update() {
+    protected void update() {
         Iterator<Material> materials = PlayerCustomize.getTrimMaterial().iterator();
-        for (int i = 9; i < 54; i++) {
+        for (int i = 0; i < 45; i++) {
             int j = i % 9;
             if (j == 0 || j == 8)
                 getInventory().setItem(i, material(materials.next()));
         }
         Iterator<Material> patterns = PlayerCustomize.getTrimPattern().iterator();
-        for (int i = 10; i < 44; i++) {
+        for (int i = 1; i < 35; i++) {
             int j = i % 9;
             if (j == 1 || j == 2 || j == 6 || j == 7)
                 getInventory().setItem(i, pattern(patterns.next()));
         }
-        getInventory().setItem(22, present());
-        getInventory().setItem(40, reset());
-    }
-
-    @ButtonHandler("back")
-    public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new ClothingCustomizeGUI(p).getInventory());
-        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-    }
-
-    @ButtonHandler("select_material")
-    public void selectMaterial(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PlayerCustomize.setClothTrimMaterial(p, slot, trimMaterial = item.getType());
-        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
-        update();
-        PlayerCustomize.suitUp(p);
-    }
-
-    @ButtonHandler("select_pattern")
-    public void selectPattern(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PlayerCustomize.setClothTrimPattern(p, slot, trimPattern = item.getType());
-        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
-        update();
-        PlayerCustomize.suitUp(p);
-    }
-
-    @ButtonHandler("reset")
-    public void reset(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        PlayerCustomize.resetClothTrim(p, slot);
-        trimMaterial = null;
-        trimPattern = null;
-        p.playSound(Sound.sound(Key.key("minecraft:entity.arrow.hit_player"), Sound.Source.MASTER, 1f, 1f));
-        update();
-        PlayerCustomize.suitUp(p);
+        getInventory().setItem(13, present());
+        getInventory().setItem(31, reset());
     }
 
     private @NotNull ItemStack material(Material material) {
@@ -107,5 +73,36 @@ public class ClothingTrimGUI extends PluginGUI {
     private @NotNull ItemStack reset() {
         return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset")
                 .arguments(Component.translatable("gui.customize.clothing.reset_trim")));
+    }
+
+    @ButtonHandler("select_material")
+    public void selectMaterial(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        PlayerCustomize.setClothTrimMaterial(p, slot, trimMaterial = item.getType());
+        p.playSound(EXECUTION_SUCCESS_SOUND);
+        update();
+        PlayerCustomize.suitUp(p);
+    }
+
+    @ButtonHandler("select_pattern")
+    public void selectPattern(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        PlayerCustomize.setClothTrimPattern(p, slot, trimPattern = item.getType());
+        p.playSound(EXECUTION_SUCCESS_SOUND);
+        update();
+        PlayerCustomize.suitUp(p);
+    }
+
+    @ButtonHandler("reset")
+    public void reset(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        PlayerCustomize.resetClothTrim(p, slot);
+        trimMaterial = null;
+        trimPattern = null;
+        p.playSound(EXECUTION_SUCCESS_SOUND);
+        update();
+        PlayerCustomize.suitUp(p);
+    }
+
+    @ButtonHandler("back")
+    public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        new ClothingCustomizeGUI(p).open(p);
     }
 }

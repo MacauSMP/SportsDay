@@ -5,13 +5,18 @@ api-version: '1.21'
 authors: [ JJGP ]
 description: "The MacauSMP SportsDay plugin"
 commands:
-  competition:
-    usage: "/competition (start|load|save|pause|unpause|terminate|join|leave|score|info) <argument>"
-    description: "Competition hosting command"
+  sportsday:
+    usage: "/sportsday"
+    description: "Open sportsday gui"
+    aliases: ["sd"]
     permission: op
-  competitiongui:
-    usage: "/competitiongui"
-    description: "Open competition gui"
+  event:
+    usage: "/event (start|load|save|pause|unpause|terminate|join|leave|score|info) <argument>"
+    description: "Event management command"
+    permission: op
+  contestant:
+    usage: "/contestant (join|leave|score|list) <argument>"
+    description: "Contestant management command"
     permission: op
   register:
     usage: "/register <number>"

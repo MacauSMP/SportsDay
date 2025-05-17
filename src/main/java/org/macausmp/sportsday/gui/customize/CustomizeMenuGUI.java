@@ -1,7 +1,5 @@
 package org.macausmp.sportsday.gui.customize;
 
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -36,7 +34,7 @@ public class CustomizeMenuGUI extends PluginGUI {
     }
 
     @Override
-    public void update() {
+    protected void update() {
         getInventory().setItem(10, clothing());
         getInventory().setItem(12, boatType());
         getInventory().setItem(14, weaponSkin());
@@ -45,21 +43,6 @@ public class CustomizeMenuGUI extends PluginGUI {
         getInventory().setItem(30, walkingEffect());
         getInventory().setItem(32, graffitiSpray());
         getInventory().setItem(34, musickit());
-    }
-
-    @ButtonHandler
-    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        switch (e.getSlot()) {
-            case 10 -> p.openInventory(new ClothingCustomizeGUI(p).getInventory());
-            case 12 -> p.openInventory(new BoatTypeGUI(p).getInventory());
-            case 14 -> p.openInventory(new WeaponSkinGUI(p).getInventory());
-            case 16 -> p.openInventory(new VictoryDanceGUI(p).getInventory());
-            case 28 -> p.openInventory(new ProjectileTrailGUI(p).getInventory());
-            case 30 -> p.openInventory(new WalkingEffectGUI(p).getInventory());
-            case 32 -> p.openInventory(new GraffitiSprayGUI(p).getInventory());
-            case 34 -> p.openInventory(new MusickitGUI(p).getInventory());
-        }
-        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
     }
 
     private @NotNull ItemStack clothing() {
@@ -163,5 +146,19 @@ public class CustomizeMenuGUI extends PluginGUI {
     private @NotNull ItemStack customize(Material material, String customize) {
         return ItemUtil.item(material, "customize_" + customize, Component.translatable("gui.customize." + customize + ".title")
                 .color(NamedTextColor.YELLOW));
+    }
+
+    @ButtonHandler
+    public void onClick(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        switch (e.getSlot()) {
+            case 10 -> new ClothingCustomizeGUI(p).open(p);
+            case 12 -> new BoatTypeGUI(p).open(p);
+            case 14 -> new WeaponSkinGUI(p).open(p);
+            case 16 -> new VictoryDanceGUI(p).open(p);
+            case 28 -> new ProjectileTrailGUI(p).open(p);
+            case 30 -> new WalkingEffectGUI(p).open(p);
+            case 32 -> new GraffitiSprayGUI(p).open(p);
+            case 34 -> new MusickitGUI(p).open(p);
+        }
     }
 }

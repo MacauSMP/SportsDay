@@ -1,127 +1,66 @@
 #file: noinspection SpellCheckingInspection
 # 想要顯示出來的伺服器IP
 server_ip: §esample.server.ip
-# 判斷玩家到達終點或完成圈數的方塊
-finish_line_block: GOLD_BLOCK
-# 判斷玩家到達檢查點的方塊
-checkpoint_block: EMERALD_BLOCK
-# 判斷玩家離開賽道的方塊
-death_block: RED_TERRACOTTA
 # 讓玩家準備到開始比賽的時間
 ready_time: 15
 # 前三名玩家完成比賽後比賽結束倒計時
-event_end_countdown: 60
+event_end_countdown: 300
 # 中途斷線的玩家充許重新連線時間
 reconnect_time: 50
+# item - 代表物品
 # enable - 是否啟用該比賽
 # least_players_required - 開始該比賽最少需要的選手人數
-# lap - 徑類項目完成比賽的所需圈數
-# location - 比賽場地開始位置
+# laps - 徑類項目完成比賽的所需圈數
+# all_checkpoints_required - 徑類項目是否需要經過所有檢查點
 # ready_command - 徑類項目準備所運行的指令，可以使用函數指令運行多條指令
 # start_command - 徑類項目開始所運行的指令，可以使用函數指令運行多條指令
 # 飛行賽
 elytra_racing:
+  item: ELYTRA
   enable: true
   least_players_required: 8
   laps: 1
-  location:
-    ==: org.bukkit.Location
-    world: world
-    x: 0
-    y: 0
-    z: 0
-    pitch: 0
-    yaw: 0
+  all_checkpoints_required: true
   ready_command: "fill 0 0 0 0 0 0 barrier"
   start_command: "fill 0 0 0 0 0 0 air"
 # 冰船賽
 ice_boat_racing:
+  item: OAK_BOAT
   enable: true
   least_players_required: 8
   laps: 2
-  location:
-    ==: org.bukkit.Location
-    world: world
-    x: 0
-    y: 0
-    z: 0
-    pitch: 0
-    yaw: 0
+  all_checkpoints_required: true
   ready_command: "fill 0 0 0 0 0 0 barrier"
   start_command: "fill 0 0 0 0 0 0 air"
 # 擲標槍
 javelin_throw:
+  item: TRIDENT
   enable: true
   least_players_required: 8
-  location:
-    ==: org.bukkit.Location
-    world: world
-    x: 0
-    y: 0
-    z: 0
-    pitch: 0
-    yaw: 0
 # 障礙賽
 obstacle_course:
+  item: OAK_FENCE_GATE
   enable: true
   least_players_required: 8
   laps: 2
-  location:
-    ==: org.bukkit.Location
-    world: world
-    x: 0
-    y: 0
-    z: 0
-    pitch: 0
-    yaw: 0
+  all_checkpoints_required: true
   ready_command: "fill 0 0 0 0 0 0 barrier"
   start_command: "fill 0 0 0 0 0 0 air"
 # 跑酷賽
 parkour:
+  item: LEATHER_BOOTS
   enable: true
   least_players_required: 8
   laps: 1
-  location:
-    ==: org.bukkit.Location
-    world: world
-    x: 0
-    y: 0
-    z: 0
-    pitch: 0
-    yaw: 0
+  all_checkpoints_required: true
   ready_command: "fill 0 0 0 0 0 0 barrier"
   start_command: "fill 0 0 0 0 0 0 air"
 # 相撲
 sumo:
+  item: COD
   enable: true
   least_players_required: 8
   # 是否啟用武器（擊退棒）
   enable_weapon: true
   # 武器出現時間（秒）
   weapon_time: 45
-  location:
-    ==: org.bukkit.Location
-    world: world
-    x: 0
-    y: 0
-    z: 0
-    pitch: 0
-    yaw: 0
-  # 一號選手開始位置
-  p1-location:
-    ==: org.bukkit.Location
-    world: world
-    x: 0
-    y: 0
-    z: 0
-    pitch: 0
-    yaw: 0
-  # 二號選手開始位置
-  p2-location:
-    ==: org.bukkit.Location
-    world: world
-    x: 0
-    y: 0
-    z: 0
-    pitch: 0
-    yaw: 0

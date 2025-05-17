@@ -1,5 +1,6 @@
 package org.macausmp.sportsday.gui.customize;
 
+import com.google.common.collect.ImmutableMultimap;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -32,18 +33,18 @@ public class ClothingCustomizeGUI extends PluginGUI {
     public ClothingCustomizeGUI(@NotNull Player player) {
         super(45, Component.translatable("gui.customize.clothing.title"));
         this.player = player;
-        for (int i = 0; i < 9; i++)
+        for (int i = 36; i < 45; i++)
             getInventory().setItem(i, BOARD);
-        getInventory().setItem(8, BACK);
-        getInventory().setItem(17, reset("gui.customize.clothing.head"));
-        getInventory().setItem(26, reset("gui.customize.clothing.chest"));
-        getInventory().setItem(35, reset("gui.customize.clothing.legs"));
-        getInventory().setItem(44, reset("gui.customize.clothing.feet"));
+        getInventory().setItem(44, BACK);
+        getInventory().setItem(8, reset("gui.customize.clothing.head"));
+        getInventory().setItem(17, reset("gui.customize.clothing.chest"));
+        getInventory().setItem(26, reset("gui.customize.clothing.legs"));
+        getInventory().setItem(35, reset("gui.customize.clothing.feet"));
         update();
     }
 
     @Override
-    public void update() {
+    protected void update() {
         for (int i = 0; i < 4; i++) {
             PlayerCustomize.Cloth selected = PlayerCustomize.getCloth(player, EquipmentSlot.values()[5 - i]);
             for (int j = 0; j < 6; j++) {
@@ -55,52 +56,13 @@ public class ClothingCustomizeGUI extends PluginGUI {
                     stack.lore(lore);
                     stack.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
                 }
-                getInventory().setItem(11 + i * 9 + j, stack);
+                getInventory().setItem(2 + i * 9 + j, stack);
             }
         }
-        getInventory().setItem(9, present(EquipmentSlot.HEAD));
-        getInventory().setItem(18, present(EquipmentSlot.CHEST));
-        getInventory().setItem(27, present(EquipmentSlot.LEGS));
-        getInventory().setItem(36, present(EquipmentSlot.FEET));
-    }
-
-    @ButtonHandler("back")
-    public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        p.openInventory(new CustomizeMenuGUI(p).getInventory());
-        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-    }
-
-    @ButtonHandler("select_cloth")
-    public void selectCloth(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (e.isLeftClick()) {
-            PlayerCustomize.setClothMaterial(p, item.getType());
-            update();
-            PlayerCustomize.suitUp(p);
-        } else if (e.isRightClick() && item.getItemMeta() instanceof ColorableArmorMeta) {
-            p.openInventory(new ClothingColorGUI(p, item.getType().getEquipmentSlot()).getInventory());
-        }
-        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-    }
-
-    @ButtonHandler("cloth")
-    public void cloth(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        if (e.isRightClick()) {
-            p.openInventory(new ClothingTrimGUI(p, item.getType().getEquipmentSlot()).getInventory());
-            p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-        }
-    }
-
-    @ButtonHandler("reset")
-    public void reset(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
-        switch (e.getSlot()) {
-            case 17 -> PlayerCustomize.resetCloth(p, EquipmentSlot.HEAD);
-            case 26 -> PlayerCustomize.resetCloth(p, EquipmentSlot.CHEST);
-            case 35 -> PlayerCustomize.resetCloth(p, EquipmentSlot.LEGS);
-            case 44 -> PlayerCustomize.resetCloth(p, EquipmentSlot.FEET);
-        }
-        p.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 1f, 1f));
-        update();
-        PlayerCustomize.suitUp(p);
+        getInventory().setItem(0, present(EquipmentSlot.HEAD));
+        getInventory().setItem(9, present(EquipmentSlot.CHEST));
+        getInventory().setItem(18, present(EquipmentSlot.LEGS));
+        getInventory().setItem(27, present(EquipmentSlot.FEET));
     }
 
     private @Nullable ItemStack present(@NotNull EquipmentSlot slot) {
@@ -112,7 +74,7 @@ public class ClothingCustomizeGUI extends PluginGUI {
             List<Component> lore = new ArrayList<>();
             lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.trim.lore")));
             meta.lore(lore);
-            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "cloth");
+            meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "present");
         });
         return stack;
     }
@@ -125,6 +87,7 @@ public class ClothingCustomizeGUI extends PluginGUI {
             if (stack.getItemMeta() instanceof ColorableArmorMeta)
                 lore.add(TextUtil.text(Component.translatable("gui.customize.clothing.color.lore")));
             meta.lore(lore);
+            meta.setAttributeModifiers(ImmutableMultimap.of());
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             meta.getPersistentDataContainer().set(ItemUtil.ITEM_ID, PersistentDataType.STRING, "select_cloth");
         });
@@ -137,5 +100,44 @@ public class ClothingCustomizeGUI extends PluginGUI {
     private @NotNull ItemStack reset(String slot) {
         return ItemUtil.item(Material.BARRIER, "reset", Component.translatable("gui.customize.clothing.reset")
                 .arguments(Component.translatable(slot)));
+    }
+
+    @ButtonHandler("present")
+    public void present(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        if (e.isRightClick()) {
+            new ClothingTrimGUI(p, item.getType().getEquipmentSlot()).open(p);
+        }
+    }
+
+    @ButtonHandler("select_cloth")
+    public void selectCloth(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        if (e.isLeftClick()) {
+            PlayerCustomize.setClothMaterial(p, item.getType());
+            update();
+            PlayerCustomize.suitUp(p);
+            p.playSound(Sound.sound(Key.key("minecraft:item.armor.equip_generic"), Sound.Source.MASTER, 1f, 1f));
+        } else if (e.isRightClick() && item.getItemMeta() instanceof ColorableArmorMeta) {
+            if (PlayerCustomize.getCloth(p, item.getType().getEquipmentSlot()) == null)
+                PlayerCustomize.setClothMaterial(p, item.getType());
+            new ClothingColorGUI(p, item.getType().getEquipmentSlot()).open(p);
+        }
+    }
+
+    @ButtonHandler("reset")
+    public void reset(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        switch (e.getSlot()) {
+            case 8 -> PlayerCustomize.resetCloth(p, EquipmentSlot.HEAD);
+            case 17 -> PlayerCustomize.resetCloth(p, EquipmentSlot.CHEST);
+            case 26 -> PlayerCustomize.resetCloth(p, EquipmentSlot.LEGS);
+            case 35 -> PlayerCustomize.resetCloth(p, EquipmentSlot.FEET);
+        }
+        p.playSound(UI_BUTTON_CLICK_SOUND);
+        update();
+        PlayerCustomize.suitUp(p);
+    }
+
+    @ButtonHandler("back")
+    public void back(@NotNull InventoryClickEvent e, @NotNull Player p, @NotNull ItemStack item) {
+        new CustomizeMenuGUI(p).open(p);
     }
 }
